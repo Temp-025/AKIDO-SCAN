@@ -1,0 +1,378 @@
+﻿@model List<EnterpriseGatewayPortal.Web.ViewModel.DigitalForm.DocumentTemplateViewModel>
+
+@{
+    Layout = "~/Views/Shared/_LayoutDigitalForms.cshtml";
+}
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+
+<style>
+
+    .hover-blue{
+        text-align: center;
+        text-decoration: underline;
+    }
+
+    .hover-blue:hover {
+        color: blue;
+    }
+
+
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body">
+                <div class="row p-b-20">
+                    <div class="col-md-12 col-sm-6 col-6">
+                        <div class="btn-group">
+                            <a id="addRow1" asp-action="Index" class="btn btn-secondary">MY FORMS</a>
+                        </div>
+                        &nbsp;
+                        <div class="btn-group">
+                            <a id="addRow1" asp-action="publishedForms" class="btn btn-primary">PUBLISHED FORMS</a>
+                        </div>
+                        &nbsp;
+                        <div class="btn-group">
+                            <a id="addRow1" asp-action="standardForms" class="btn btn-primary">STANDARD FORMS</a>
+                        </div>
+                        &nbsp;&nbsp;&nbsp
+                        <div class="btn-group" style="float:right">
+                            <a class="btn btn-primary" asp-action="createForms" >
+                                Create Digital Form
+                            </a>
+                        </div>
+
+                    </div>
+
+                </div>
+                <table id="myForms" class="table-striped table-bordered table-hover table-checkable order-column full-width table">
+                    <thead>
+                        <tr>
+                            <th>FORM NAME</th>
+                            <th>CREATED DATE</th>
+                            <th>DOCUMENT NAME</th>
+                            <th>RESPONSE COUNT</th>                            
+                            <th>STATUS</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null)
+                        {
+                            <tr>
+                                <td style="text-align:center" valign="top" colspan="7" class="dataTables_empty">No record found</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr class="odd gradeX">
+                                    <td>@(string.IsNullOrWhiteSpace(item.TemplateName) ? "N/A" : item.TemplateName)</td>
+                                    <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.DocumentName) ? "N/A" : item.DocumentName)</td>
+                                    <td style="text-align:center">
+                                        <a asp-action="Responses" asp-route-templateId="@item._id" class="hover-blue">
+                                            <i class="icon-pencil"></i>@item.Count
+                                        </a>
+                                    </td>                                    
+                                    <td style="color: @(item.Status == "Publish" ? "green !important" : item.Status == "Unpublish" ? "red !important" : "")">@item.Status</td>
+                                    @if (item.Status == "Publish")
+                                    {
+                                        <td class="valigntop">
+                                            <div class="btn-group">
+                                                <button class="btn btn-xs deepPink-bgcolor no-margin" type="button" data-toggle="dropdown"
+                                                        aria-expanded="false">
+                                                    Actions
+                                                    <i class="fa fa-angle-down"></i>
+                                                </button>
+                                                <ul class="dropdown-menu pull-left" role="menu">
+                                                    <li>
+                                                        <a asp-action="EditForms" asp-route-templateId="@item._id">
+                                                            <i class="icon-pencil"></i>Edit
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a asp-action="previewform" asp-route-edmsId="@item.EdmsId" asp-route-documentName="@item.DocumentName">
+                                                            <i class="icon-pencil"></i>Preview
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a asp-action="Responses" asp-route-templateId="@item._id">
+                                                            <i class="icon-pencil"></i>Responses
+                                                        </a>
+                                                    </li>
+                                                    @if (item.Count > 0 && item.Status == "Publish")
+                                                    {
+                                                        <li>
+                                                            <a asp-action="downloadCSV" asp-route-templateId="@item._id" asp-route-FormName="@item.TemplateName">
+                                                                <i class="icon-pencil"></i>Download CSV
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                    <li>
+                                                        <a href="#" onclick="Unpublish('@item._id')">
+                                                            <i class="icon-docs"></i> Unpublish
+                                                        </a>
+                                                    </li>
+
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="valigntop">
+                                            <div class="btn-group">
+                                                <button class="btn btn-xs deepPink-bgcolor no-margin" type="button" data-toggle="dropdown"
+                                                        aria-expanded="false">
+                                                    Actions
+                                                    <i class="fa fa-angle-down"></i>
+                                                </button>
+                                                <ul class="dropdown-menu pull-left" role="menu">
+                                                    <li>
+                                                        <a asp-action="EditForms" asp-route-templateId="@item._id">
+                                                            <i class="icon-pencil"></i>Edit
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a asp-action="previewform" asp-route-edmsId="@item.EdmsId">
+                                                            <i class="icon-pencil"></i>Previvew
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" onclick="Publish('@item._id')">
+                                                            <i class="icon-docs"></i>Publish
+                                                        </a>
+                                                    </li>
+
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    }
+                                        
+                                </tr> 
+                            }
+                        }
+                    </tbody>
+                </table>
+
+                @* Modal *@
+
+                <div class="modal fade" id="digitalFormModal" tabindex="-1" role="dialog" aria-labelledby="digitalFormModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="digitalFormModalLabel">Choose an option to Publish:</h5>
+                            </div>
+                            <div class="modal-body" style="padding-left:10%">
+                                <div class="d-grid gap-2">
+                                    <div >
+                                        <label style="display:flex">
+                                            <input type="radio" id="Organization" name="publishOption" value="Publish" checked>
+                                            &nbsp; Organization
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label style="display:flex">
+                                            <input type="radio" id="Globally" name="publishOption" value="PublishAll">
+                                            &nbsp; Globally (All Subcribers)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer" style="border-top: 1px solid #efefef;">
+                                <button type="button" class="btn btn-primary" onclick="ChangeStatus(getSelectedValue())">Continue</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div id='Viewer1' style='width: auto; height: 600px; margin: 0 auto;' hidden></div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+        $('#digitalFormsMenu').addClass('active');
+
+        $('#homeMenu').removeClass('breadcrumb-item');
+        $('#homeMenu').addClass('breadcrumb-item').append('Digital Forms > My Forms');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        
+        var table1 = $("#myForms").DataTable({
+            "bLengthChange": false,
+            "searching": true,
+            "ordering": false,
+            "sort": false
+        });
+    });
+
+    var TemplateId = "";
+
+    function Publish(templateId) {
+
+        $("#digitalFormModal").modal('show');  
+        TemplateId = templateId;
+    }
+
+    function getSelectedValue() {
+        
+        $('#digitalFormModal').modal('hide');
+        const radios = document.getElementsByName('publishOption');
+
+        for (let i = 0; i < radios.length; i++) {
+            if (radios[i].checked) {
+                return radios[i].value;
+            }
+        }      
+        
+    }
+
+    async function ChangeStatus(selectedValue) {
+        try {
+            const response = await $.ajax({
+                url: '@Url.Action("changeStatus", "DigitalForm")',
+                type: 'POST',
+                data: { templateId: TemplateId, action: selectedValue },
+                beforeSend: () => $('#overlay').show(),
+                complete: () => $('#overlay').hide(),
+            });
+
+            if (response.status == "Failed") {
+                await showError(response.message);
+            } else {
+                await showSuccess(response.message);
+            }
+        } catch (error) {
+            await showError('An error occurred while processing your request.');
+        }
+    }
+
+    async function showError(message) {
+        const result = await Swal.fire({
+            title: "Error",
+            text: message,
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        if (result.isConfirmed) {
+            redirectToIndex();
+        }
+    }
+
+    async function showSuccess(message) {
+        const result = await Swal.fire({
+            title: "Success",
+            text: message,
+            icon: 'success',
+            confirmButtonText: 'OK'
+        });
+        if (result.isConfirmed) {
+            redirectToIndex();
+        }
+    }
+
+
+    function redirectToIndex() {
+        window.location.href = '@Url.Action("Index", "DigitalForm")';
+    }
+
+    function Unpublish(templateId) {
+        $.ajax({
+            url: '@Url.Action("changeStatus", "DigitalForm")',
+            type: 'POST',
+            data: { templateId: templateId, action: "Unpublish" },
+            success: function (response) {
+                handleResponse(response);
+            },
+            error: function (xhr, status, error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred while processing your request.',
+                    icon: 'error',
+                });
+            }
+        });
+    }
+
+    function handleResponse(response) {
+        const { status, message } = response;
+        const type = status === 'Failed' ? 'info' : 'success';
+        const title = status === 'Failed' ? 'Server response' : 'Success';
+
+        Swal.fire({
+            title: title,
+            text: message,
+            icon: type, 
+            confirmButtonText: 'OK'
+        }).then((result) => {
+            if (result.isConfirmed && status !== 'Failed') {
+                redirectToIndex();
+            }
+        });
+
+    }
+
+    function redirectToIndex() {
+        window.location.href = '@Url.Action("Index", "DigitalForm")';
+    }
+
+    // function Unpublish(templateId) {
+
+    //     $.ajax({
+    //         url: '@Url.Action("changeStatus", "DigitalForm")',
+    //         type: 'POST',
+    //         data: { templateId: templateId, action: "Unpublish" },
+    //         success: function (response) {
+    //             if (response.status == "Failed") {
+    //                 swal({
+    //                     title: 'Server response',
+    //                     text: response.message,
+    //                     type: 'info',
+    //                 }, function (isConfirm) {
+    //                     if (isConfirm) {
+    //                         window.location.href = '@Url.Action("Index", "DigitalForm")';
+    //                     }
+    //                 });
+    //             } else {
+    //                 swal({
+    //                     title: 'Success',
+    //                     text: response.message,
+    //                     type: 'success',
+    //                 }, function (isConfirm) {
+    //                     if (isConfirm) {
+    //                         window.location.href = '@Url.Action("Index", "DigitalForm")';
+    //                     }
+    //                 });
+    //             }
+    //         },
+    //         error: function (xhr, status, error) { // Added an error handler
+    //             console.log("Error:", error); // Log the error for debugging
+    //             swal({
+    //                 title: 'Error',
+    //                 text: 'An error occurred while processing your request.',
+    //                 type: 'error',
+    //             });
+    //         }
+    //     });
+
+
+    // }
+
+</script>                                                

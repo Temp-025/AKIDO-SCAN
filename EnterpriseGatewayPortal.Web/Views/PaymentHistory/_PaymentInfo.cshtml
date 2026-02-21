@@ -1,0 +1,156 @@
+﻿@model IList<EnterpriseGatewayPortal.Web.ViewModel.PaymentHistory.OrganizationPaymentInfoViewModel>
+
+<style>
+    table {
+        border: 1px solid #ccc;
+        border-collapse: separate;
+    }
+
+    /* hide info text only for #support_table5 */
+    #support_table5_wrapper .dataTables_info {
+        display: none;
+    }
+
+    #support_table5_wrapper{
+        padding:0;
+    }
+
+    /* remove sorting arrows only for #support_table5 */
+    #support_table5.dataTable thead .sorting:before,
+    #support_table5.dataTable thead .sorting:after,
+    #support_table5.dataTable thead .sorting_asc:before,
+    #support_table5.dataTable thead .sorting_asc:after,
+    #support_table5.dataTable thead .sorting_desc:before,
+    #support_table5.dataTable thead .sorting_desc:after {
+        content: none !important;
+    }
+
+   /*  .modal-header{
+        padding-bottom: 18px !important;
+        padding:0;
+    } */
+
+    .modal-footer{
+        display: none;
+    }
+    .modal-body{
+        padding:0;
+    }
+    .modal-content {
+        border-radius: 16px !important;
+        padding: 16px;
+    }
+
+</style>
+
+<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+       @*  <div class="modal-header">
+            <h5 class="modal-title s3">
+                <span class="text-capitalize s3" style="font-size: 16px; font-weight:700;">
+                    Payment Info
+                </span>
+            </h5>
+            <button type="button" class="close cross" data-dismiss="modal">
+                &times;
+            </button>
+        </div> *@
+
+        <div class="modal-header" style="padding: 0px 0px 18px 0px !important; border-bottom: 1px solid rgba(226, 232, 240, 1);align-items:end !important;">
+            <h5 class="modal-title"
+                style="color: black; font-weight: 700 !important; font-size:16px !important; padding:0px !important;">
+                Payment Info
+            </h5>
+            <img src="~/assets/images/CloseIcon.svg"
+                 class="close-img"
+                 data-dismiss="modal"
+                 alt="Close"
+                 style="cursor:pointer;" />
+        </div>
+        <div class="modal-body">
+            
+                        <table class="table-striped table-bordered table-hover table-checkable order-column full-width table" id="support_table5">
+                            <thead>
+                                <tr>
+                                    <th >Service Name</th>
+                                    <th >Rate</th>
+                                    <th >Quantity</th>
+                                    <th >Tax</th>
+                                    <th >Discount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Count() > 0)
+                                {
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            @if (!String.IsNullOrEmpty(item.ServiceDisplayName))
+                                            {
+                                                <td >@item.ServiceDisplayName</td>
+                                            }
+                                            else
+                                            {
+                                                <td >N/A</td>
+                                            }
+                                            @if (item.Rate != 0)
+                                            {
+                                                <td >@item.Rate</td>
+                                            }
+                                            else
+                                            {
+                                                <td >N/A</td>
+                                            }
+                                            @if (item.Volume != 0)
+                                            {
+                                                <td >@item.Volume</td>
+                                            }
+                                            else
+                                            {
+                                                <td >N/A</td>
+                                            }
+                                            @if (item.Tax != 0)
+                                            {
+                                                <td >@item.Tax</td>
+                                            }
+                                            else
+                                            {
+                                                <td >N/A</td>
+                                            }
+                                            @if (item.Discount != 0)
+                                            {
+                                                <td >@item.Discount</td>
+                                            }
+                                            else
+                                            {
+                                                <td >N/A</td>
+                                            }
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" align="center">No records found</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                  
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+
+        $('#networkOverlay').hide();
+         var table = $("#support_table5").DataTable({
+             "destroy": true,
+            "bLengthChange": false,
+            "searching": false,
+            "sorting": false,
+            "paging": false
+        });
+
+    });
+</script>

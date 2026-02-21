@@ -1,0 +1,1596 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.DigitalForm.SignatureTemplateViewModel;
+
+@{
+    var signData = "data:image/png;base64," + Model.Templates.FirstOrDefault(x => x.Id == 1).SamplePreview;
+    var esealData = "data:image/png;base64," + Model.Templates.FirstOrDefault(x => x.Id == 5).SamplePreview;
+}
+
+@{
+    Layout = "~/Views/Shared/_LayoutDigitalForms.cshtml";
+}
+
+<style>
+
+    .form-box {
+        border: 1px solid #ccc; /* Border style */
+        border-radius: 5px; /* Rounded corners */
+        padding: 15px; /* Padding inside the box */        
+    }
+
+    .Common{
+        background:none;
+    }
+
+    .Standard{
+        background: rgb(169, 223, 191);
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 25px;
+        top:3px;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        /* -webkit-transition: .4s; */
+        transition: .4s;
+        border-radius: 4px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        /* right:4px; */
+        bottom: 4px;
+        top:4px;
+        background-color: white;
+       /*  -webkit-transition: .4s; */
+        transition: .4s;
+       /*  border-radius: 5px; */
+    }
+
+    input:checked + .slider {
+        background-color: #167ccb;
+    }
+
+    input:checked + .slider:before {
+        /* -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px); */
+        transform: translateX(26px);
+    }
+
+    .dropzone {
+        border: 2px dashed #ced4da;
+        border-radius: 5px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        margin-bottom: 20px;
+        height: 80px;
+        background-color: #fafafa;
+        color: #bdbdbd;
+        transition: border .24s ease-in-out;
+    
+    }
+
+        .dropzone p {
+            margin: 0;
+            font-size: 16px;
+            color: #6c757d;            
+        }
+
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card-custom">                    
+            <div class="card-body classshide">
+
+                <div class="row">
+
+                    <div class="col-md-8" style="padding-right:0px">
+                        <div class="well form-box" style='display:flex; flex-flow:wrap;justify-content:space-between;height:55px;background:#ebedef;border-radius:3px;'>
+                            <h4 style="margin-left:10px;margin-top:0px"><b>New Form</b></h4>
+                            <button class="btn btn-primary" style="height:35px;margin-top:-5px;margin-right:30px;" onclick="SaveForm()"><img src="~/assets/svgg/Save.svg" />&nbsp; Save Form</button>
+                        </div>
+                        
+                        <div id='Viewer1' style='width: auto; height: 600px; margin: 0 auto;'></div>
+                    </div>
+
+
+                    <div class="col-md-1" style="max-width:80px;text-align:center;padding-right:0px">
+                        <div>
+                            <button class="btn Common" id="docConfigBtn" data-toggle="tooltip" data-placement="right" title="DocConfig" onclick="DocConfig()" style="margin-bottom:3px;"><img src="~/assets/svgg/DocConfig1.svg" style="height: 24px;" /></button>
+                            
+                            <button class="btn Common" id="rolesBtn" data-toggle="tooltip" data-placement="right" title="Roles" onclick="Roles()" style="margin-bottom:3px;"><img src="~/assets/svgg/Roles.svg" style="height: 24px;" /></button>
+                            
+                            <button class="btn Common" id="rolesConfigBtn" data-toggle="tooltip" data-placement="right" title="Roles Configuraton" onclick="RolesConfiguraton()"><img src="~/assets/svgg/RolesConfiguration1.svg" style="height: 24px;" /></button>
+                        </div>
+                    </div>
+
+                                                    @* Document Config(DocConfig) *@ 
+
+                    <div class="col-md-3 form-box container" id="docConfig" style="display:block;overflow-y:scroll;height: 655px;margin:initial;">
+                        
+                        <div class="form-group row">
+                            <label class="col-sm-10 col-form-label" style="display:flex;"><u>Document Configuration</u></label>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-5" style="font-size:15px;padding-right:0px">
+                                Name:<span style="color:red">*</span>
+                            </label>
+                            <div class="col-sm-7" style="padding-left:0px">
+                                <input type="text" class="form-control" mame="name" id="tempName"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-5" style="font-size:15px;padding-right:0px">
+                                Days to complete:<span style="color:red">*</span>
+                            </label>
+                            <div class="col-sm-7" style="padding-left:0px">
+                                <input type="text" class="form-control" mame="daysToComplete" value="5" id="daysToComplete" />
+                            </div>
+                        </div>
+
+                        <div class="form-group row" id="noSignRequiredInput" style="display:none">
+                            <label class="col-sm-5" style="font-size:15px;padding-right:0px">
+                                No. Sign Required:
+                            </label>
+                            <div class="col-sm-7" style="padding-left:0px">
+                                <input type="text" class="form-control" mame="NoOfSign" id="NoOfSign" />
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-7" style="padding-right:0px;font-size:15px">
+                                Signature Templates:
+                            </label>
+                            <div class="col-sm-12" style="display:flex">
+                                <select name="TemplateName" id="templateSelect" class="btn-primary.dropdown-toggle" style="border-radius: 4px; padding: 6px; max-width: 80%; width:70%;">
+                                    <option>Choose Template</option>
+                                    @foreach (var item in Model.Templates.Where(x => x.Type.ToLower() == "sign"))
+                                    {
+                                        <option data-preview="@item.SamplePreview" onclick="InnerDiv()" value="@item.Id" id="SignatureSelect">@item.TemplateId</option>
+                                    }
+                                </select>
+                            
+                                <div style="margin-left: 20px; display:none; " id="innerModel" onclick="ImagePreview()">
+                                    <div class="col-md-2">
+                                        <img src="~/assets/images/eyeicon.png" style="max-width: 25px;">
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-7" style="padding-right:0px;font-size:15px">
+                                Eseal Templates:
+                            </label>
+                            <div class="col-sm-12" style="display:flex">
+                                <select name="TemplateName" id="EsealtemplateSelect" class="btn-primary.dropdown-toggle" style="border-radius: 4px; padding: 6px; max-width: 80%; width:70%;">
+                                    <option>Choose Template</option>
+                                    @foreach (var item in Model.Templates.Where(x => x.Type.ToLower() == "eseal"))
+                                    {
+                                        <option data-preview="@item.SamplePreview" onclick="InnerDiv()" value="@item.Id" id="EsealSelect">@item.TemplateId</option>
+                                    }
+                                </select>
+                            
+                                <div style="margin-left: 20px; display:none; " id="EsealInnerModel" onclick="ImagePreviewEseal()">
+                                    <div class="col-md-2">
+                                        <img src="~/assets/images/eyeicon.png" style="max-width: 25px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check mt-4" style="padding:0px;">
+                            <label class="form-check-label" style="display: inline-flex; align-items: center;">
+                                <label class="switch">
+                                    <input type="checkbox" name="allSignRequired" id="allSignRequiredCheckbox" checked>
+                                    <span class="slider"></span>
+                                </label>&nbsp;&nbsp;
+                                <span style="font-size: 15px;"> All Signatures Required</span>
+                            </label>
+                        </div>
+
+                        <div class="form-check mt-4" style="padding:0px;">
+                            <label class="form-check-label" style="display: inline-flex; align-items: center;">
+                                <label class="switch">
+                                    <input type="checkbox" name="sequentialSign" id="sequentialSign" checked>
+                                    <span class="slider"></span>
+                                </label>&nbsp;&nbsp;
+                                <span style="font-size: 15px;"> Sequential Signing</span>
+                            </label>
+                        </div>
+
+                        @* Inner Modal Sign *@
+                        <div class="modal fade" id="digitalFormModal1" tabindex="-1" role="dialog" aria-labelledby="digitalFormModalLabel" aria-hidden="true" data-backdrop="static">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content" style="width:350px;border-radius:3px;margin-left:150px;">
+                                    <div class="modal-body">
+                                        <img id="signatureTemplatePreviewImage" src="@signData" style="inline-size: -webkit-fill-available;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-secondary" style="margin-left: 240px;" onclick="closeModal()">close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Inner Modal ESeal *@
+                        <div class="modal fade" id="digitalFormModal2" tabindex="-1" role="dialog" aria-labelledby="digitalFormModalLabel" aria-hidden="true" data-backdrop="static">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content" style="width:350px;border-radius:3px;margin-left:150px;">
+                                    <div class="modal-body" style="text-align:center">
+                                        <img id="esealSignatureTemplatePreviewImage" style="height:125px" src="@esealData" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-secondary" onclick="closeModals()">close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    @* Roles(Roles) *@
+
+                    <div class="col-md-3 form-box container" id="roles" style="display:none;overflow-y:scroll;height: 655px;margin:initial">
+                        <div class="form-group row">
+                            <label class="col-sm-10 col-form-label" style="display:flex;"><u>Roles</u></label>
+                        </div>
+
+                        <div class="role-card even card" style="padding: 0px;height:200px;">
+                            <div class="card-body" style="padding: 10px;">
+                                <div>
+                                    <div style="display: flex; align-items: center;">
+                                        <label style="margin-right: 2px;">Name<span style="color: red;">*</span>:</label>
+                                        <input type="text" value="Client" id="input_0" style="margin-right: 5px; width: 70%;">
+                                        <span style="cursor: pointer;" onclick="removeRoleCard(this)"><i class="fa fa-trash" aria-hidden="true"></i></span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; margin-top: 5px;">
+                                        <label style="margin-right: 12px;">Email:</label>
+                                        <input type="text" id="inputEmail_0" value="" style="width: 65%;">
+                                    </div>
+                                    <div style="display: flex; align-items: center; margin-top: 5px;">
+                                        <label style="margin-right: 8px;">Description:</label>
+                                    </div>
+                                    <textarea id="inputDesc_0" style="width: 95%;height:80px">Default Signer Role</textarea>
+                                </div>
+                            </div>
+                        </div>                        
+
+                        <a class="button" onclick="addNewRole()">
+                            <img src="~/assets/svgg/AddNewRole.svg" />
+                        </a>
+
+                    </div>
+
+                                                                           @* Roles Configuraton (Roles Configuraton) *@
+
+
+                    <div class="col-md-3 form-box container" id="rolesconfiguraton" style="display:none;overflow-y:scroll;height: 655px;margin:initial">
+                       
+                        <div class="form-group row">
+
+                            <label class="col-sm-10 col-form-label" style="display:flex;"><u>Common Fields</u></label>
+                            
+                            <div class="col-sm-12" style="display:flex;justify-content:space-evenly;padding:5px;">
+                                <button class="col-md-5 form-box Common" onclick='handleAnnotationClick("paragraph")'>
+                                    <span>
+                                        <img src="~/assets/svgg/Tex.svg" />&nbsp;&nbsp; Text
+                                    </span>
+                                </button>
+
+                                <button class="col-md-5 form-box Common" onclick='handleAnnotationClick("image")'>
+                                    <span>
+                                        <img src="~/assets/svgg/Image.svg" />&nbsp;&nbsp; Image
+                                    </span>
+                                </button>
+                            </div>   
+                            
+                        </div>
+                   
+                        <div class="form-group row">
+                            <label class="col-sm-12 col-form-label" style="display:flex;"><u>Roles Configuration</u></label>
+                            <div class="col-sm-12" style="display:flex;align-items:center;">
+                                <select name="Client" id="ClientSelect" class="btn-primary.dropdown-toggle" style="border-radius: 4px; padding: 6px; max-width: 100%; width:100%;">
+                                    <option>Select a role</option>
+                                   
+                                </select>                                
+                            </div>
+                        </div>
+                
+                        @* Standard Fields *@
+
+                        <div class="form-group row">
+                            <label class="col-sm-12 col-form-label" style="display:flex;"><u>Standard Fields</u></label>
+
+                            <div class="col-sm-12" style="display:flex;justify-content:space-evenly;padding:5px">
+                                <button class="col-md-5 form-box Standard" style="padding:5px;height:50px;" onclick='addField("SIGNATURE")' data_lable="Signature" text="Signature1">
+                                    <span>
+                                        <img src="~/assets/svgg/Signature.svg" />&nbsp;&nbsp; Signature
+                                    </span>
+                                </button>
+
+                                <button class="col-md-5 form-box Standard" style="padding:5px;height:50px;" onclick='addField("ESEAL")' data_lable="Signature" text="Eseal">
+                                    <span>
+                                        <img src="~/assets/svgg/Eseal.svg" />&nbsp;&nbsp; Eseal
+                                    </span>
+                                </button>                                                              
+                            </div>
+
+                            <div class="col-sm-12" style="display:flex;justify-content:space-evenly;padding:5px">
+                                <button class="col-md-5 form-box Standard" style="padding:5px;height:50px;" onclick='handleAnnotationClick("text")' data_lable="Text" text="Text">
+                                    <span>
+                                        <img src="~/assets/svgg/TEXT.svg" />&nbsp;&nbsp; Text
+                                    </span>
+                                </button>
+
+                                <button class="col-md-5 form-box Standard" style="padding:5px;height:50px" onclick='handleAnnotationClick("radio")' data_lable="Radio" text="Radio">
+                                    <span>
+                                        <img src="~/assets/svgg/Radio.svg" />&nbsp;&nbsp; Radio
+                                    </span>
+                                </button>
+                            </div>
+
+                            <div class="col-sm-12" style="display:flex;justify-content:space-evenly;padding:5px">
+                                <button class="col-md-5 form-box Standard" style="padding:5px;height:50px;" onclick='handleAnnotationClick("checkbox")' data_lable="Checkbox" text="Checkbox">
+                                    <span>
+                                        <img src="~/assets/svgg/Checkbox.svg" />&nbsp; Checkbox
+                                    </span>
+                                </button>
+
+                                <button class="col-md-5 form-box Standard" style="padding:5px;height:50px;" onclick='handleAnnotationClick("listbox")' data_lable="ListBox" text="ListBox">
+                                    <span>
+                                        <img src="~/assets/svgg/List Box.svg" />&nbsp;&nbsp; List Box
+                                    </span>
+                                </button>
+                            </div>
+
+                            <div class="col-sm-12" style="display:flex;justify-content:space-evenly;padding:5px">
+                                <button class="col-md-5 form-box Standard" style="padding:5px;height:50px;" onclick='handleAnnotationClick("combobox")' data_lable="ComboBox" text="ComboBox">
+                                    <span style="font-size:12px;">
+                                        <img src="~/assets/svgg/Combo Box.svg" />&nbsp; Combo Box
+                                    </span>
+                                </button>
+
+                                <div class="col-md-5" >
+                                  
+                                </div>
+                            </div>
+                        </div>
+                                    
+                        @* Recommended Fields *@
+
+                        <div class="form-group row">
+                            <label class="col-sm-12 col-form-label" style="display:flex;"><u>Recommended Fields</u></label>
+
+                            <div class="col-sm-12"  style="display:flex;justify-content:space-evenly;padding:5px;">
+                                <button class="col-md-4 form-box Standard" onclick='handlerecommend("text","Full Name")' style="border-radius:15px;padding:5px;">
+                                    <span>
+                                        Full Name
+                                    </span>
+                                </button>
+                               
+                                <button class="col-md-3 form-box Standard" onclick='handlerecommend("text","Gender")' style="border-radius:15px;padding:5px;">
+                                    <span>
+                                        Gender
+                                    </span>
+                                </button>
+                              
+                                <button class="col-md-3 form-box Standard" onclick='handlerecommend("text","Nation")' style="border-radius:15px;padding:5px;">
+                                    <span>
+                                        Nation
+                                    </span>
+                                </button>
+                            </div>
+                    
+                            <div class="col-sm-12" style="display:flex;justify-content:space-evenly;padding:5px;">
+                                <button class="col-md-4 form-box Standard" onclick='handlerecommend("text","First Name")' style="border-radius:15px;padding:5px;">
+                                    <span>
+                                        First Name
+                                    </span>
+                                </button>
+                                
+                                <button class="col-md-4 form-box Standard" onclick='handlerecommend("text","Last Name")' style="border-radius:15px;padding:5px;">
+                                    <span>
+                                       Last Name
+                                    </span>
+                                </button>
+
+                                <div class="col-md-2" >
+                                 
+                                </div>
+                            </div>
+                          
+                            <div class="col-sm-12" style="display:flex;justify-content:space-evenly;padding:5px;">
+                                <button class="col-md-5 form-box Standard" onclick='handlerecommend("text","Date of Birth")' style="border-radius:15px;padding:5px;">
+                                    <span>
+                                        Date of Birth
+                                    </span>
+                                </button>  
+                                
+                                <div class="col-md-3"></div>
+                                <div class="col-md-2"></div>
+                            </div>                            
+                        </div>
+                      
+                    </div>
+                </div>
+
+                @* Modal *@
+
+                <div class="modal fade" id="digitalFormModal" tabindex="-1" role="dialog" aria-labelledby="digitalFormModalLabel" aria-hidden="true" data-backdrop="static">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="digitalFormModalLabel">How do you want to start?</h5>
+                            </div>
+
+                            <div class="modal-body">
+
+                                <div>
+                                    <div style="margin:auto;border: 1px solid rgb(0, 0, 0); width: 140px; height: 170px; display: flex; justify-content: flex-start; align-items: flex-start; padding: 5px; box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 8px;">
+                                        <span class="MuiButtonBase-root MuiIconButton-root jss28 MuiRadio-root MuiRadio-colorSecondary jss29 Mui-checked MuiIconButton-colorSecondary" aria-disabled="false">
+                                            <span class="MuiIconButton-label">
+                                                <input class="jss31" type="radio" value="option2" checked="">
+                                                <div class="jss32 jss34">
+                                                    @* <svg class="MuiSvgIcon-root" focusable="false" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path>
+                                                    </svg>
+                                                    <svg class="MuiSvgIcon-root jss33" focusable="false" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path d="M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"></path>
+                                                    </svg> *@
+                                                </div>
+                                            </span>
+                                            <span class="MuiTouchRipple-root"></span>
+                                        </span>
+                                        <span class="MuiTypography-root MuiFormControlLabel-label MuiTypography-body1"></span>
+                                            
+                                        
+                                        <div style="font-size: 20px; padding-top: 60px; color: grey;margin-left:20px;">DOC</div>
+                                    </div>
+                                    <p class="MuiTypography-root MuiTypography-body2 MuiTypography-colorTextSecondary MuiTypography-alignCenter" style="margin-top: 10px;">Existing Document</p>
+                                </div>
+
+                                <div>
+                                    <div role="button" tabindex="0" class="dropzone" onclick="open_file()">
+                                        <div style="overflow:hidden;width: 0px; height: 0px;">
+                                            <input id="File" onchange="fileSelect(event)" type="file" accept=".docx,.pdf,.xlsx" autocomplete="off" tabindex="-1">
+                                        </div>
+                                        <p>Drag 'n' drop one file here (PDF,DOCX,XLSX), or click to select</p>
+                                    </div>
+                                </div>
+                                &nbsp;
+                                <p id="DocumentName" style="text-align: center;font-weight: 400;"></p>
+                                
+                            </div>
+
+                            <div class="modal-footer" style="border-top: 1px solid #efefef;">
+                                <button type="button" id="continue" class="btn btn-primary" onclick="modalClose()" disabled>Continue</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>            
+        </div>
+    </div>
+</div>
+
+@section scripts {
+
+    <script>
+
+        //File and FileName for Continue Button in Modal
+        var file = null;
+        var name = null;
+
+        var signSelectedValue = "";
+        var esealSelectedValue = "";
+
+        $(document).ready(function () {
+
+            $('#digitalFormsMenu').addClass('active');
+
+            $('#homeMenu').removeClass('breadcrumb-item');
+            $('#homeMenu').addClass('breadcrumb-item').append('Digital Forms > Create New Forms');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+
+            $("#digitalFormModal").modal('show');
+            $('#docConfigBtn').css('background', 'skyblue');
+
+            $('[data-toggle="tooltip"]').tooltip()
+
+        });
+
+
+        // DocConfig
+        function DocConfig() {
+            var divToToggle = document.getElementById('docConfig');
+            var divToToggle_1 = document.getElementById('roles');
+            var divToToggle_2 = document.getElementById('rolesconfiguraton');
+            if (divToToggle.style.display === 'none' || divToToggle.style.display === '') {
+                divToToggle.style.display = 'block';
+                divToToggle_1.style.display = 'none';
+                divToToggle_2.style.display = 'none';
+            }
+
+            $('#docConfigBtn').css('background', 'skyblue');
+            $('#rolesConfigBtn').css('background', '');
+            $('#rolesBtn').css('background', '');
+
+        }
+
+        $('#allSignRequiredCheckbox').change(function () {
+            $('#noSignRequiredInput').toggle(!$(this).prop('checked'));
+        });
+        // $('#allSignRequiredCheckbox').change(function () {
+        //     if ($(this).prop('checked')) {
+        //         $('#noSignRequiredInput').hide();
+        //     } else {
+        //         $('#noSignRequiredInput').show();
+        //     }
+        // });
+
+        //Roles
+
+        function Roles() {
+            var divToToggle = document.getElementById('docConfig');
+            var divToToggle_1 = document.getElementById('roles');
+            var divToToggle_2 = document.getElementById('rolesconfiguraton');
+            if (divToToggle_1.style.display === 'none' || divToToggle.style.display === '') {
+                divToToggle_1.style.display = 'block';
+                divToToggle.style.display = 'none';
+                divToToggle_2.style.display = 'none';
+            }
+
+            var docConfigBtn = document.getElementById('docConfigBtn');
+            var rolesBtn = document.getElementById('rolesBtn');
+            var rolesConfigBtn = document.getElementById('rolesConfigBtn');
+
+            $('#rolesBtn').css('background', 'skyblue');
+            $('#docConfigBtn').css('background', '');
+            $('#rolesConfigBtn').css('background', '');
+        }
+
+        var roleList = [];
+        var i = 1;
+
+        var inputId = '';
+        var inputEmail = '';
+        var inputDesc = '';
+
+        function addNewRole() {
+
+
+            // RoleData();
+            // var emailRegex = /^([\w-\.]+)@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+            // var emailInputValue = null;
+            // $.each(roleList, function (index, role) {
+            //     emailInputValue = role.email;
+            // });
+
+            // if (!emailRegex.test(emailInputValue)) {
+            //     // showCustomAlert('Please enter a valid Email');
+            //     Swal.fire({ type: 'error', title: "Error", text: "Please enter a valid Email" });
+            //     return; // Exit the function if email format is invalid
+            // }
+
+            var rolesContainer = document.getElementById('roles');
+
+            // Create the new role card div
+            var newRoleCard = document.createElement('div');
+            newRoleCard.classList.add('role-card', 'even', 'card');
+            newRoleCard.style.padding = '0px';
+            newRoleCard.style.height = '200px';
+
+            // Create the card body div
+            var cardBody = document.createElement('div');
+            cardBody.classList.add('card-body');
+            cardBody.style.padding = '10px';
+
+            inputId = 'input_' + i;
+            inputEmail = 'inputEmail_' + i;
+            inputDesc = 'inputDesc_' + i;
+
+            // Create the inner content
+            var innerContent = `
+                <div>
+                    <div style="display: flex; align-items: center;">
+                        <label style="margin-right: 2px;">Name<span style="color: red;">*</span>:</label>
+                        <input type="text" id="${inputId}" style="margin-right: 5px; width: 70%;">
+                                <span style="cursor: pointer;" onclick="removeRoleCard(${i})">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-top: 5px;">
+                        <label style="margin-right: 12px;">Email:</label>
+                        <input type="text" id="${inputEmail}"value="" style="width: 65%;">
+                    </div>
+                    <div style="display: flex; align-items: center; margin-top: 5px;">
+                        <label style="margin-right: 8px;">Description:</label>
+                    </div>
+                    <textarea id="${inputDesc}" style="width: 95%; height: 80px;"></textarea>
+                </div>
+            `;
+
+            i++;
+
+            // Set the innerHTML of cardBody to the generated content
+            cardBody.innerHTML = innerContent;
+
+            // Append cardBody to newRoleCard
+            newRoleCard.appendChild(cardBody);
+
+            // Insert the newRoleCard after the original role card
+            rolesContainer.insertBefore(newRoleCard, rolesContainer.children[1].nextSibling); // Insert after index 1
+
+            // Scroll to the bottom of the roles container to show the newly added role card
+            rolesContainer.scrollTop = rolesContainer.scrollHeight;
+        }
+
+        function removeRoleCard(index) {
+            var roleToRemove = document.getElementById('input_' + index);
+            if (roleToRemove) {
+                roleToRemove.closest('.role-card').remove();
+
+                // Remove the corresponding role from the roleList array
+                roleList.splice(index - 1, 1);
+
+                // Update the dropdown options
+                var selectDropdown = $('#ClientSelect');
+                selectDropdown.empty();
+
+                // Re-populate the dropdown with updated roleList
+                $.each(roleList, function (index, role) {
+                    selectDropdown.append($('<option></option>').attr('value', role.name).text(role.name));
+                });
+            }
+        }
+
+
+        // New removeFunction
+        // function removeRoleCard(index) {
+        //     var roleToRemove = document.getElementById('input_' + index);
+        //     if (roleToRemove) {
+        //         roleToRemove.closest('.role-card').remove();
+        //     }
+
+
+        // }
+
+        //Old removeFunction
+        // function removeRoleCard(element) {
+        //     // Remove the parent role card when trash icon is clicked
+        //     element.closest('.role-card').remove();
+        // }
+
+
+
+        //Roles Conifiguration
+
+        function RolesConfiguraton() {
+
+            roleList = [];
+            var divToToggle = document.getElementById('docConfig');
+            var divToToggle_1 = document.getElementById('roles');
+            var divToToggle_2 = document.getElementById('rolesconfiguraton');
+            if (divToToggle_2.style.display === 'none' || divToToggle.style.display === '') {
+                divToToggle_2.style.display = 'block';
+                divToToggle.style.display = 'none';
+                divToToggle_1.style.display = 'none';
+            }
+
+            var docConfigBtn = document.getElementById('docConfigBtn');
+            var rolesBtn = document.getElementById('rolesBtn');
+            var rolesConfigBtn = document.getElementById('rolesConfigBtn');
+
+            $('#docConfigBtn').css('background', '');
+            $('#rolesBtn').css('background', '');
+            $('#rolesConfigBtn').css('background', 'skyblue');
+
+
+            // Get input field values
+            var inputIdElement = document.getElementById('input_0');
+            var inputEmailElement = document.getElementById('inputEmail_0');
+            var inputDescElement = document.getElementById('inputDesc_0');
+
+            // Check if elements exist before accessing their values
+            if (inputIdElement && inputEmailElement && inputDescElement) {
+                var inputIdValue = inputIdElement.value;
+                var inputEmailValue = inputEmailElement.value;
+                var inputDescValue = inputDescElement.value;
+
+                // Create an object to store input field values
+                var roleData = {
+                    name: inputIdValue,
+                    email: inputEmailValue,
+                    description: inputDescValue
+                };
+
+                // Push the roleData object into the roleList array
+                roleList.push(roleData);
+            }
+
+
+            for (var x = 1; x < i; x++) {
+                var roleData = {
+                    name: $("#input_" + x).val(),
+                    email: $("#inputEmail_" + x).val(),
+                    description: $("#inputDesc_" + x).val(),
+                };
+
+                roleList.push(roleData);
+            }
+
+            var selectDropdown = $('#ClientSelect');
+            selectDropdown.empty();
+
+            $.each(roleList, function (index, role) {
+                selectDropdown.append($('<option></option>').attr('value',role.name).text(role.name));
+            });
+        }
+
+        //Modal Continue Button click
+
+        function modalClose(e) {
+
+            const { Annotations, documentViewer, PDFNet, Tools, annotationManager } = webviwerInstance.Core
+            const annotManager = documentViewer.getAnnotationManager();
+            const fieldManager = annotManager.getFieldManager();
+            const annotationsList = annotManager.getAnnotationsList();
+
+            //documentViewer.removeEventListener();
+
+            const formFieldCreationManager = webviwerInstance.Core.annotationManager.getFormFieldCreationManager();
+            formFieldCreationManager.startFormFieldCreationMode();
+
+            var blob = getblob(file,name).then(data => {
+                webviwerInstance.UI.loadDocument(data, { filename: name });
+            });
+
+            var fileInput = document.getElementById('File');
+
+            if ((fileInput && fileInput.files.length > 0) || isFileUploaded == true) {
+                $('#digitalFormModal').modal('hide');
+            }
+
+            documentViewer.addEventListener('documentLoaded', () => {
+
+                webviwerInstance.UI.setZoomLevel("100%");
+                const zoom = webviwerInstance.UI.getZoomLevel("100%");
+            });
+        }
+
+
+        // Template List for signature and eseal
+        function InnerDiv() {
+            var model = document.getElementById("innerModel");
+            var model_1 = document.getElementById("EsealInnerModel");
+
+            // Toggle display based on the current state
+            var isHidden = model.style.display === "none" || model_1.style.display === "none";
+            model.style.display = isHidden ? "block" : "none";
+            model_1.style.display = isHidden ? "block" : "none";
+        }
+
+        document.getElementById('templateSelect').addEventListener('change', function () {
+            const signSelectedValue = this.value;
+            const innerModel = document.getElementById('innerModel');
+
+            innerModel.style.display = (signSelectedValue !== 'Choose Template') ? 'block' : 'none';
+        });
+        document.getElementById('EsealtemplateSelect').addEventListener('change', function () {
+
+            esealSelectedValue = this.value;
+            if (esealSelectedValue !== 'Choose Template') {
+                document.getElementById('EsealInnerModel').style.display = 'block';
+            } else {
+                document.getElementById('EsealInnerModel').style.display = 'none';
+            }
+        });
+
+        //Sign Img Previvew
+        $('#templateSelect').change(function () {
+
+            // Get the selected option's data-preview attribute
+            var preview = $('option:selected', this).attr('data-preview');
+
+            // Update the preview image
+            $("#signatureTemplatePreviewImage").attr("src", "data:image/png;base64," + preview);
+
+
+        });
+
+        // Eseal Image Previvew
+        $('#EsealtemplateSelect').change(function () {
+
+            // Get the selected option's data-preview attribute
+            var preview = $('option:selected', this).attr('data-preview');
+            // Update the preview image
+            $("#esealSignatureTemplatePreviewImage").attr("src", "data:image/png;base64," + preview);
+        });
+
+        function ImagePreview() {
+            $("#digitalFormModal1").modal('show');
+        }
+
+        function closeModal() {
+            $("#digitalFormModal1").modal('hide');
+        }
+
+        function ImagePreviewEseal() {
+            $("#digitalFormModal2").modal('show');
+        }
+
+        function closeModals() {
+            $("#digitalFormModal2").modal('hide');
+        }
+
+        // pdf/docx/Xlsx
+        function open_file() {
+            document.getElementById('File').click();
+        }
+
+        function fileSelect(e) {
+
+            // Added validation for maximum file size (15MB)
+            if (e.target.files[0].size > 15 * 1024 * 1024) {
+                Swal.fire({
+                    type: 'info',
+                    title: 'Info',
+                    text: "File size should be 15 MB or below."
+
+                });
+                return false;
+            }
+
+            if (
+                e.target.files[0].type !=
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document" &&
+                e.target.files[0].type !=
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" &&
+                e.target.files[0].type != "application/pdf"
+            ) {
+                Swal.fire.fire({
+                    type: 'info',
+                    title: 'Info',
+                    text: "Only PDFs, Word documents, and Excel sheets are supported."
+                });
+                return false;
+            }
+
+            // Validation for file name length
+            var len = e.target.files[0].name.length;
+            if (len > 50) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "File name length should be less than 40 characters."
+                });
+                return false;
+            }
+
+            document.getElementById("DocumentName").textContent = e.target.files[0].name;
+
+            isFileUploaded = true;
+            file = e.target.files[0];
+            name = e.target.files[0].name;
+
+            document.getElementById('continue').disabled = false;
+        }
+
+
+        var dragAndDropableDiv = $(".dropzone");
+        dragAndDropableDiv.on('dragenter', function (e) {
+        });
+        dragAndDropableDiv.on('dragover', function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+        });
+
+
+        //If user drop File on DropArea
+        dragAndDropableDiv.on("drop", (event) => {
+
+            event.preventDefault(); //preventing from default behaviour
+            //getting user select file and [0] this means if user select multiple files then we'll select only the first one
+            file = event.originalEvent.dataTransfer.files[0];
+            let extn = file.name.substring(file.name.lastIndexOf(".") + 1);
+
+            // Added validation for maximum file size (15MB)
+            if (file.size > 15 * 1024 * 1024) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "File size should be 15 MB or below."
+
+                });
+                return false;
+            }
+
+            if (
+                file.type !=
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document" &&
+                file.type !=
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" &&
+                file.type != "application/pdf"
+            ) {
+                return false;
+            }
+
+            var len = file.name.length;
+            if (len > 50) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "File name length should be less than 40 characters."
+                });
+                return false;
+            }
+
+            document.getElementById("DocumentName").textContent = file.name;
+
+
+            var reader = new FileReader();
+
+            reader.onloadend = async function (e) {
+                if (extn === "pdf") {
+                    var buff = new Int8Array(e.target.result);
+                    return;
+                }
+            };
+
+            isFileUploaded = true;
+            name = file.name;
+            document.getElementById('continue').disabled = false;
+        });
+
+
+        async function SaveForm(){
+
+
+            $('#overlay').show();
+
+            const { Annotations, documentViewer, PDFNet, Tools, annotationManager, Core } = webviwerInstance.Core
+            const annotManager = documentViewer.getAnnotationManager();
+            const fieldManager = annotManager.getFieldManager();
+            const annotationsList = annotManager.getAnnotationsList();
+            const zoom = documentViewer.getZoomLevel();
+            const formFieldCreationManager = webviwerInstance.Core.annotationManager.getFormFieldCreationManager();
+            formFieldCreationManager.endFormFieldCreationMode();
+
+            let signCheckArr = [];
+            let esealCheckArr = [];
+
+            await Promise.all(
+                annotationsList.map(async (annot, index) => {
+                    let recpemail = annot.getCustomData("recepient");
+
+                    if (annot.getCustomData("type") === "SIGNATURE") {
+                        signCheckArr.push(recpemail);
+                    }
+
+                    if (annot.getCustomData("type") === "ESEAL") {
+                        esealCheckArr.push(recpemail);
+                    }
+                })
+            );
+
+            const toFindDuplicates = (arry) =>
+                arry.filter((item, index) => arry.indexOf(item) !== index);
+
+            const duplicateSign = toFindDuplicates(signCheckArr);
+            if (duplicateSign.length !== 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: `Remove 1 Signature`
+                });
+                $('#overlay').hide();
+                return;
+            }
+
+            const duplicateElements = toFindDuplicates(esealCheckArr);
+            if (duplicateElements.length !== 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: `Remove 1 Eseal Signature`
+
+                });
+                $('#overlay').hide();
+                return;
+            }
+
+
+            let signCordinates = {};
+            let esealCordinates = {};
+
+            let name = document.getElementById("tempName").value;
+            if (name.trim() === "") {
+                Swal.fire({
+                    icon: "Error",
+                    text: "Form name should not be empty",
+                    type: "error",
+                });
+                $('#overlay').hide();
+                return;
+            }
+
+            await Promise.all(
+                annotationsList.map(async (annot, index) => {
+
+                    let inputAnnot;
+                    let field;
+                    if (annot.getCustomData("type") !== "") {
+                        // create a form field based on the type of annotation
+                        if (
+                            annot.getCustomData("type") === "TEXT" ||
+
+                            annot.getCustomData("type") === "INITIAL" ||
+                            annot.getCustomData("type") === "COMPANY" ||
+                            annot.getCustomData("type") === "FULL_NAME" ||
+                            annot.getCustomData("type") === "JOB_TITLE" ||
+                            annot.getCustomData("type") === "ADDRESS" ||
+                            annot.getCustomData("type") === "PHONE"
+                        ) {
+                            field = new Annotations.Forms.Field(
+                                annot.getCustomData("name") + Date.now() + index,
+                                {
+                                    type: "Tx",
+                                    value: annot.getCustomData("value"),
+                                }
+                            );
+                            inputAnnot = new Annotations.TextWidgetAnnotation(field);
+                        } else if (annot.getCustomData("type") === "EMAIL") {
+                            field = new Annotations.Forms.Field(
+                                annot.getCustomData("name") + Date.now() + index,
+                                {
+                                    type: "Tx",
+                                    value: annot.getCustomData("value"),
+                                }
+                            );
+                            inputAnnot = new Annotations.TextWidgetAnnotation(field);
+                        }
+                        else if (annot.getCustomData("type") === "SIGNATURE") {
+                            //let recpemail = annot.getCustomData("recepient");
+                            let anname = annot.getCustomData("name") + Date.now() + index;
+                            signCordinates = {
+                                fieldName: anname,
+                                posX: annot.getX(),
+                                posY: annot.getY(),
+                                PageNumber: annot.getPageNumber(),
+                                width: annot.getWidth(),
+                                height: annot.getHeight(),
+                            };
+
+
+                            field = new Annotations.Forms.Field(
+                                annot.getCustomData("name") + Date.now() + index,
+                                {
+                                    type: "Sig",
+                                }
+                            );
+                            inputAnnot = new Annotations.SignatureWidgetAnnotation(field, {
+                                appearance: "_DEFAULT",
+                                appearances: {
+                                    _DEFAULT: {
+                                        Normal: {
+                                            data: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjEuMWMqnEsAAAANSURBVBhXY/j//z8DAAj8Av6IXwbgAAAAAElFTkSuQmCC",
+                                            offset: {
+                                                x: 100,
+                                                y: 100,
+                                            },
+                                        },
+                                    },
+                                },
+                            });
+                        }
+                        else if (annot.getCustomData("type") === "ESEAL") {
+                           // let recpemail = annot.getCustomData("recepient");
+                           // let orgIDofUser = "";
+                            let anname = annot.getCustomData("name") + Date.now() + index;
+                            esealCordinates = {
+                                fieldName: anname,
+                                posX: annot.getX(),
+                                posY: annot.getY(),
+                                PageNumber: annot.getPageNumber(),
+                                width: annot.getWidth(),
+                                height: annot.getHeight(),
+                               // organizationID: orgIDofUser,
+                            };
+
+                            field = new Annotations.Forms.Field(
+                                annot.getCustomData("name") + Date.now() + index,
+                                {
+                                    type: "Sig",
+                                }
+                            );
+                            inputAnnot = new Annotations.SignatureWidgetAnnotation(field, {
+                                appearance: "_DEFAULT",
+                                appearances: {
+                                    _DEFAULT: {
+                                        Normal: {
+                                            data: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGMAAAAgCAIAAACJlVEAAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAEiSURBVGhD7ZTbFYMgEESty4Ksx2psxmIM4AIL8phEPxIy9yMRZpew9+Q4HQSDplBoCoWmUGgKhaZQ+qb2dZ4y5nUvhOVdIYYnUrJssha25Vr6JYCm8okcLglzmZV/rrd4rJFlsR9p1aCmqmN1TTlRm/9SDGyqmPRMBUMXMTVT7sQYvLV8iDumzsiQ36rRYgmirmZ+35QmvUOMs6tqdIsLg8ZMTc3UF3DrPxURN1LWasmz1M34pgx2SKlrtIjSHF/8F6ZUXb2llCjFg5oyU8WhXJUva7UUArVbM+VOzH4NXT7EB2/0eIskUlertZRF6X33pJFT2y7ay4fomyInNIVCUyg0hUJTKDSFQlMoNIVCUyg0hUJTKDSFQlMoNIVCUxjH8QKm2g2cIoXf3gAAAABJRU5ErkJggg==",
+                                            offset: {
+                                                x: 100,
+                                                y: 100,
+                                            },
+                                        },
+                                    },
+                                },
+                            });
+                        }
+                        else if (annot.getCustomData("type") === "QRCODE") {
+                            let recpemail = annot.getCustomData("recepient");
+                            let anname = annot.getCustomData("name") + Date.now() + index;
+                            qrCordinates[recpemail] = {
+                                fieldName: anname,
+                                posX: annot.getX(),
+                                posY: annot.getY(),
+                                PageNumber: annot.getPageNumber(),
+                                width: annot.getWidth(),
+                                height: annot.getHeight(),
+                            };
+
+
+                            field = new Annotations.Forms.Field(
+                                annot.getCustomData("name") + Date.now() + index,
+                                {
+                                    type: "Sig",
+                                }
+                            );
+                            inputAnnot = new Annotations.SignatureWidgetAnnotation(field, {
+                                appearance: "_DEFAULT",
+                                appearances: {
+                                    _DEFAULT: {
+                                        Normal: {
+                                            data: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjEuMWMqnEsAAAANSURBVBhXY/j//z8DAAj8Av6IXwbgAAAAAElFTkSuQmCC",
+                                            offset: {
+                                                x: 100,
+                                                y: 100,
+                                            },
+                                        },
+                                    },
+                                },
+                            });
+                        }
+                        else if (annot.getCustomData("type") === "DATE") {
+                            field = new Annotations.Forms.Field(
+                                annot.getCustomData("name") + Date.now() + index,
+                                {
+                                    type: "Tx",
+                                    value: "m-d-yyyy",
+                                    // Actions need to be added for DatePickerWidgetAnnotation to recognize this field.
+                                    actions: {
+                                        F: [
+                                            {
+                                                name: "JavaScript",
+                                                // You can customize the date format here between the two double-quotation marks
+                                                // or leave this blank to use the default format
+                                                javascript: 'AFDate_FormatEx("mmm d, yyyy");',
+                                            },
+                                        ],
+                                        K: [
+                                            {
+                                                name: "JavaScript",
+                                                // You can customize the date format here between the two double-quotation marks
+                                                // or leave this blank to use the default format
+                                                javascript: 'AFDate_FormatEx("mmm d, yyyy");',
+                                            },
+                                        ],
+                                    },
+                                }
+                            );
+
+                            inputAnnot = new Annotations.DatePickerWidgetAnnotation(field);
+                        } else {
+                            // exit early for other annotations
+                            annotManager.deleteAnnotation(annot, false, true); // prevent duplicates when importing xfdf
+                            return;
+                        }
+                    } else {
+                        // exit early for other annotations
+                        return;
+                    }
+
+                    // set position
+                    inputAnnot.PageNumber = annot.getPageNumber();
+
+                    inputAnnot.X = annot.getY();
+                    inputAnnot.Y = annot.getX();
+
+                    inputAnnot.rotation = annot.Rotation;
+                    if (annot.Rotation === 0 || annot.Rotation === 180) {
+                        inputAnnot.Width = annot.getWidth();
+                        inputAnnot.Height = annot.getHeight();
+                    } else {
+                        inputAnnot.Width = annot.getHeight();
+                        inputAnnot.Height = annot.getWidth();
+                    }
+
+                    // customize styles of the form field
+                    Annotations.WidgetAnnotation.getCustomStyles = function (widget) {
+                        if (widget instanceof Annotations.SignatureWidgetAnnotation) {
+                            return {
+                                border: "1px solid #a5c7ff",
+                                "background-color": "transparent",
+                                color: "white",
+                                "font-size": "12px",
+                                "font-family": "Comic Sans MS Bold Italic",
+                            };
+                        } else {
+                            return {
+                                border: "1px solid #000000",
+                                "font-size": "" + 12.0 / zoom + "px",
+                            };
+                        }
+                    };
+                    Annotations.WidgetAnnotation.getCustomStyles(inputAnnot);
+                })
+            );
+
+            const xfdfString = await annotManager.exportAnnotations();
+            const data = await documentViewer.getDocument().getFileData({
+                xfdfString,
+                flags: webviwerInstance.Core.SaveOptions.INCREMENTAL,
+                downloadType: "pdf",
+            });
+
+            await PDFNet.initialize();
+            const doc = await PDFNet.PDFDoc.createFromBuffer(new Uint8Array(data));
+
+            await PDFNet.runWithCleanup(async () => {
+
+                doc.lock();
+                const buf = await doc.saveMemoryBuffer(
+                    PDFNet.SDFDoc.SaveOptions.e_incremental
+                );
+                const blob = new Blob([buf], { type: "application/pdf" });
+
+
+                var dropdownSign = document.getElementById("templateSelect");
+                var selectedOptionSign = dropdownSign.options[dropdownSign.selectedIndex];
+
+                var dropdownEseal = document.getElementById("EsealtemplateSelect");
+                var selectedOptionEseal = dropdownEseal.options[dropdownEseal.selectedIndex];
+
+                let name = document.getElementById("tempName").value;
+                let DocumentName = document.getElementById("DocumentName").textContent;
+                let daysToComplete = document.getElementById("daysToComplete").value;
+                let numberOfSignatures = document.getElementById("NoOfSign").value;
+                let allSigRequired = $("#allSignRequiredCheckbox").prop('checked');
+                let sequentialSigning = $("#sequentialSign").prop('checked');
+
+                let SignatureSelectedName, SignatureSelectedImage, SignatureSelected;
+                if (selectedOptionSign.index == 0) {
+                    SignatureSelectedName = "";
+                    SignatureSelectedImage = "";
+                    SignatureSelected = 0;
+                } else {
+                    SignatureSelectedName = selectedOptionSign.textContent;
+                    SignatureSelectedImage = selectedOptionSign.getAttribute("data-preview");
+                    SignatureSelected = dropdownSign.value;
+                }
+
+                let ESealSelectedName, ESealSelectedImage, ESealSelected;
+                if (selectedOptionEseal.index == 0) {
+                    ESealSelectedName = "";
+                    ESealSelectedImage = "";
+                    ESealSelected = 0;
+                } else {
+                    ESealSelectedName = selectedOptionEseal.textContent;
+                    ESealSelectedImage = selectedOptionEseal.getAttribute("data-preview");
+                    ESealSelected = dropdownEseal.value;
+                }
+
+                let advancedSettings = {
+                    SignatureSelectedName: SignatureSelectedName,
+                    SignatureSelectedImage: SignatureSelectedImage,
+                    ESealSelectedName: ESealSelectedName,
+                    ESealSelectedImage: ESealSelectedImage,
+                    ESealSelected: ESealSelected,
+                    SignatureSelected: SignatureSelected
+                }
+
+                var dropDwn = document.getElementById("ClientSelect").value;
+                var selectedRole = null;
+
+                // Iterate over roleList to find the matching role
+                for (var i = 0; i < roleList.length; i++) {
+                    if (roleList[i].name === dropDwn) {
+                        selectedRole = roleList[i];
+                        break; // Exit the loop once a match is found
+                    }
+                }
+
+
+                let roles = selectedRole;
+
+                let rolesConfig = {
+                    signCordinates: signCordinates,
+                    esealCordinates:esealCordinates
+                }
+
+                var fileFormData = new FormData();
+                fileFormData.append("File", blob, DocumentName);
+                fileFormData.append("DocumentName", DocumentName);
+                fileFormData.append("name", name);
+                fileFormData.append("daysToComplete", daysToComplete);
+                fileFormData.append("numberOfSignatures", numberOfSignatures);
+                fileFormData.append("allSigRequired", allSigRequired);
+                fileFormData.append("sequentialSigning", sequentialSigning);
+                fileFormData.append("advancedSettings", JSON.stringify(advancedSettings));
+                fileFormData.append("roles", JSON.stringify(roles));
+                fileFormData.append("rolesConfig", JSON.stringify(rolesConfig));
+
+                SaveDocument("@Url.Action("saveForm", "DigitalForm")", fileFormData)
+                    .then((response) => {
+                        if (response.status === "Success") {
+                            Swal.fire({
+                                icon: "Success",
+                                text: response.message,
+                                icon: "success"
+                            }).then(() => {
+                                window.location.href = '@Url.Action("Index", "DigitalForm")';
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: "Error",
+                                text: response.message,
+                                icon: "error"
+                            }).then(() => {
+                                window.location.href = '@Url.Action("Index", "DigitalForm")';
+                            });
+                        }
+
+                    })
+                    .catch((e) => {
+
+                        Swal.fire({
+                            icon: "Error",
+                            text: "Something went wrong!",
+                            type: "error",
+
+                        });
+                    });
+            });
+        }
+
+        function SaveDocument(url, formData) {
+            return new Promise(function (resolve, reject) {
+                $.ajax({
+                    url: url,
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    method: 'POST',
+                    type: 'POST',
+                    beforeSend: function () {
+                        $('#overlay').show();
+                    },
+                    complete: function () {
+                        $('#overlay').hide();
+                    },
+                    success: function (data) {
+                        resolve(data)
+                    },
+                    error: function (err) {
+                        reject(err)
+                    }
+                });
+            });
+        }
+
+
+    </script>
+    <script>
+
+        //script for prepare Drawing Annotation on Pdf 
+
+        const addField = (type, point = {}, name = "", value = "", flag = {}) => {
+            const { documentViewer, Annotations } = webviwerInstance.Core;
+            const annotManager = documentViewer.getAnnotationManager();
+            const doc = documentViewer.getDocument();
+            const displayMode = documentViewer.getDisplayModeManager().getDisplayMode();
+            const page = displayMode.getSelectedPages(point, point);
+            if (!!point.x && page.first == null) {
+                return;
+            }
+            const page_idx =
+                page.first !== null ? page.first : documentViewer.getCurrentPage();
+            const page_info = doc.getPageInfo(page_idx);
+            const page_point = displayMode.windowToPage(point, page_idx);
+            const zoom = documentViewer.getZoomLevel();
+
+            var textAnnot = new Annotations.FreeTextAnnotation();
+            textAnnot.PageNumber = page_idx;
+            const rotation = documentViewer.getCompleteRotation(page_idx) * 90;
+            textAnnot.Rotation = rotation;
+            if (type === "ESEAL") {
+                if (rotation === 270 || rotation === 90) {
+                    textAnnot.Width = 70.0 / zoom;
+                    textAnnot.Height = 70.0 / zoom;
+                } else {
+                    textAnnot.Width = 70.0 / zoom;
+                    textAnnot.Height = 70.0 / zoom;
+                }
+            } else {
+                if (rotation === 270 || rotation === 90) {
+                    textAnnot.Width = 20.0 / zoom;
+                    textAnnot.Height = 90.0 / zoom;
+                } else {
+                    textAnnot.Width = 90.0 / zoom;
+                    textAnnot.Height = 20.0 / zoom;
+                }
+            }          
+            textAnnot.X = (page_point.x || page_info.width / 2) - textAnnot.Width / 2;
+            textAnnot.Y = (page_point.y || page_info.height / 2) - textAnnot.Height / 2;
+            textAnnot.setPadding(new Annotations.Rect(0, 0, 0, 0));
+            textAnnot.custom = {
+                type,
+                value,
+                flag,
+                name: type,
+            };
+            textAnnot.setCustomData("type",type);
+            textAnnot.setCustomData("value", value);
+            textAnnot.setCustomData("flag", flag);
+            textAnnot.setCustomData("name", name);
+            
+            textAnnot.setContents(textAnnot.custom.name);
+            textAnnot.FontSize = "" + 12.0 / zoom + "px";
+            textAnnot.FillColor = new Annotations.Color(211, 211, 211, 0.5);
+            textAnnot.TextColor = new Annotations.Color(0, 165, 228);
+            textAnnot.StrokeThickness = 1;
+            textAnnot.StrokeColor = new Annotations.Color(0, 165, 228);
+            textAnnot.TextAlign = "center";
+            textAnnot.Author = annotManager.getCurrentUser();
+
+            annotManager.deselectAllAnnotations();
+            annotManager.addAnnotation(textAnnot, true);
+            annotManager.redrawAnnotation(textAnnot);
+            annotManager.selectAnnotation(textAnnot);            
+
+        };
+
+        const handleAnnotationClick = (annotationType, user) => {
+
+            const { Annotations, annotationManager, documentViewer, Tools } = webviwerInstance.Core;
+
+            if (webviwerInstance && annotationType) {
+
+                let doc = documentViewer.getDocument();
+                const annotManager = documentViewer.getAnnotationManager();
+                const totalPages = documentViewer.getPageCount();
+                const displayMode = documentViewer
+                    .getDisplayModeManager()
+                    .getDisplayMode();
+                let point = {};
+                const page = displayMode.getSelectedPages(point, point);
+                if (!!point.x && page.first == null) {
+                    return;
+                }
+
+                const setToolMode = async (toolMode) => {
+                    const tool = await documentViewer.getTool(Tools.ToolNames[toolMode]);
+
+                    if (tool) {
+                        documentViewer.setToolMode(tool);
+                    }
+                };
+
+                const freeFormTools = async (toolMode) => {
+                    const tool = new Tools.DateFreeTextCreateTool(documentViewer);
+                    documentViewer.setToolMode(tool);
+                };
+
+                switch (annotationType) {
+                    case "text":
+                        setToolMode("TEXT_FORM_FIELD");
+                        break;
+                    case "radio":
+                        setToolMode("RADIO_FORM_FIELD");
+                        break;
+                    case "checkbox":
+                        setToolMode("CHECK_BOX_FIELD");
+                        break;
+                    case "date":
+                        freeFormTools("DateFreeTextCreateTool");
+                        break;
+                    case "sig":
+                        setToolMode("SIGNATURE");
+                        break;
+                    case "listbox":
+                        setToolMode("LIST_BOX_FIELD");
+                        break;
+                    case "combobox":
+                        setToolMode("COMBO_BOX_FIELD");
+                        break;
+                    case "paragraph":
+                        setToolMode("FREETEXT");
+                        break;
+                    case "image":
+                        setToolMode("STAMP");
+                        break;
+                    default:
+                        console.error(`Unknown annotation type: ${annotationType}`);
+                    return;
+                }
+            }
+
+        };
+
+        const handlerecommend = (annotationType, field_name) => {
+            
+            const { annotationManager, Annotations, documentViewer, Tools, Core } = webviwerInstance.Core;
+            const field = new Annotations.Forms.Field(field_name, {
+                type: 'Tx',
+                defaultValue: "some placeholder default text value",
+            });
+            const widgetAnnot = new Annotations.TextWidgetAnnotation(field);
+
+            const formFieldCreationManager = webviwerInstance.Core.annotationManager.getFormFieldCreationManager();
+            formFieldCreationManager.startFormFieldCreationMode();
+                       
+            widgetAnnot.PageNumber = 1;
+            widgetAnnot.X = 200;
+            widgetAnnot.Y = 200;
+            widgetAnnot.Width = 150;
+            widgetAnnot.Height = 20;
+
+            widgetAnnot.backgroundColor.R = 211;
+            widgetAnnot.backgroundColor.G = 211;
+            widgetAnnot.backgroundColor.B = 211;
+            widgetAnnot.backgroundColor.A = 0.5;
+            widgetAnnot.border.Ty.A = 1;
+            widgetAnnot.border.lv = 1;
+
+            //add the form field and widget annotation
+            annotationManager.getFieldManager().addField(field);
+            annotationManager.addAnnotation(widgetAnnot);
+            annotationManager.deselectAllAnnotations();
+            annotationManager.redrawAnnotation(widgetAnnot);
+            annotationManager.selectAnnotation(widgetAnnot)
+            annotationManager.drawAnnotationsFromList([widgetAnnot]);
+
+        }              
+
+        const delAnnotation = () => {
+            const {
+                Annotations,
+                annotationManager,
+                documentViewer,
+                Tools,
+            } = webviwerInstance.Core
+
+            const annotationsl = annotationManager.getAnnotationsList();
+            annotationManager.deleteAnnotations(annotationsl, null, true);
+            if (docId != undefined) {
+                setdelstatus(true);
+            }
+
+        };
+
+    </script>  
+}

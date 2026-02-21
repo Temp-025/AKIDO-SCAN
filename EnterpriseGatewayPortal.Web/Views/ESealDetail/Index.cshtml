@@ -1,0 +1,503 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.ESealDetails.ESealDetailsViewModel
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+{
+      new BreadCrumbModel { Title = "Organization - ESeal Details",Url = "", IconKey = "org-eseal"}
+    };
+    var layoutType = Context.Request.Cookies["HeaderNavigationLayout"];
+}
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+<style>
+    /* Add shaded borders to the eSeal image container */
+    .custom-file-container {
+        border: 2px solid #ccc; /* Border color */
+        border-radius: 5px; /* Border radius for rounded corners */
+        padding: 10px; /* Padding for the container */
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Shaded border effect */
+    }
+
+    .PreviewImage {
+        padding-top: 50px;
+    }
+
+    /* Set dimensions for the eSeal preview image #ced4da*/
+    #eSealPreviewImage {
+        width: 300px;
+        height: 300px;
+        border: 1px solid #CCC;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .classshide {
+        display: none !important;
+    }
+
+    .custom-file-input-style {
+        border: 1px solid #CBA344;
+        border-radius: 8px;
+        padding: 0 !important;
+        padding-top: 6px !important;
+        height: 40px;
+        width: 111%;
+        box-sizing: border-box;
+        /* color: #C3C6CB; */
+    }
+
+        .custom-file-input-style::file-selector-button {
+            border: none;
+            background-color: transparent;
+            font-weight: 400;
+            padding: 6px 12px;
+            margin: -6px 12px -6px 0; 
+            border-right: 1px solid #C3C6CB;
+            cursor: pointer;
+            height: calc(100% + 6px); 
+            color: #6C4527;
+        }
+
+        .custom-file-input-style:hover::file-selector-button {
+            background-color: rgba(249, 247, 237, 1); /* on hover */
+        }
+
+        .custom-file-input-style:focus::file-selector-button {
+            border-right: 2px solid #92722A; /* change to focus color */
+        }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<label class="form-label sub-label">Eseal Details</label>
+<div class="row">
+    <div class="col-md-12 plr">
+       
+        <div class="card-custom">
+            <div class="card-body">
+                <form asp-action="Index" asp-controller="ESealDetail" id="esealForm" enctype="multipart/form-data">
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+
+                            <div class="form-group col-md-6" style="float:left;">
+
+                                <div class="form-group">
+                                    <label asp-for="certificateStatus" class="col-form-label s3"></label>
+                                    <input asp-for="certificateStatus" class="form-control" readonly />
+                                    <span asp-validation-for="certificateStatus" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="certificateStartDate" class="col-form-label s3"></label>
+                                    <input asp-for="certificateStartDate" class="form-control" readonly />
+                                    <span asp-validation-for="certificateStartDate" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="certificateEndDate" class="col-form-label s3"></label>
+                                    <input asp-for="certificateEndDate" class="form-control" readonly />
+                                    <span asp-validation-for="certificateEndDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-6" style="float:right;" >
+                                <div class="form-group">
+
+                                    <div class="d-flex align-items-center">
+                                        <div class="custom-file form-group">
+
+
+
+                                            <div class="custom-file" style="width:92%">
+                                                <label asp-for="ESealImage" class="col-form-label"></label>
+                                                <input type="file" asp-for="ESealImage" class="form-control custom-file-input-style" onchange="FileToBase64(this)" tabindex="1" accept=".jpg, .png, .jpeg">
+
+                                                <span asp-validation-for="ESealImage" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="form-group" hidden>
+                                                <input asp-for="ResizedEsealImage" id="ResizedEsealImage" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-sm-12 d-flex justify-content-center flex-row" style="margin-top: 70px;padding:0px !important;">
+                                    <img id="eSealPreviewImage" style="max-width: 200px; max-height: 200px;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end" style="padding-top: 31px;">
+                        <partial name="_EsealImagePreview" />
+                        &nbsp;&nbsp;
+                        @*<a type="button" asp-action="Index" class="btn btn-other">Cancel</a>*@
+
+                        &nbsp;&nbsp;
+                        <button type="button" id="updateBtn" class="btn btn-primary uaeid-primary" onclick="updateESealLogo()">Update</button>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+@section Scripts {
+
+    <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+<script>
+
+        var allowedImageFileTypes = ['jpg', 'jpeg', 'png'];
+        $("#eSealPreviewImage").attr('src', 'data:image/jpg;base64,' + '@Html.Raw(Model.ResizedEsealImage)');
+
+        $(document).ready(function () {
+
+            var layoutType = '@(layoutType ?? "")';
+            if (layoutType == "Vertical") {
+                $("#OrgDetailsModle > a")
+                    .attr("aria-expanded", "true")
+                    .addClass("active");
+
+                $("#OrgDetailsModle")
+                    .addClass("submenu-active show");
+
+                $("#OrgDetailsModle .submenu")
+                    .addClass("show");
+
+                $('#OrganizationEseal').addClass('active');
+            }
+
+
+            /*For Beadcrum Start*/
+            //$('#homeMenu').addClass('breadcrumb-item').append('Organization Details > ESeal Details');
+            //$('#mainMenu').addClass('breadcrumb-item').append('Status and Logo');
+            //$('#subMenu').removeClass('breadcrumb-item');
+            /*For Beadcrum End*/
+            $('#networkOverlay').hide();
+            var today = new Date();
+            $('.datepicker').datepicker({
+                dateFormat: "yy-mm-dd",
+                changeMonth: true,
+                changeYear: true,
+                minDate: 0
+            });
+
+            var esealImgSrc = 'data:image/jpg;base64,' + '@Html.Raw(Model.ResizedEsealImage)';
+            $("#eSealPreviewImage").attr('src', esealImgSrc);
+
+            var img = new Image();
+            img.src = esealImgSrc;
+
+            img.onload = function () {
+                const resizedImage = resizeImage(img);
+                $("#eSealPreviewImage").attr('src', resizedImage);
+            };
+
+        });
+
+    $(document).on("change", '.custom-file-input-style', function () {
+            var id = this.id;
+            $('span[data-valmsg-for=' + id + ']').text("");
+            var file = $(this).get(0).files[0];
+            if (file == undefined) {
+                fileName = "Choose File...";
+            } else {
+                fileName = file.name;
+                var ext = this.value.match(/\.(.+)$/)[1];
+                    if (!allowedImageFileTypes.includes(ext)) {
+                        $(this).val('');
+                        fileName = "Choose File...";
+                        $('.custom-file #ESealImage-error').text("");
+                        $('span[data-valmsg-for="ESealImage"]').text("Only files with extensions: " + allowedImageFileTypes.join(',') + " are allowed");
+                    }
+                    else if (file.size >= 50 * 1024) {
+                        $(this).val('');
+                        fileName = "Choose File...";
+                        Swal.fire({ icon: 'error', title: "Error", text: "File size cannot be greater than 50 kb" });
+                    }
+                    else {
+                        var reader = new FileReader();
+                        reader.onload = function () {
+                            showImagePreview(reader.result);
+                        }
+                        reader.readAsDataURL(file);
+                    }
+            }
+            $(this).next('.custom-file-label').html(fileName);
+            $(this).closest('.help-block').remove();
+        });
+
+        function ImagePreview(data) {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("MakeTransparentImage", "ESealDetail")',
+                    data: data,
+                    error: function (xhr, status, error) {
+                        console.error('AJAX Error:', error);
+                        reject(error);
+                    },
+                    success: function (data) {
+                        resolve(data);
+                    }
+                });
+            });
+        }
+
+        function showTooltip() {
+            var certificateStatus = $('input[name="certificateStatus"]').val();
+            var tooltipText = '';
+
+            if (certificateStatus == "ACTIVE") {
+                var startTime = $('input[name="certificateStartDate"]').val();
+                var endTime = $('input[name="certificateEndDate"]').val();
+                var formattedstartTime = startTime.replace("T", "  T");
+                var formattedendTime = endTime.replace("T", "  T");
+                Swal.fire({ icon: 'success', title: "Eseal Certificate Details", text: 'GENERATED ON  :  ' + formattedstartTime + '\nEXPIRY DATE       :  ' + formattedendTime });
+            }
+            else if (certificateStatus == "EXPIRED") {
+                var startDate = $('input[name="certificateStartDate"]').val();
+                var endDate = $('input[name="certificateEndDate"]').val();
+                var formattedstartDate = startDate.replace("T", "  T");
+                var formattedendDate = endDate.replace("T", "  T");
+                Swal.fire({ icon: 'error', title: "Eseal Certificate Details", text: 'GENERATED ON  :  ' + formattedstartDate + '\nEXPIRY DATE       :  ' + formattedendDate });
+            }
+            else if (certificateStatus == "NOT ISSUED") {
+                Swal.fire({ icon: 'info', title: "Eseal Certificate Details", text: "Certificate was not issued to this Organization" });
+            }
+            else {
+                Swal.fire({ icon: 'error', title: "Eseal Certificate Details", text: "Something went wrong. Please try after sometime" });
+            }
+        }
+
+        function showImagePreview(PrvImageData) {
+            if (PrvImageData) {
+                var imgEl = document.createElement('img');
+                imgEl.addEventListener('load', function () {
+
+                    var resizedImage = resizeImage(imgEl);
+                    var base64EsealImage = "";
+                    if (resizedImage.startsWith("data:image/jpg;base64,"))
+                        base64EsealImage = resizedImage.replace("data:image/jpg;base64,", "");
+
+                    else if (resizedImage.startsWith("data:image/jpeg;base64,"))
+                        base64EsealImage = resizedImage.replace("data:image/jpeg;base64,", "");
+
+                    else
+                        base64EsealImage = resizedImage.replace("data:image/png;base64,", "");
+                    const postData = { "base64": base64EsealImage };
+
+                    ImagePreview(postData)
+                        .then(data => {
+                            if (data.success) {
+                                var resizedImgElement = document.getElementById('previewImage');
+                                resizedImgElement.src = "data:image/png;base64," + data.result;
+
+                                var esealImagePopup = document.getElementById('esealImagePopup');
+                                esealImagePopup.style.display = 'flex';
+                            }
+                            else {
+                                var resizedImgElement = document.getElementById('previewImage');
+                                resizedImgElement.src = resizedImage;
+
+                                var esealImagePopup = document.getElementById('esealImagePopup');
+                                esealImagePopup.style.display = 'flex';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+
+
+
+                });
+
+                imgEl.src = PrvImageData;
+            }
+        }
+
+        $(document).on("click", '#agreeButton', function (e) {
+            e.preventDefault();
+            var imgSrc = document.getElementById('previewImage').getAttribute('src');
+            handelEsealImagePreview(imgSrc, true);
+        });
+        $(document).on("click", '#uploadAgainButton', function (e) {
+            e.preventDefault();
+            handelEsealImagePreview(false);
+        });
+
+        $(document).on("click", '#hideImagePreview', function (e) {
+            e.preventDefault();
+            handelEsealImagePreview(false);
+        });
+
+        function handelEsealImagePreview(resizedImage, agreed) {
+            if (agreed) {
+                var base64EsealImage = "";
+                if (resizedImage.startsWith("data:image/jpg;base64,"))
+                    base64EsealImage = resizedImage.replace("data:image/jpg;base64,", "");
+
+                else if (resizedImage.startsWith("data:image/jpeg;base64,"))
+                    base64EsealImage = resizedImage.replace("data:image/jpeg;base64,", "");
+
+                else
+                    base64EsealImage = resizedImage.replace("data:image/png;base64,", "");
+
+
+
+                $('#ResizedEsealImage').val(base64EsealImage);
+                $('#eSealPreviewImage').attr('src', resizedImage);
+            } else {
+                $('.custom-file-input-style').val('');
+                $('.custom-file-label').html('Choose File...');
+                var esealImgSrc = 'data:image/jpg;base64,' + '@Html.Raw(Model.ResizedEsealImage)';
+                $("#eSealPreviewImage").attr('src', esealImgSrc);
+
+                var img = new Image();
+                img.src = esealImgSrc;
+
+                // Wait for the image to load before resizing
+                img.onload = function () {
+                    const resizedImage1 = resizeImage(img);
+                    $("#eSealPreviewImage").attr('src', resizedImage1);
+                     $("#eSealPreviewImage").val('@Html.Raw(Model.ResizedEsealImage)');
+
+                };
+            }
+
+            var esealImagePopup = document.getElementById('esealImagePopup');
+            esealImagePopup.style.display = 'none';
+        }
+
+        // Resize image logic
+        function resizeImage(imgEl) {
+
+            const maxWidth = 250; // Set the desired width for the resized image
+            const maxHeight = 250; // Set the desired height for the resized image
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            let width = imgEl.width;
+            let height = imgEl.height;
+
+            // Calculate the new dimensions while maintaining the aspect ratio
+            if (width > height) {
+                if (width > maxWidth) {
+                    height *= maxWidth / width;
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width *= maxHeight / height;
+                    height = maxHeight;
+                }
+            }
+
+            var xPadding = 0;
+            var yPadding = 0;
+
+            if (width < 250) {
+                var widthDiff = 250 - width;
+                xPadding = widthDiff / 2;
+            }
+            if (height < 250) {
+                var heightDiff = 250 - height;
+                yPadding = heightDiff / 2;
+            }
+
+
+            canvas.width = 250;
+            canvas.height = 250;
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+
+            ctx.drawImage(imgEl, xPadding, yPadding, width, height);
+
+            return canvas.toDataURL();
+        }
+
+        function FileToBase64(element) {
+            var file = element.files[0];
+
+            var maxSizeKB = 50;
+            var maxSize = maxSizeKB * 1024;
+            if (file.size > maxSize) {
+                return Swal.fire({ icon: 'error', title: "Max size exceeded", text: "File must be less than 50 Kb" });
+            }
+
+            var reader = new FileReader();
+
+            reader.onloadend = function () {
+                var base64String = reader.result.split(',')[1]; // Extract base64 string from data URL
+                $("#eSealPreviewImage").val(base64String);
+            }
+
+            reader.readAsDataURL(file);
+        }
+
+        function updateESealLogo() {
+
+                var img = $('#eSealPreviewImage').val()
+                if(!img || img ==="")
+                {
+                    Swal.fire({ icon: 'info', title: "Info", text: "Please upload an Eseal image before updating." });
+                    return;
+                }
+                $.ajax({
+                    url: '@Url.Action("Edit", "ESealDetail")',
+                    type: 'POST',
+                    data: {
+                        eSealImage: img
+                    },
+                     beforeSend: function () {
+                        $('#overlay').show();
+                    },
+                    complete: function () {
+                        $('#overlay').hide();
+                    },
+                    success:
+                        function (data) {
+                            if (data.status == "Success") {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: "Success",
+                                    text: data.message
+                                }, function (isConfirm) {
+                                    if (isConfirm) {
+
+                                        window.location.href = '@Url.Action("Index", "ESealDetail")';
+
+                                    }
+                                });
+                            }
+
+                            if (data.status == "Failed") {
+                                Swal.fire({ icon: 'error', title: "Error", text: data.message }, function (isConfirm) {
+                                    if (isConfirm) {
+
+                                        window.location.href = '@Url.Action("Index", "ESealDetail")';
+
+                                    }
+                                });
+                            }
+                        }
+                });
+        };
+
+</script>
+
+
+}

@@ -1,0 +1,218 @@
+﻿@model IEnumerable<EnterpriseGatewayPortal.Core.DTOs.VerificationDetailDTO>
+@using EnterpriseGatewayPortal.Core.Constants
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+    //var len = Model.Count();
+}
+<style>
+    .classshide {
+        display: none !important;
+    }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+
+                <table id="scopesTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table">
+                    <thead>
+                        <tr>
+                            <th style="display: none;">Id</th>
+                            <th>Document Type</th>
+                            <th>Request From</th>
+                            <th>Verification method</th>
+                            <th>Created Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || Model.Count() == 0)
+                        {
+                            <tr>
+                                <td style="text-align:center" valign="top" colspan="6" class="dataTables_empty">No record found</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr class="odd gradeX">
+                                    <td style="display: none;">@item.Id</td>
+                                    <td>@item.DocumentType</td>
+                                    <td>@item.IssuerOrgName</td>
+                                    <td>@item.VerificationType</td>
+                                    <td>@item.CreatedAt</td>
+                                    <td> @item.Status</td>
+                                    <td class="valigntop">
+                                        <div class="btn-group">
+                                            <button class="btn btn-xs deepPink-bgcolor no-margin" type="button" data-toggle="dropdown"
+                                                    aria-expanded="false">
+                                                Actions
+                                                <i class="fa fa-angle-down"></i>
+                                            </button>
+                                            <ul class="dropdown-menu pull-left" role="menu">
+                                                <li>
+
+                                                <li>
+
+                                                    <a asp-action="GetVerificationRequestDetails" asp-route-requestverificationId="@item.Id">
+                                                        <i class="icon-pencil"></i>View
+                                                    </a>
+
+
+
+
+                                                </li>
+
+                                            </ul>
+                                        </div>
+
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var publishConstant = '@DocumentStatusConstants.Publish';
+    var UnpublishConstant = '@DocumentStatusConstants.Unpublish'
+    $(document).ready(function () {
+
+        var DocumentIssuerLink = document.getElementById('DocumentIssuerModle').querySelector('.nav-link');
+        DocumentIssuerLink.click();
+       // $('#scopesTable').DataTable();
+
+        $('#homeMenu').addClass('breadcrumb-item').append('Document Issuer > Verification Requests');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        $('#networkOverlay').hide();
+        $('#VerificationRequestsMenu').addClass('active');
+       @* var count = @len;
+        if (count > 0)
+      {*@
+            if ($("#scopesTable").length)
+        {
+        var table = $(".table").DataTable({
+            "bLengthChange": false,
+            "order": [[0, 'desc']],
+        });
+
+        }
+    @* }*@
+    });
+
+    function publish(id) {
+
+
+        var updateIssuerStatus =
+        {
+            docId: id,
+            action: publishConstant
+        };
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("UpdateIssuerStatus", "DocumentIsuuer")',
+            data: JSON.stringify(updateIssuerStatus),
+            cache: false,
+            contentType: "application/json; charset=utf-8",
+            processData: false,
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+
+                $('#overlay').hide();
+            },
+            success: function (data) {
+                if (data.status === "Success") {
+                    Swal.fire({
+                        icon: 'success',
+                        title: "Success",
+                        text: data.message
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '@Url.Action("List", "DocumentIsuuer")';
+                        }
+                    });
+                }
+
+                if (data.status === "Failed") {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Error",
+                        text: data.message
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '@Url.Action("List", "DocumentIsuuer")';
+                        }
+                    });
+                }
+
+            }
+        });
+    };
+
+    function unPublish(id) {
+
+
+        var updateIssuerStatus =
+        {
+            docId: id,
+            action: UnpublishConstant
+        };
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("UpdateIssuerStatus", "DocumentIsuuer")',
+            data: JSON.stringify(updateIssuerStatus),
+            cache: false,
+            contentType: "application/json; charset=utf-8",
+            processData: false,
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+
+                $('#overlay').hide();
+            },
+            success: function (data) {
+                if (data.status === "Success") {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: data.message,
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '@Url.Action("List", "DocumentIsuuer")';
+                    }
+                });
+            }
+
+            if (data.status === "Failed") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message,
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '@Url.Action("List", "DocumentIsuuer")';
+                    }
+                });
+            }
+
+            }
+        });
+    };
+</script>

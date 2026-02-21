@@ -1,0 +1,462 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.DigitalForm.DigitalFormFillViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutDigitalForms.cshtml";
+}
+
+<style>
+    .form-box {
+        border: 1px solid #ccc; /* Border style */
+        border-radius: 5px; /* Rounded corners */
+        padding: 15px; /* Padding inside the box */
+    }
+</style>
+
+@* <div style="display: flex; justify-content: flex-end;">
+    <a class="btn btn-primary" asp-action="PublishedForm" asp-controller="DigitalForm" style="font-size: 15px;">
+        <i class="fa fa-caret-left"></i> Back
+    </a>
+</div> *@
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body classshide">
+
+                <div class="row">
+
+                    <div class="col col-lg-9 col-sm-9 col-md-9">
+                        <div class="well form-box" style='height:50px;background:#c6e2ff;border-radius:3px;color:#1b508f;padding:5px'>
+                            <h4>Fill Form using UserData By clicking ApplyData</h4>
+                        </div>
+                        <br />
+                        <div id='Viewer1' style='width: auto; height: 600px; margin: 0 auto; border-radius:3px;'></div>
+                    </div>
+
+                    <div class="col col-lg-3 col-sm-3 col-md-3 form-box container">
+                        <div class="form-group row">
+                            <h3 class="col-sm-10" style="display:flex;font-size:medium !important"><u><b>Populate User Data</b></u></h3>
+                        </div>
+
+                        <div class="col-sm-12" style="display:flex;justify-content:center;padding:5px;">
+                            <button class="col-md-7 form-box" onclick='fillData()' style="background: none;padding:14px;">
+                                <span>
+                                    <img src="~/assets/svgg/Tex.svg" />&nbsp;&nbsp; Fill Data
+                                </span>
+                            </button>
+                        </div>
+
+                        &nbsp;&nbsp;
+
+                        <div class="form-group row">
+                            <h3 class="col-sm-10" style="display:flex;font-size:medium !important"><u><b>Digital Signature</b></u></h3>
+                        </div>
+
+                        <div class="col-sm-12" style="display:flex;justify-content:center;padding:5px;">
+                            <button class="col-md-7 form-box" onclick='saveAndSign()' style="background: none;padding:14px;">
+                                <span>
+                                    <img src="~/assets/svgg/Signature.svg" />&nbsp;&nbsp;  Save & Sign
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    var digitalFormName = '@Model.DigitalFormName';
+    function base64ToBlob(base64) {
+
+        const binaryString = window.atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; ++i) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return new Blob([bytes], { type: 'application/pdf' });
+    };
+
+    $(document).ready(function () {
+        $('#digitalFormsMenu').addClass('active');
+
+        $('#homeMenu').removeClass('breadcrumb-item');
+        $('#homeMenu').addClass('breadcrumb-item').append('Digital Forms > Fill Form ');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+
+       // get();
+        $('#overlay').show();
+
+        var intervalId = "";
+        intervalId = setInterval(function () {
+            if (isWebViewerLoaded) {
+                $('#overlay').hide();
+                get();
+                clearInterval(intervalId);
+            }
+        }, 3000);
+    });
+
+    function get() {
+
+        var url = "@Url.Action("GetPreviewConfig", "DigitalForm")";
+        var id = "@Model.EdmsId";
+
+        $.ajax({
+            url: url + '/' + id,
+            type: 'GET',
+            success: function (resp) {
+                if (resp.success) {
+                    var Documentbase64 = resp.resource;
+                    //var file = base64ToBlob(Documentbase64);
+
+                    webviwerInstance.UI.loadDocument(base64ToBlob(Documentbase64), { filename: 'Sample.pdf' });
+                    const { Annotations, documentViewer, PDFNet, Tools, annotationManager } = webviwerInstance.Core
+
+                    documentViewer.addEventListener('documentLoaded', () => {
+
+                        webviwerInstance.UI.setZoomLevel("100%");
+                        const zoom = webviwerInstance.UI.getZoomLevel("100%");
+                    });
+
+                    documentViewer.addEventListener('annotationsLoaded', () => {
+                        annotationManager.getAnnotationsList().forEach(annot => {
+                            annot.ReadOnly = true;
+                        });
+                    });
+
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: resp.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '@Url.Action("Index", "DigitalForm")';
+                        }
+                    });
+                }
+            },
+            error: function (e) {
+               Swal.fire({
+                  title: 'Error',
+                  text: 'Something went wrong!',
+                  icon: 'error',
+                  confirmButtonText: 'OK'
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("Index", "DigitalForm")';
+                  }
+                });
+
+            }
+        });
+
+    }
+
+    const selectedData = {
+        "Full Name": "@Html.Raw(Model.PrimaryIdentifier + ' ' + Model.SecondaryIdentifier)",
+        "Gender": "@Html.Raw(Model.Gender)",
+        "Nation": "@Html.Raw(Model.Nationality)",
+        "First Name": "@Html.Raw(Model.PrimaryIdentifier)",
+        "Last Name": "@Html.Raw(Model.SecondaryIdentifier)",
+        "Date of Birth": "@Html.Raw(Model.DateOfBirth)"
+    };
+
+    function fillData() {
+
+        const {Annotations,annotationManager,documentViewer,} = webviwerInstance.Core;
+        let annotsToDraw = [];
+        let annotsToDelete = [];
+
+        const annotManager = documentViewer.getAnnotationManager();
+        const annotationsList = annotationManager.getAnnotationsList();
+        const fieldManager = annotManager.getFieldManager();
+
+        annotationsList.forEach((annotation) => {
+            let field;
+            let inputAnnot;
+
+            if (annotation.Subject === "Widget" || annotation.Subject === "Rectangle") {
+                if (annotation.pb !== undefined) {
+                    if (annotation.pb.kv === "Tx") {
+                        const fieldName = annotation.fieldName;
+                        var fieldValue = selectedData[fieldName];
+
+                        if (selectedData[fieldName]) {
+
+                            field = new Annotations.Forms.Field(fieldName, {
+                                type: "Tx",
+                                value: fieldValue,
+                                //   tooltipName: annot.getCustomData("type"),
+                            });
+                            annotsToDelete.push(annotation);
+                            inputAnnot = new Annotations.TextWidgetAnnotation(field);
+                            inputAnnot.PageNumber = annotation.getPageNumber();
+                            inputAnnot.backgroundColor.R = 211;
+                            inputAnnot.backgroundColor.G = 211;
+                            inputAnnot.backgroundColor.B = 211;
+                            inputAnnot.backgroundColor.A = 0.5;
+                            inputAnnot.border.Ty.A = 1;
+                            inputAnnot.border.$u = 1;
+
+                            inputAnnot.Y = annotation.getY();
+                            inputAnnot.X = annotation.getX();
+
+                            inputAnnot.rotation = annotation.Rotation;
+                            if (annotation.Rotation === 0 || annotation.Rotation === 180) {
+                                inputAnnot.Width = annotation.getWidth();
+                                inputAnnot.Height = annotation.getHeight();
+                            } else {
+                                inputAnnot.Width = annotation.getHeight();
+                                inputAnnot.Height = annotation.getWidth();
+                            }
+                            annotManager.addAnnotation(inputAnnot);
+                            fieldManager.addField(field);
+                            annotsToDraw.push(inputAnnot);
+
+                        }
+                    } else if (annotation.pb.kv === "Btn") {
+                        const fieldName = annotation.fieldName;
+                        const flags = new Annotations.WidgetFlags();
+                        flags.set("Required", true);
+                        flags.set("Edit", true);
+                        if (selectedData.hasOwnProperty(fieldName)) {
+                            field = new Annotations.Forms.Field(fieldName, {
+                                type: "Tx",
+                                value: false,
+                                flags,
+                                //   tooltipName: annot.getCustomData("type"),
+                            });
+                            annotsToDelete.push(annotation);
+                            const inputAnnot = new Annotations.CheckButtonWidgetAnnotation(
+                                field,
+                                {
+                                    appearance: "Off",
+                                    appearances: {
+                                        Off: {},
+                                        Yes: {},
+                                    },
+                                    captions: {
+                                        Normal: "", // Check
+                                    },
+                                }
+                            );
+                            inputAnnot.PageNumber = annotation.getPageNumber();
+
+                            inputAnnot.Y = annotation.getY();
+                            inputAnnot.X = annotation.getX();
+
+                            inputAnnot.rotation = annotation.Rotation;
+                            if (annotation.Rotation === 0 || annotation.Rotation === 180) {
+                                inputAnnot.Width = annotation.getWidth();
+                                inputAnnot.Height = annotation.getHeight();
+                            } else {
+                                inputAnnot.Width = annotation.getHeight();
+                                inputAnnot.Height = annotation.getWidth();
+                            }
+                            annotManager.addAnnotation(inputAnnot);
+                            fieldManager.addField(field);
+                            annotsToDraw.push(inputAnnot);
+
+
+                        }
+                    }
+                }
+
+
+            }
+        });
+
+        annotationManager.deleteAnnotations(annotsToDelete, null, true);
+        annotationManager.drawAnnotationsFromList(annotsToDraw, null, true);
+
+    }
+
+
+    async function saveAndSign() {
+
+
+        var filleddata = {};
+        var isEseal = false;
+
+        const { annotationManager, documentViewer, Annotations, } = webviwerInstance.Core;
+        const { PDFNet } = webviwerInstance.Core;
+
+        const annotManager = documentViewer.getAnnotationManager();
+
+        const fieldManager = annotManager.getFieldManager();
+        const annotationsbeforesend = annotationManager.getAnnotationsList();
+
+        var delannots = [];
+        var Drawannots = [];
+        annotationsbeforesend.forEach((annot) => {
+            let field;
+            let inputAnnot;
+            if (annot.Subject === "Free Text") {
+                if (annot.gxa === "SIGNATURE") {
+                    delannots.push(annot);
+                }
+                if (annot.gxa === "ESEAL") {
+                    delannots.push(annot);
+                    isEseal = true;
+                }
+
+            }
+            else if (annot.Subject === "Widget" || annot.Subject === "Rectangle") {
+                if (annot.pb !== undefined) {
+                    if (annot.pb.kv === "Tx") {
+                        const fieldName = annot.fieldName;
+                        const fieldValue = annot.value;
+                        // annotation.setCustomData('trn-form-field-value', fieldValue);
+                        // if(annotation.ToolName === )
+                        filleddata[fieldName] = fieldValue;
+                        field = new Annotations.Forms.Field(fieldName, {
+                            type: "Tx",
+                            value: fieldValue,
+                            //   tooltipName: annot.getCustomData("type"),
+                        });
+                        delannots.push(annot);
+                        inputAnnot = new Annotations.TextWidgetAnnotation(field);
+                        inputAnnot.PageNumber = annot.getPageNumber();
+
+                        inputAnnot.Y = annot.getY();
+                        inputAnnot.X = annot.getX();
+
+                        inputAnnot.rotation = annot.Rotation;
+                        if (annot.Rotation === 0 || annot.Rotation === 180) {
+                            inputAnnot.Width = annot.getWidth();
+                            inputAnnot.Height = annot.getHeight();
+                        } else {
+                            inputAnnot.Width = annot.getHeight();
+                            inputAnnot.Height = annot.getWidth();
+                        }
+                        annotManager.addAnnotation(inputAnnot);
+                        fieldManager.addField(field);
+                        Drawannots.push(inputAnnot);
+
+                    }
+                }
+
+
+            }
+
+        })
+        annotationManager.deleteAnnotations(delannots, null, true);
+        annotationManager.drawAnnotationsFromList(Drawannots, null, true);
+
+        documentViewer.refreshAll();
+
+        const xfdfString = await annotManager.exportAnnotations();
+        const data = await documentViewer.getDocument().getFileData({
+            xfdfString,
+            flags: webviwerInstance.Core.SaveOptions.INCREMENTAL,
+            downloadType: "pdf",
+        });
+
+        await PDFNet.initialize();
+        const doc = await PDFNet.PDFDoc.createFromBuffer(new Uint8Array(data));
+
+
+        var TempId = "@Model.TemplateId";
+
+        await PDFNet.runWithCleanup(async () => {
+            doc.lock();
+
+            doc.flattenAnnotations();
+
+            const buf = await doc.saveMemoryBuffer(
+                PDFNet.SDFDoc.SaveOptions.e_incremental
+            );
+            const blob = new Blob([buf], { type: "application/pdf" });
+
+
+            var fileFormData = new FormData();
+            fileFormData.append("File", blob, 'Sample.pdf');
+            fileFormData.append("TemplateId", TempId);
+            fileFormData.append("isEseal", isEseal);
+            fileFormData.append("FormFieldData", JSON.stringify(filleddata));
+
+
+            SaveDocument("@Url.Action("SaveandSingFormData", "DigitalForm")", fileFormData)
+                .then((response) => {
+                    // $('#digitalFormModal1').modal('hide');
+                    if (response.status === "Success") {
+                      Swal.fire({
+                        title: "Success",
+                        text: response.message,
+                        icon: "success",
+                        confirmButtonText: "OK"
+                      }).then((result) => {
+                        if (result.isConfirmed) {
+                          if (digitalFormName === "publishForm") {
+                            window.location.href = '@Url.Action("publishedForms", "DigitalForm")';
+                          } else {
+                            window.location.href = '@Url.Action("standardForms", "DigitalForm")';
+                          }
+                        }
+                      });
+                    } else {
+                      Swal.fire({
+                        title: "Error",
+                        text: response.message,
+                        icon: "error",
+                        confirmButtonText: "OK"
+                      }).then((result) => {
+                        if (result.isConfirmed) {
+                          window.location.href = '@Url.Action("Index", "DigitalForm")';
+                        }
+                      });
+                    }
+
+                })
+                .catch((e) => {
+
+                    Swal.fire({
+                      title: "Error",
+                      text: "Something went wrong!",
+                      icon: "error",
+                      confirmButtonText: "OK"
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        window.location.href = '@Url.Action("Index", "DigitalForm")';
+                      }
+                    });
+
+                });
+        });
+
+        function SaveDocument(url, formData) {
+            return new Promise(function (resolve, reject) {
+                $.ajax({
+                    url: url,
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    method: 'POST',
+                    type: 'POST',
+                    beforeSend: function () {
+                        $('#overlay6').show();
+                    },
+                    complete: function () {
+                        $('#overlay6').hide();
+                    },
+                    success: function (data) {
+                        resolve(data) // Resolve promise and when success
+                    },
+                    error: function (err) {
+                        reject(err) // Reject the promise and go to catch()
+                    }
+                });
+            });
+        }
+    }
+</script>                       

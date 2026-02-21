@@ -1,0 +1,572 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.DocumentIssuer.CreateDocIssuerViewModel
+@{
+    ViewData["Title"] = "Add";
+}
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+<style>
+    .custom-check-box {
+        margin-right: 5px;
+        -webkit-print-color-adjust: exact;
+        vertical-align: top;
+        background-repeat: no-repeat;
+        background-position: 50%;
+        background-size: contain;
+        position: relative !important;
+        width: 1.125rem;
+        height: 1.125rem;
+        background-color: #fff;
+        border: .125rem solid rgba(0,0,0,0.3);
+    }
+
+    /* .custom-card {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        max-width: 622px;
+        width: 548px;
+        margin-left: 2px;
+        margin-right: 20px;
+    }
+
+        .custom-card .card-body {
+            padding: 20px;
+        }
+
+    #emailDataTable_wrapper .dataTables_filter input {
+        width: 184px;
+    } */
+
+    .rounded-box {
+        border: 1px solid #ccc; /* Add border color as needed */
+        border-radius: 10px; /* Adjust the radius for the desired curvature */
+        padding: 10px; /* Add padding inside the box */
+        margin-bottom: 15px; /* Adjust spacing if needed */
+    }
+
+    .roundedbox {
+        border: 1px solid #ccc; /* Add border color as needed */
+        border-radius: 10px; /* Adjust the radius for the desired curvature */
+        padding: 10px; /* Add padding inside the box */
+        margin-bottom: 15px; /* Adjust spacing if needed */
+        /* width: 551px; */
+    }
+
+    /*///////////////////////////////////////////////////////*/
+
+    .custom-card {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        max-width: 100%; /* Ensures it scales within its container */
+        width: 100%; /* Set to full width of the parent container */
+    }
+
+        .custom-card .card-body {
+            padding: 20px;
+        }
+
+    #businessUserDataTable {
+        width: 100%; /* Ensures it scales within its parent */
+        word-wrap: break-word; /* Wrap text to prevent overflow */
+    }
+
+        #businessUserDataTable th,
+        #businessUserDataTable td {
+            text-align: left; /* Ensure consistent alignment */
+            padding: 8px; /* Adjust padding for readability */
+        }
+
+    #businessUserDataTable_wrapper .dataTables_filter input {
+        width: 134px;
+    }
+
+
+    th, td {
+        width: auto; /* Ensures consistent widths */
+        text-align: left;
+        padding: 8px; /* Optional for spacing */
+    }
+
+    thead th:nth-child(1),
+    tbody td:nth-child(1) {
+        width: 70%; /* Adjust width for the first column */
+    }
+
+    thead th:nth-child(2),
+    tbody td:nth-child(2) {
+        width: 30%; /* Adjust width for the second column */
+    }
+
+    .classshide {
+        display: none !important;
+    }
+
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body">
+                <form asp-action="UpdateDocumentIssure" asp-controller="DocumentIsuuer" id="updateDocIssuerForm">
+                    <div class="form-row" style="height:830px;">
+                        <div class="form-group col-md-12">
+                            <div class="form-group col-md-6" style="float:left;">
+                                <div class="form-group">
+                                    
+                                    <input asp-for="id" class="form-control" tabindex="1" hidden/>
+                                   
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="documentName" class="col-form-label"></label>
+                                    <input asp-for="documentName" class="form-control" tabindex="1" />
+                                    <span asp-validation-for="documentName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <fieldset style="height:120px; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
+                                        <legend style="font-size:1rem; font-weight: bold;">Supported Verification Methods</legend>
+
+                                        <label style="display: block;">
+                                            <input type="checkbox" asp-for="techincal" style="margin-left:5px" class="custom-check-box" />
+                                            Techincal
+                                        </label>
+
+                                        <label style="display: block;">
+                                            <input type="checkbox" asp-for="qrcode" style="margin-left:5px" class="custom-check-box" />
+                                            QR Code
+                                        </label>
+
+                                        <label style="display: block;">
+                                            <input type="checkbox" asp-for="trueCopyVerification" style="margin-left:5px" class="custom-check-box" />
+                                            True Copy Verification
+                                        </label>
+                                    </fieldset>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Maximum Duration For Each Verification Method <span class="text-danger">*</span></label>
+                                    <div class="rounded-box">
+                                    
+                                        <div class="form-group">
+                                            <label asp-for="daysForTechincal"></label>
+                                           
+                                            <div class="row" style="position: relative;">
+                                                <div class="col-md-10">
+                                                    <div style="position: relative; display: inline-block; width: 121%;">
+                                                        <input asp-for="daysForTechincal" class="form-control" tabindex="1" style="width: 100%; padding-right: 40px;" />
+                                                        <label style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999; margin: 0;">DAYS</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span id="daysTechnicalValidation" asp-validation-for="daysForTechincal" class="text-danger"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label asp-for="daysForQrcode"></label>
+                                            <div class="row" style="position: relative;">
+                                                <div class="col-md-10">
+                                                    <div style="position: relative; display: inline-block; width: 121%;">
+                                                        <input asp-for="daysForQrcode" class="form-control" tabindex="1" style="width: 100%; padding-right: 40px;" />
+                                                        <label style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999; margin: 0;">DAYS</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span id="daysQrValidation" asp-validation-for="daysForQrcode" class="text-danger"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label asp-for="daysForTrueCopyVerification"></label>
+                                            <div class="row" style="position: relative;">
+                                                <div class="col-md-10">
+                                                    <div style="position: relative; display: inline-block; width: 121%;">
+                                                        <input asp-for="daysForTrueCopyVerification" class="form-control" tabindex="1" style="width: 100%; padding-right: 40px;" />
+                                                        <label style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999; margin: 0;">DAYS</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span id="daysTrueCopyValidation" asp-validation-for="daysForTrueCopyVerification" class="text-danger"></span>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <fieldset style="height:120px; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
+                                        <legend style="font-size:1rem; font-weight: bold;">Allowed Consumers</legend>
+
+                                        <label style="display: block;">
+                                            <input type="checkbox" asp-for="relayingParty" style="margin-left:5px" class="custom-check-box" />
+                                            Relaying Party
+                                        </label>
+
+                                        <label style="display: block;">
+                                            <input type="checkbox" asp-for="professional" style="margin-left:5px" class="custom-check-box" />
+                                            Professional
+                                        </label>
+
+                                        <label style="display: block;">
+                                            <input type="checkbox" asp-for="individual" style="margin-left:5px" class="custom-check-box" />
+                                            Individual
+                                        </label>
+                                    </fieldset>
+                                </div>
+                     
+                            </div>
+                            <div class="form-group col-md-6" style="float:left;">
+                                <div class="form-group">
+                                    <label class="col-form-label"> Price For Each Verification Method <span class="text-danger">*</span></label>
+                                    <div class="roundedbox">
+                                        <div class="form-group">
+                                            <label asp-for="priceForTechincal"></label>
+                                         
+                                            <div class="row" style="position: relative;">
+                                                <div class="col-md-10">
+                                                    <div style="position: relative; display: inline-block; width: 121%;">
+                                                        <input asp-for="priceForTechincal" class="form-control" tabindex="1" style="width: 100%; padding-right: 40px;" />
+                                                        <label style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999; margin: 0;">UGX</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span id="priceTechicalValidation" asp-validation-for="priceForTechincal" class="text-danger"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label asp-for="priceForQrcode"></label>
+                                            <div class="row" style="position: relative;">
+                                                <div class="col-md-10">
+                                                    <div style="position: relative; display: inline-block; width: 121%;">
+                                                        <input asp-for="priceForQrcode" class="form-control" tabindex="1" style="width: 100%; padding-right: 40px;" />
+                                                        <label style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999; margin: 0;">UGX</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span id="priceQrValidation" asp-validation-for="priceForQrcode" class="text-danger"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label asp-for="priceForTrueCopyVerification"></label>
+                                            <div class="row" style="position: relative;">
+                                                <div class="col-md-10">
+                                                    <div style="position: relative; display: inline-block; width: 121%;">
+                                                        <input asp-for="priceForTrueCopyVerification" class="form-control" tabindex="1" style="width: 100%; padding-right: 40px;" />
+                                                        <label style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999; margin: 0;">UGX</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span id="priceTrueCopyValidation" asp-validation-for="priceForTrueCopyVerification" class="text-danger"></span>
+                                        </div>
+                            
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="businessUsers" class="col-form-label">Authorized Personal For Verification<span class="text-danger">*</span></label>
+
+                                    <div class="custom-card">
+
+                                        <div class="card-body" style="margin-bottom:20px;">
+
+                                            <table id="businessUserDataTable" class="table-striped custom-table table">
+
+                                                <thead>
+                                                    <tr>
+                                                        <th>Email</th>
+                                                        <th>Select</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in Model.businessUsers)
+                                                    {
+                                                        <tr>
+                                                            <td>@item.EmployeeEmail</td>
+                                                            <td>
+                                                                <input type="checkbox" class="select-checkbox" data-email="@item.EmployeeEmail">
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" id="submitBtn" class="btn btn-primary" onclick="updateDocumentIssuer()">Update</button>
+                        &nbsp;&nbsp;
+                        <a type="button" asp-action="List" class="btn btn-danger">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    }
+<script>
+
+
+    $(document).ready(function () {
+
+        $('#District').addClass('active');
+        if ($('#sidebar ul li.dropdown.active')) {
+            $('#sidebar ul li.dropdown.active ul').addClass('show');
+            $('#eSeal').addClass('active');
+            $('#sidebar ul li.dropdown.active a.nav-link.drop-logo').attr('aria-expanded', 'true');
+        }
+         var DocumentIssuerLink = document.getElementById('DocumentIssuerModle').querySelector('.nav-link');
+        DocumentIssuerLink.click();
+        /*For Beadcrum Start*/
+        $('#homeMenu').addClass('breadcrumb-item').append('Document Isuuer >  Documents > Edit');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        $('#DocumentsMenu').addClass('active');
+        $('#networkOverlay').hide();
+        var table = $("#businessUserDataTable").DataTable({
+                info: false,
+                lengthChange: false,
+                scrollY: '225px',
+                scrollCollapse: true,
+                paging: false
+           });
+
+             var allowedIssuers = '@Model.allowedIssuers';
+
+                var allowedIssuersArray = allowedIssuers.split(',');
+
+                $('.select-checkbox').each(function () {
+                    var email = $(this).data('email');
+
+                    if (allowedIssuersArray.includes(email.trim())) {
+
+                        $(this).prop('checked', true);
+                    }
+                });
+
+    });
+
+
+    function updateDocumentIssuer() {
+
+        var validData = true;
+        var form = $("#updateDocIssuerForm");
+        var url = form.attr("action");
+
+        var docissuerId = $('#id').val();
+        var documentName = $('#documentName').val();
+        var daysForTechincal = $('#daysForTechincal').val();
+        var daysForQrcode = $('#daysForQrcode').val();
+        var daysForTrueCopyVerification = $('#daysForTrueCopyVerification').val();
+
+        var priceForTechincal = $('#priceForTechincal').val();
+        var priceForQrcode = $('#priceForQrcode').val();
+        var priceForTrueCopyVerification = $('#priceForTrueCopyVerification').val();
+
+
+        var techincal = $('#techincal').prop('checked');
+        var qrcode = $('#qrcode').prop('checked');
+        var trueCopyVerification = $('#trueCopyVerification').prop('checked');
+
+        var relayingParty = $('#relayingParty').prop('checked');
+        var professional = $('#professional').prop('checked');
+        var individual = $('#individual').prop('checked');
+
+        var subscriptionFee = $('#subscriptionFee').val();
+
+        //Document Name Validation
+        if (documentName == null || documentName.trim() === '') {
+            $('#documentName').siblings(".text-danger").text("Document Name is required.");
+            validData = false;
+        }
+        else {
+            $('#documentName').siblings(".text-danger").text("");
+        }
+
+        // Allowed Issuer Validation
+        if (relayingParty == false && professional == false && individual == false) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Allowed Consumers Empty!',
+                text: 'Atleast one Allowed Consumer is required.'
+            });
+
+            validData = false;
+        }
+
+
+        if (techincal && (priceForTechincal === null || priceForTechincal.trim() === '')) {
+            $('#priceTechicalValidation').text("Price for Technical is required.").addClass("text-danger");
+            validData = false;
+        }
+        else if (!techincal && (priceForTechincal != null && priceForTechincal.trim() != '')) {
+            $('#priceTechicalValidation').text("Please check Technical Verification to apply Price.").addClass("text-danger");
+            validData = false;
+        } else {
+            $('#priceTechicalValidation').text("").removeClass("text-danger");
+        }
+
+        //days
+        if (techincal && (daysForTechincal === null || daysForTechincal.trim() === '')) {
+            $('#daysTechnicalValidation').text("Days for Technical is required").addClass("text-danger");
+            validData = false;
+        }
+        else if (!techincal && (daysForTechincal != null && daysForTechincal.trim() != '')) {
+            $('#daysTechnicalValidation').text("Please check Technical Verification to apply Duration.").addClass("text-danger");
+            validData = false;
+        } else {
+            $('#daysTechnicalValidation').text("").removeClass("text-danger");
+        }
+
+        // QR Validation
+
+        if (qrcode && (priceForQrcode === null || priceForQrcode.trim() === '')) {
+            $('#priceQrValidation').text("Price for QRCode is required.").addClass("text-danger");
+            validData = false;
+        }
+        else if (!qrcode && (priceForQrcode != null && priceForQrcode.trim() != '')) {
+            $('#priceQrValidation').text("Please check QRCode Verification to apply Price.").addClass("text - danger");
+            validData = false;
+        }
+        else {
+            $('#priceQrValidation').text("").removeClass("text-danger");
+        }
+
+        //days
+        if (qrcode && (daysForQrcode === null || daysForQrcode.trim() === '')) {
+            $('#daysQrValidation').text("Days for QRCode is required.").addClass("text-danger");
+            validData = false;
+        }
+        else if (!qrcode && (daysForQrcode != null && daysForQrcode.trim() != '')) {
+            $('#daysQrValidation').text("Please check QRCode Verification to apply Duration.").addClass("text-danger");
+            validData = false;
+        } else {
+            $('#daysQrValidation').text("").removeClass("text-danger");
+        }
+
+        // TrueCopy Validation
+
+        if (trueCopyVerification && (priceForTrueCopyVerification === null || priceForTrueCopyVerification.trim() === '')) {
+            $('#priceTrueCopyValidation').text("Price for True Copy Verification is required.").addClass("text-danger");
+            validData = false;
+        }
+        else if (!trueCopyVerification && (priceForTrueCopyVerification != null && priceForTrueCopyVerification.trim() != '')) {
+            $('#priceTrueCopyValidation').text("Please check TrueCopy Verification to apply Price.").addClass("text - danger");
+            validData = false;
+        }
+        else {
+            $('#priceTrueCopyValidation').text("").removeClass("text-danger");
+        }
+
+        //days
+        if (trueCopyVerification && (daysForTrueCopyVerification === null || daysForTrueCopyVerification.trim() === '')) {
+            $('#daysTrueCopyValidation').text("Days for True Copy Verification is required.").addClass("text-danger");
+            validData = false;
+        }
+        else if (!trueCopyVerification && (daysForTrueCopyVerification != null && daysForTrueCopyVerification.trim() != '')) {
+            $('#daysTrueCopyValidation').text("Please check TrueCopy Verification to apply Duration.").addClass("text-danger");
+            validData = false;
+        } else {
+            $('#daysTrueCopyValidation').text("").removeClass("text-danger");
+        }
+
+        // Gather selected emails from checkboxes
+        var selectedEmails = [];
+        $('.select-checkbox:checked').each(function () {
+            selectedEmails.push($(this).data('email'));
+        });
+        if (selectedEmails.length === 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Allowed Issuers Empty!',
+                text: 'Atleast one Email Selection is required.'
+            });
+
+            validData = false;
+        }
+
+        if (!validData) {
+            return;
+        }
+        var allowedIssuers = selectedEmails.join(',');
+
+        var createDocIssuerViewModel =
+        {
+            id: docissuerId,
+            documentName: documentName,
+            daysForTechincal: daysForTechincal,
+            daysForQrcode: daysForQrcode,
+            daysForTrueCopyVerification: daysForTrueCopyVerification,
+            priceForTechincal: priceForTechincal,
+            priceForQrcode: priceForQrcode,
+            priceForTrueCopyVerification : priceForTrueCopyVerification,
+            techincal: techincal,
+            qrcode: qrcode,
+            trueCopyVerification: trueCopyVerification,
+            relayingParty: relayingParty,
+            professional: professional,
+            individual: individual,
+            allowedIssuers: allowedIssuers,
+            subscriptionFee: subscriptionFee
+        };
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: JSON.stringify(createDocIssuerViewModel),
+            cache: false,
+            contentType: "application/json; charset=utf-8",
+            processData: false,
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+
+                $('#overlay').hide();
+            },
+            success: function (data) {
+                if (data.status == "Success") {
+                    Swal.fire({
+                      icon: 'success',
+                      title: "Success",
+                      text: data.message,
+                      confirmButtonText: 'OK'
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        window.location.href = '@Url.Action("List", "DocumentIsuuer")';
+                      }
+                    });
+
+                }
+
+                if (data.status == "Failed") {
+                 Swal.fire({
+                    icon: 'error',
+                    title: "Error",
+                    text: data.message,
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("List", "DocumentIsuuer")';
+                    }
+                });
+
+
+                }
+            }
+        });
+    };
+
+
+
+
+</script>
+

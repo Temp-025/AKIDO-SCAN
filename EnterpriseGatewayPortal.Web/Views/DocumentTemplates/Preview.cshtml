@@ -1,0 +1,662 @@
+﻿@using System.Security.Claims;
+@using EnterpriseGatewayPortal.Web.Models
+@using Newtonsoft.Json;
+
+@model EnterpriseGatewayPortal.Web.ViewModel.DocumentTemplates.PreviewConfigViewModel;
+@{
+    var userEmail = User.FindFirst(ClaimTypes.Email).Value;
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+     {
+         new BreadCrumbModel { Title = "Bulk - Signing - Templates" , Url = Url.Action("Index","DocumentTemplates")},
+         new BreadCrumbModel { Title = "Template Preview" , Url = ""},
+     };
+}
+<label class="sub-label">Template Preview</label>
+<div class="row" id="spacingCss">
+    <div class="col-md-12 plr">
+        
+            <partial name="_AlertBox" />
+            <div class="card-body" id="viwer">
+               
+
+                <div class="row">
+
+
+                <div class="pdfViewContainer col-md-12" style="flex: 2;padding:0; height: 68vh; padding-left: 21px;
+    padding-right: 21px;">
+
+                        <div class="well form-box" style="display: flex;flex-flow: wrap; justify-content: space-between; height: 5%;
+                                width: 100%;background: #f9f9f9; border-radius: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        </div>
+
+                        <div style=" overflow-y: auto; display: flex;justify-content: center; height: 92%;border-top: 1px solid #ccc;
+                                    background: #f4f6f9; box-shadow: inset 0 1px 4px rgba(0,0,0,0.1);">
+                            <div id="pdf-container" style="width: 55%;  border-radius: 4px;
+                                    background: white;"></div>
+                        </div>
+
+
+                    </div>
+
+                </div>
+            </div>
+        
+    </div>
+</div>
+<input type="hidden" id="filebase64" name="filebase64" value="" />
+<input type="hidden" id="pdfschema" name="pdfschema" value="@Model.htmlSchema" />
+@section scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script>
+        var config = "";
+          const pdfjsLib = window['pdfjs-dist/build/pdf'];
+         if (!pdfjsLib) {
+             console.error('PDF.js library is not loaded.');
+         } else {
+             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+         }
+         const pdfContainer = document.getElementById('pdf-container');
+         const components = document.getElementById('pdfschema').value;
+         var zoomlevelval = "100%";
+
+        function base64ToBlob(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; ++i) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return new Blob([bytes], { type: 'application/pdf' });
+        };
+
+         function base64ToArrayBuffer(base64) {
+            var binaryString = window.atob(base64);
+            var binaryLen = binaryString.length;
+            var bytes = new Uint8Array(binaryLen);
+            for (var i = 0; i < binaryLen; i++) {
+                var ascii = binaryString.charCodeAt(i);
+                bytes[i] = ascii;
+            }
+            return bytes;
+        }
+
+        $(document).ready(function () {
+            document.getElementById("navigationNetworkOverlay").style.display = "none";
+
+            $("#builksignModule > a")
+                .attr("aria-expanded", "true")
+                .addClass("active");
+
+            $("#builksignModule")
+                .addClass("submenu-active show");
+
+            $("#builksignModule .submenu")
+                .addClass("show");
+
+            $("#Templates").addClass("active");
+
+            $('#homeMenu').addClass('breadcrumb-item').append('Bulk signing > Tempaltes > Template Preview');
+             $('#mainMenu').removeClass('breadcrumb-item');
+             $('#subMenu').removeClass('breadcrumb-item');
+            $('#TemplateMenu').addClass('active');
+            $('#networkOverlay').hide();
+            $('#overlay').show();
+
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            document.body.style.overflowY = 'hidden';
+
+            getDocumentdata();
+
+
+            if ($(window).width() >= 768) {
+                zoomlevelval = '100%';
+            }
+            else if ($(window).width() < 768) {
+                zoomlevelval = '58%';
+            }
+
+        });
+
+         function renderPDF(pdf, annotations = []) {
+             $('#overlay').hide();
+             pdfContainer.innerHTML = '';
+             const numPages = pdf.numPages;
+             for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                 pdf.getPage(pageNum).then(page => {
+                     const scale = 1.5;
+                     const viewport = page.getViewport({ scale });
+                     const canvas = document.createElement('canvas');
+                     const context = canvas.getContext('2d');
+                     canvas.height = viewport.height;
+                     canvas.width = viewport.width;
+                     canvas.style.width = '100%';
+
+                     const pageContainer = document.createElement('div');
+                     pageContainer.className = 'pdf-page';
+                     pageContainer.style.position = 'relative';
+                     pageContainer.appendChild(canvas);
+
+                     pdfContainer.appendChild(pageContainer);
+
+                     const firstCanvas = document.querySelector('canvas');
+                     canvasWidth = firstCanvas.getBoundingClientRect().width;
+                     canvasHeight = firstCanvas.getBoundingClientRect().height;
+                     const renderContext = {
+                         canvasContext: context,
+                         viewport: viewport
+                     };
+                     page.render(renderContext).promise.then(() => {
+                         const annotationLayer = document.createElement('div');
+                         annotationLayer.className = 'annotation-layer';
+                         annotationLayer.style.position = 'absolute';
+                         annotationLayer.style.top = '0';
+                         annotationLayer.style.left = '0';
+                         annotationLayer.style.width = '100%'
+                         annotationLayer.style.height = '100%'
+                         annotationLayer.style.pointerEvents = 'none';
+                         pageContainer.appendChild(annotationLayer);
+                         originalWidth = viewport.viewBox[2];
+                         originalHeight = viewport.viewBox[3];
+                            renderAnnotationsForPage(pageNum, annotationLayer, annotations);
+                     });
+                 });
+             }
+         }
+
+         async function renderAnnotationsForPage(pageNum, annotationLayer, annotations) {
+             const pageAnnotations = annotations.filter(annotation => annotation.page === pageNum);
+             if (pageAnnotations.length > 0) {
+                 for (const annotation of pageAnnotations) {
+                     if (annotation.type !== 'wsave' && annotation.type !== 'Wfill') {
+                             const element = await createDraggableElement(annotation);
+                             if (element) {
+                                 annotationLayer.appendChild(element);
+                             }
+
+                     }
+                 }
+             }
+         }
+
+         function getDocumentdata() {
+              var url = "@Url.Action("GetPreviewConfig", "DocumentTemplates")";
+            // var id = "@Model.edmsId";
+             var id = "@Model._id";
+             var sigAnnData = @Html.Raw(JsonConvert.SerializeObject(Model.annotations));
+             var esealAnnData = @Html.Raw(JsonConvert.SerializeObject(Model.esealAnnotations));
+             var qrAnnData = @Html.Raw(JsonConvert.SerializeObject(Model.qrCodeAnnotations));
+
+             $.ajax({
+                 url: url + '/' + id,
+                 type: 'GET',
+                 success: function (resp) {
+                     if (resp.success) {
+                         var Documentbase64 = resp.resource;
+
+                         //-----Get the file from result and do renderPdf---------
+                          var blobdata = base64ToBlob(Documentbase64);
+                          globalblobdata = blobdata;
+                          var reader = new FileReader();
+                          reader.readAsDataURL(blobdata);
+                          reader.onloadend = function () {
+                              document.getElementById('filebase64').value = reader.result.split(',')[1]; // Extract only the Base64 part
+                          };
+                          const pdfBase64 = Documentbase64;
+
+                          const pdfArrayBuffer = base64ToArrayBuffer(pdfBase64);
+                          pdfjsLib.getDocument({ data: pdfArrayBuffer }).promise.then(pdf => {
+
+                              renderPDF(pdf, JSON.parse(components));
+                          }).catch(error => {
+                              console.error('Error loading PDF:', error);
+                          });
+
+                     } else {
+                         swal({
+                             title: 'Error',
+                             text: resp.message,
+                             type: 'error',
+                         }, function (isConfirm) {
+                             if (isConfirm) {
+                                 window.location.href = '@Url.Action("Index", "DocumentTemplates")';
+                             }
+                         });
+                     }
+                 },
+                 error: function (e) {
+                     swal({
+                         title: 'Error',
+                         text: 'Something went wrong!',
+                         type: 'error',
+                     }, function (isConfirm) {
+                         if (isConfirm) {
+                             window.location.href = '@Url.Action("Index", "DocumentTemplates")';
+                         }
+                     });
+                 }
+             });
+         }
+
+         async function createDraggableElement(annotation) {
+             var sigAnnData = @Html.Raw(JsonConvert.SerializeObject(Model.annotations ?? "null"));
+             var esealAnnData = @Html.Raw(JsonConvert.SerializeObject(Model.esealAnnotations ?? "null"));
+             var qrAnnData = @Html.Raw(JsonConvert.SerializeObject(Model.qrCodeAnnotations ?? "null"));
+              // const selectedRole = PerpareDocumentContext.selectuser;
+             const element = document.createElement('div');
+             element.classList.add('draggable');
+             // element.style.left = left + 'px';
+             // element.style.top = top + 'px';
+             element.style.left = ((annotation.x / 100) * canvasWidth) + 'px';
+             element.style.top = ((annotation.y / 100) * canvasHeight) + 'px';
+             element.style.border = 'none';
+
+             const content = document.createElement('div');
+             content.classList.add('draggable-content');
+
+             if (annotation.role.startsWith("SIGNATURE") || annotation.role.startsWith("ESEAL") || (annotation.type === 'plain-text')) {
+                 if (annotation.type === 'text') {
+                     isannotationspresent = false;
+                     const element = document.createElement('div');
+                     element.classList.add('draggable');
+                     element.style.position = 'absolute';
+                     element.style.pointerEvents = 'auto';
+                     element.style.border = 'none';
+                     element.style.padding = '0';
+
+                     const wratio = (annotation.width / 100);
+                     const hratio = (annotation.height / 100);
+                     const lratio = ((annotation.x) / 100);
+                     const tratio = ((annotation.y / 100));
+                     element.setAttribute('data-wpercent', wratio)
+                     element.setAttribute('data-hpercent', hratio)
+                     element.setAttribute('data-lpercent', lratio)
+                     element.setAttribute('data-tpercent', tratio)
+
+                     const content = document.createElement('div');
+                     content.classList.add('draggable-content');
+
+                     element.style.left = (((annotation.x + annotation.draggablepadding) / 100) * canvasWidth) + 'px';
+                     element.style.top = (((annotation.y / 100) * canvasHeight) + ((annotation.draggablepadding / 100) * canvasWidth)) + 'px';
+                     // element.style.top = (((annotation.y + annotation.draggablepadding) / 100) * canvasHeight) + 'px';
+                     const input = document.createElement('input');
+                     input.type = 'text';
+                     input.placeholder = 'Please Enter ' + annotation.id;
+                     input.classList.add('input-field');
+                     input.id = annotation.id;
+                     input.value = annotation.content;
+                     input.style.width = ((annotation.width / 100) * canvasWidth) + 'px';
+                     input.style.height = ((annotation.height / 100) * canvasHeight) + 'px';
+                     input.style.fontSize = ((annotation.fontsize / 100) * canvasWidth) + 'px';
+                     input.style.color = annotation.fontcolor;
+                     input.setAttribute('mandatory', annotation.isMandatory);
+                     if (input.value) {
+                         input.classList.add('has-value');
+                     }
+                     if (annotation.content) {
+
+                         input.disabled = true;
+                     }
+
+                     input.addEventListener('input', () => {
+                         if (input.value) {
+                             input.classList.add('has-value');
+                             input.style.borderColor = 'black'
+                         } else {
+                             input.classList.remove('has-value');
+                         }
+                     });
+
+                     // input.addEventListener('blur', () => {
+                     //     if (input.value) {
+                     //         input.classList.add('has-value');
+                     //     } else {
+                     //         input.classList.remove('has-value');
+                     //     }
+                     // });
+
+                     content.appendChild(input);
+                     element.appendChild(content);
+
+                 }
+                 else if (annotation.type === 'plain-text') {
+                     const element = document.createElement('div');
+                     element.classList.add('draggable');
+                     element.style.position = 'absolute';
+                     element.style.pointerEvents = 'auto';
+                     element.style.border = 'none';
+                     element.style.padding = '0';
+
+                     const wratio = (annotation.width / 100);
+                     const hratio = (annotation.height / 100);
+                     const lratio = ((annotation.x) / 100);
+                     const tratio = ((annotation.y / 100));
+                     element.setAttribute('data-wpercent', wratio)
+                     element.setAttribute('data-hpercent', hratio)
+                     element.setAttribute('data-lpercent', lratio)
+                     element.setAttribute('data-tpercent', tratio)
+
+                     const content = document.createElement('div');
+                     content.classList.add('draggable-content');
+
+                     // element.style.left = ((annotation.x / 100) * canvasWidth) + 'px';
+                     // element.style.top = ((annotation.y / 100) * canvasHeight) + 'px';
+                     element.style.left = (((annotation.x + annotation.draggablepadding) / 100) * canvasWidth) + 'px';
+                     element.style.top = (((annotation.y / 100) * canvasHeight) + ((annotation.draggablepadding / 100) * canvasWidth)) + 'px';
+                     // element.style.top = (((annotation.y + annotation.draggablepadding) / 100) * canvasHeight) + 'px';
+
+                     const editableTextContainer = document.createElement('div');
+
+                     // editableTextContainer.classList.add('editable-text');
+                     // editableTextContainer.setAttribute('contenteditable', 'true');
+
+
+                     editableTextContainer.style.width = ((annotation.width / 100) * canvasWidth) + 'px';
+                     editableTextContainer.style.height = ((annotation.height / 100) * canvasHeight) + 'px';
+                     editableTextContainer.style.fontSize = ((annotation.fontsize / 100) * canvasWidth) + 'px';
+                     editableTextContainer.style.color = annotation.fontcolor;
+                     editableTextContainer.innerText = annotation.content;
+
+                     content.appendChild(editableTextContainer);
+                     element.appendChild(content);
+
+                 }
+                 else if (annotation.type === "Signature") {
+                     var signatureconfig = JSON.parse(sigAnnData);
+                     var keyName;
+                    for (const key in signatureconfig) {
+                        if (signatureconfig.hasOwnProperty(key)) {
+                            keyName = key;
+                            var obj = signatureconfig[key];
+                            obj.name = key + '_SIGNATURE';
+                            obj.type = 'SIGNATURE';
+                        }
+                    }
+                     overlaysignflag = true;
+                         element.style.padding = '0';
+                         const input = document.createElement('div');
+                         input.style.border = "1px solid #44aad1";
+                         input.style.textAlign = 'center';
+                         input.classList.add(`${keyName}_signature-container`);
+                         var fontSize = 0;
+
+                         // input.style.width = (canvasWidth * 0.0575) + 'px';
+                         // input.style.height = (canvasWidth * 0.21795) + 'px';
+                         input.style.width = ((annotation.width / 100) * canvasWidth) + 'px';
+                         input.style.height = ((annotation.height / 100) * canvasHeight) + 'px';
+                        // fontSize = (canvasWidth * 0.05812)/4.5 //9.45px
+                          fontSize = (canvasWidth * 0.0575)/4.5   //9.35px
+                         input.textContent = 'SIGNATURE' + "_" + keyName;
+                         input.style.backgroundColor = "#d8d7d78a";
+                         input.style.color = "#44aad1";
+                         input.style.fontSize = `${fontSize}px`;
+                         input.id = 'SIGNATURE' + "_" + keyName;
+                         input.setAttribute('role', 'SIGNATURE' + "_" + keyName);
+                         input.style.whiteSpace = 'normal';
+                         input.style.wordWrap = 'break-word';
+                         input.style.overflow = 'hidden';
+                         input.style.display = 'flex';
+                         input.style.flexDirection = 'column';
+                         input.style.justifyContent = 'center';
+
+                     content.appendChild(input);
+                     element.appendChild(content);
+                     var signatureconfig = JSON.parse(sigAnnData);
+                     // matchedSignData = {};
+
+                     // for (const key in signatureconfig) {
+                     //     if (signatureconfig.hasOwnProperty(key) && key === suid) {
+                     //         matchedSignData[key] = signatureconfig[key];
+                     //     }
+                     // }
+
+
+                 }
+                 else if (annotation.type === 'Eseal') {
+
+                        var esealconfig = JSON.parse(esealAnnData);
+                        var keyName;
+                        for (const key in esealconfig) {
+                            if (esealconfig.hasOwnProperty(key)) {
+                                 keyName = key;
+                                var obj = esealconfig[key];
+                                obj.name = key + '_ESEAL';
+                                obj.type = 'ESEAL';
+                            }
+                        }
+
+                         element.style.padding = '0';
+                         const input = document.createElement('div');
+                         input.style.border = "1px solid #44aad1";
+                         input.style.textAlign = 'center';
+                         //input.style.padding = '30%';
+                         var fontSize = 0;
+                         input.style.width = ((annotation.width / 100) * canvasWidth) + 'px';
+                         input.style.height = ((annotation.height / 100) * canvasHeight) + 'px';
+                        // fontSize = (canvasWidth * 0.05812)/4.5 //9.45px
+                         fontSize = (canvasWidth * 0.0575)/4.5   //9.35px
+                         //input.style.width = (canvasWidth * 0.15) + 'px';
+                         //input.style.height = (canvasWidth * 0.15) + 'px';
+                         input.textContent = 'ESEAL' + "_" + keyName;
+                         input.style.backgroundColor = "#d8d7d78a";
+                         input.style.color = "#44aad1";
+
+                         input.style.fontSize = `${fontSize}px`;
+                         input.id = 'ESEAL' + "_" + keyName;
+                         input.setAttribute('role', 'ESEAL' + "_" + keyName);
+                         input.style.whiteSpace = 'normal';
+                         input.style.wordWrap = 'break-word';
+                         input.style.overflow = 'hidden';
+                         input.style.display = 'flex';
+                         input.style.flexDirection = 'column';
+                         input.style.justifyContent = 'center';
+
+
+                     content.appendChild(input);
+
+                     element.appendChild(content);
+                     var esealconfig = JSON.parse(esealAnnData);
+
+                 }
+
+                 else if (annotation.type === 'Wsave') {
+                     const element = document.createElement('div');
+                     element.classList.add('draggable');
+                     element.style.position = 'absolute';
+                     element.style.pointerEvents = 'auto';
+                     element.style.border = 'none';
+                     element.style.zIndex = '1000';
+                     element.style.padding = '0';
+
+                     const content = document.createElement('div');
+                     content.classList.add('draggable-content');
+
+                     element.style.left = ((annotation.x / 100) * canvasWidth) + 'px';
+                     element.style.top = ((annotation.y / 100) * canvasHeight) + 'px';
+
+                     element.style.padding = '0';
+
+                     var submitbutton = document.createElement("button");
+                     submitbutton.textContent = "Submit";
+                     submitbutton.id = "Wsave";
+                     submitbutton.style.textAlign = 'center';
+
+                     submitbutton.style.width = ((annotation.width / 100) * canvasWidth) + 'px';
+                     submitbutton.style.height = ((annotation.height / 100) * canvasHeight) + 'px';
+                     submitbutton.style.color = "white";
+                     submitbutton.style.backgroundColor = 'rgb(37 66 95)';
+                     submitbutton.style.borderRadius = '5px';
+                     submitbutton.style.fontSize = "77%";
+                     submitbutton.onclick = function () {
+                         saveAnnotations();
+                     };
+                     content.appendChild(submitbutton);
+
+                     element.appendChild(content);
+
+
+                 }
+                 else if (annotation.type === 'Wfill') {
+                     const element = document.createElement('div');
+                     element.classList.add('draggable');
+                     element.style.position = 'absolute';
+                     element.style.pointerEvents = 'auto';
+                     element.style.border = 'none';
+                     element.style.zIndex = '1000';
+                     element.style.padding = '0';
+
+                     const content = document.createElement('div');
+                     content.classList.add('draggable-content');
+
+                     element.style.left = ((annotation.x / 100) * canvasWidth) + 'px';
+                     element.style.top = ((annotation.y / 100) * canvasHeight) + 'px';
+
+                     element.style.padding = '0';
+
+                     var fillbutton = document.createElement("button");
+                     fillbutton.textContent = "Auto Fill";
+                     fillbutton.id = "Wfill";
+                     fillbutton.style.textAlign = 'center';
+
+                     fillbutton.style.width = ((annotation.width / 100) * canvasWidth) + 'px';
+                     fillbutton.style.height = ((annotation.height / 100) * canvasHeight) + 'px';
+                     fillbutton.style.color = "white";
+                     fillbutton.style.backgroundColor = 'rgb(37 66 95)';
+                     fillbutton.style.borderRadius = '5px';
+                     fillbutton.style.fontSize = "77%";
+                     fillbutton.onclick = function () {
+                         autofill();
+                     };
+                     content.appendChild(fillbutton);
+
+                     element.appendChild(content);
+
+
+                 }
+
+                 else if (annotation.type === 'imagefield') {
+                     isannotationspresent = false;
+                     const element = document.createElement('div');
+                     element.classList.add('draggable');
+                     element.style.position = 'absolute';
+                     element.style.pointerEvents = 'auto';
+                     element.style.border = 'none';
+                     element.style.zIndex = '1000';
+                     element.style.padding = '0';
+
+                     const wratio = (annotation.width / 100);
+                     const hratio = (annotation.height / 100);
+                     const lratio = ((annotation.x) / 100);
+                     const tratio = ((annotation.y / 100));
+                     element.setAttribute('data-wpercent', wratio)
+                     element.setAttribute('data-hpercent', hratio)
+                     element.setAttribute('data-lpercent', lratio)
+                     element.setAttribute('data-tpercent', tratio)
+
+                     const content = document.createElement('div');
+                     content.classList.add('draggable-content');
+
+                     element.style.left = ((annotation.x / 100) * canvasWidth) + 'px';
+                     element.style.top = ((annotation.y / 100) * canvasHeight) + 'px';
+
+                     element.style.padding = '0';
+
+                     const imageContainer = document.createElement('div');
+                     imageContainer.className = 'image-container';
+                     imageContainer.style.width = ((annotation.width / 100) * canvasWidth) + 'px';
+                     imageContainer.style.height = ((annotation.height / 100) * canvasHeight) + 'px';
+
+                     const imageUpload = document.createElement('input');
+                     imageUpload.setAttribute('type', 'file');
+                     imageUpload.className = 'image-upload';
+                     imageUpload.setAttribute('accept', 'image/*');
+
+                     const uploadedImage = document.createElement('img');
+                     uploadedImage.className = 'uploaded-image';
+                     uploadedImage.setAttribute('alt', 'Uploaded Image');
+                     uploadedImage.id = annotation.id;
+
+                     uploadedImage.setAttribute('mandatory', annotation.isMandatory);
+
+                     // Create the placeholder text
+                     const placeholderText = document.createElement('span');
+                     placeholderText.className = 'placeholder-text';
+                     placeholderText.innerText = 'Upload Image';
+
+                     // Create the remove button
+                     const removeImageBtn = document.createElement('button');
+                     removeImageBtn.className = 'remove-image-btn';
+                     removeImageBtn.innerHTML = '&times;';
+
+                     // Append elements to the image container
+
+
+                     imageContainer.appendChild(imageUpload);
+                     imageContainer.appendChild(uploadedImage);
+                     imageContainer.appendChild(placeholderText);
+                     imageContainer.appendChild(removeImageBtn);
+                     imageUpload.addEventListener('change', function (event) {
+                         const file = event.target.files[0];
+                         if (file) {
+                             const reader = new FileReader();
+                             reader.onload = function (e) {
+                                 uploadedImage.src = e.target.result;
+                                 uploadedImage.style.display = 'block';
+                                 imageContainer.style.borderColor = 'black';
+
+                                 placeholderText.style.display = 'none';
+                                 removeImageBtn.classList.add('uploaded');
+                             };
+                             reader.readAsDataURL(file);
+                         }
+                     });
+
+
+                     removeImageBtn.addEventListener('click', function () {
+                         // Hide the image
+                         uploadedImage.src = '';
+                         uploadedImage.style.display = 'none';
+
+
+                         // Show the placeholder text again
+                         placeholderText.style.display = 'block';
+
+                         // Hide the remove button
+                         removeImageBtn.classList.remove('uploaded');
+
+                         // Clear the file input value
+                         imageUpload.value = '';
+                     });
+                     if (annotation.content) {
+
+                         uploadedImage.src = annotation.content;
+                         uploadedImage.style.display = 'block';
+
+                         placeholderText.style.display = 'none';
+
+                         removeImageBtn.style.display = 'none';
+
+                         imageUpload.disabled = true;
+
+                     }
+
+                     content.appendChild(imageContainer);
+
+                     element.appendChild(content);
+
+
+                 }
+
+                 element.style.position = 'absolute';
+                 element.style.pointerEvents = 'auto';  // Enable interactions
+                 element.style.zIndex = '1000';  // Ensure it's on top of other elements
+
+                 //makeDraggable(element);
+                   return element;
+             }
+         }
+
+    </script>
+}

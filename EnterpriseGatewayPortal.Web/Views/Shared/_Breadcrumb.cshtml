@@ -1,0 +1,173 @@
+﻿@model List<EnterpriseGatewayPortal.Web.Models.BreadCrumbModel>
+@using System.Security.Claims
+
+@{
+    var userRoleName = User.FindFirst("userRoleName")?.Value;
+}
+
+
+<style>
+    .breadcrumb-custom {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+        .breadcrumb-custom li {
+            display: flex;
+            align-items: flex-start;
+            color: #797E86;
+            gap: 8px;
+        }
+
+        .breadcrumb-custom .separator {
+            margin: 0 8px;
+            color: #999;
+        }
+
+        .breadcrumb-custom li.active {
+            font-weight: 600;
+            color: #000;
+        }
+
+            .breadcrumb-custom li.active:hover {
+                color: #92722A;
+                text-decoration: underline;
+                text-decoration-thickness: 2px;
+                transition: 0.3s ease-in-out;
+            }
+
+        .breadcrumb-custom a {
+            color: inherit;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+            .breadcrumb-custom a:hover {
+                text-decoration: underline;
+                color: #92722A;
+                text-decoration-thickness: 2px;
+            }
+
+    .breadcrumb-wrapper {
+        margin-top: 60px;
+        z-index: 99;
+        position: fixed;
+        width: 100%;
+        padding: 10px 45px;
+        background-color: #f9f9f9;
+        border-radius: 6px;
+    }
+
+    .breadcrumb-custom li:last-child a {
+        pointer-events: none;
+        cursor: default;
+        color: #92722A !important;
+        text-decoration: none !important;
+    }
+
+    .breadcrumb-custom li:last-child:hover {
+        text-decoration: none !important;
+    }
+
+    .breadcrumb-custom li:last-child svg {
+        fill: rgba(146, 114, 42, 1);
+    }
+</style>
+
+<div class="breadcrumb-wrapper">
+    <ol class="breadcrumb-custom">
+        <li class="d-flex justify-content-start align-items-center flex-row">
+            <img src="~/assets/images/Home Icon.svg" height="16" />
+            @{
+                var targetUrl = userRoleName == "KYCADMIN"
+                ? Url.Action("Index", "KYCDashboard")
+                : Url.Action("Index", "Dashboard");
+            }
+            <a href="@targetUrl">Home</a>
+
+        </li>
+
+        @if (Model != null && Model.Any())
+        {
+            <span class="separator">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4.89793 1.85202L8.64793 5.60202C8.70037 5.65428 8.74198 5.71637 8.77037 5.78475C8.79876 5.85312 8.81337 5.92643 8.81337 6.00046C8.81337 6.07449 8.79876 6.1478 8.77037 6.21617C8.74198 6.28454 8.70037 6.34664 8.64793 6.3989L4.89793 10.1489C4.79226 10.2546 4.64893 10.3139 4.49949 10.3139C4.35005 10.3139 4.20673 10.2546 4.10105 10.1489C3.99538 10.0432 3.93602 9.8999 3.93602 9.75046C3.93602 9.60102 3.99538 9.45769 4.10105 9.35202L7.45308 5.99999L4.10059 2.64796C3.99491 2.54229 3.93555 2.39896 3.93555 2.24952C3.93555 2.10008 3.99491 1.95676 4.10059 1.85108C4.20626 1.74541 4.34958 1.68604 4.49902 1.68604C4.64847 1.68604 4.79179 1.74541 4.89746 1.85108L4.89793 1.85202Z" fill="#232528" />
+                </svg>
+            </span>
+
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                var item = Model[i];
+                bool isLast = i == Model.Count - 1;
+
+                <li class="@(isLast ? "active" : "") d-flex align-items-center flex-row">
+                    <img data-icon="@item.IconKey" data-filled="@(isLast.ToString().ToLower())" />
+                    <a href="@item.Url">@item.Title</a>
+                </li>
+
+                @if (!isLast)
+                {
+                    <span class="separator">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.89793 1.85202L8.64793 5.60202C8.70037 5.65428 8.74198 5.71637 8.77037 5.78475C8.79876 5.85312 8.81337 5.92643 8.81337 6.00046C8.81337 6.07449 8.79876 6.1478 8.77037 6.21617C8.74198 6.28454 8.70037 6.34664 8.64793 6.3989L4.89793 10.1489C4.79226 10.2546 4.64893 10.3139 4.49949 10.3139C4.35005 10.3139 4.20673 10.2546 4.10105 10.1489C3.99538 10.0432 3.93602 9.8999 3.93602 9.75046C3.93602 9.60102 3.99538 9.45769 4.10105 9.35202L7.45308 5.99999L4.10059 2.64796C3.99491 2.54229 3.93555 2.39896 3.93555 2.24952C3.93555 2.10008 3.99491 1.95676 4.10059 1.85108C4.20626 1.74541 4.34958 1.68604 4.49902 1.68604C4.64847 1.68604 4.79179 1.74541 4.89746 1.85108L4.89793 1.85202Z" fill="#232528" />
+                        </svg>
+                    </span>
+                }
+            }
+        }
+    </ol>
+</div>
+
+<script>
+    const breadIconBasePath = "@Url.Content("~/assets/BreadCrumImages/")";
+
+    function getSVGIcon(iconName, isFilled = false) {
+        const icons = {
+            "org-profile": ["Organization Profile.svg", "Organization Profile_filled.svg"],
+            "org-sign-temp": ["Signature Templates.svg", "Signature Templates_filled.svg"],
+            "org-eseal": ["Eseal.svg", "Eseal_filled.svg"],
+            "business-users": ["Business Users.svg", "Business Users_filled.svg"],
+            "beneficiaries": ["Business Beneficiaries.svg", "Business Beneficiaries_filled.svg"],
+            "business-applications": ["Business Applications.svg", "Business Applications_filled.svg"],
+            "QRML": ["Qr Manager Credentials.svg", "Qr Manager Credentials_filled.svg"],
+            "QRMSR": ["Qr Subscription Requests.svg", "Qr Subscription Requests_filled.svg"],
+            "add": ["Add.svg", "Add_filled.svg"],
+            "edit": ["Edit.svg", "Edit_filled.svg"],
+            "view": ["View.svg", "View_filled.svg"],
+            "send": ["Send_For_activation.svg", "Send_For_activation_filled.svg"],
+            "wallet-credentials": ["Wallet Credentials.svg", "Wallet Credentials_filled.svg"],
+            "wallet-revoke": ["Revoke User Credentials.svg", "Revoke User Credentials_filled.svg"],
+            "wallet-subscriptionRequest": ["Subscription Requests.svg", "Subscription Requests_filled.svg"],
+            "wallet-subscribedCredentials": ["Subscribed Credentials.svg", "Subscribed Credentials_filled.svg"],
+            "payments-rateCards": ["Payment Rate Cards.svg", "Payment Rate Cards_filled.svg"],
+            "payments-priceSlabs": ["Payment Price Slabs.svg", "Payment Price Slabs_filled.svg"],
+            "payments-paymentHistory": ["Payment History.svg", "Payment History_filled.svg"],
+            "payments-balanceSheet": ["Payment Balance Sheets.svg", "Payment Balance Sheets_filled.svg"],
+            "payments-UsageReports": ["Usage Reports.svg", "Usage Reports_filled.svg"],
+            "adminUsers": ["Admin Users.svg", "Admin Users_filled.svg"],
+            "roles": ["Roles.svg", "Roles_filled.svg"],
+            "activityReports": ["Activity Reports.svg", "Activity Reports_filled.svg"],
+            "devices": ["", "org_device_icon.svg"]
+        };
+
+        if (!icons[iconName]) return "";
+        const file = isFilled ? icons[iconName][1] : icons[iconName][0];
+        return file ? breadIconBasePath + file : "";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("img[data-icon]").forEach(img => {
+            const iconKey = img.getAttribute("data-icon");
+            const isFilled = img.getAttribute("data-filled") === "true";
+            const src = getSVGIcon(iconKey, isFilled);
+            if (src) img.src = src;
+        });
+    });
+
+</script>

@@ -1,0 +1,14 @@
+<svg id="Group_114317" data-name="Group 114317" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="135.08" height="42.256" viewBox="0 0 135.08 42.256">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_49692" data-name="Rectangle 49692" width="135.08" height="42.256" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="Group_114316" data-name="Group 114316">
+    <g id="Group_114315" data-name="Group 114315" clip-path="url(#clip-path)">
+      <path id="Path_110128" data-name="Path 110128" d="M131.27,42.256H3.81A3.81,3.81,0,0,1,0,38.446V3.81A3.81,3.81,0,0,1,3.81,0H131.27a3.81,3.81,0,0,1,3.81,3.81V38.446a3.81,3.81,0,0,1-3.81,3.81" fill="#fff"/>
+      <path id="Path_110129" data-name="Path 110129" d="M22.513,12.945H12.931a1.087,1.087,0,0,0-1.087,1.087V27.067a1.087,1.087,0,0,0,1.087,1.087H25.583a1.087,1.087,0,0,0,1.087-1.087V17.309ZM19.257,26.531a2.208,2.208,0,1,1,2.208-2.208,2.208,2.208,0,0,1-2.208,2.208m3.126-6.56H13.745V15.035h8.638Z" fill="#4f5d71"/>
+    </g>
+  </g>
+  <text id="Save_Form" data-name="Save Form" transform="translate(35.729 26.53)" fill="#4f5d73" font-size="16" font-family="Poppins-Regular, Poppins"><tspan x="0" y="0">Save Form</tspan></text>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="26.47" height="44.707" viewBox="0 0 26.47 44.707">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_34522" data-name="Rectangle 34522" width="26.47" height="44.707" transform="translate(0 0)" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="Group_113823" data-name="Group 113823" transform="translate(1.85 3.125)">
+    <g id="Group_113822" data-name="Group 113822" transform="translate(-1.85 -3.125)" clip-path="url(#clip-path)">
+      <path id="Path_106799" data-name="Path 106799" d="M23.2,44.045H3.111A2.611,2.611,0,0,1,.5,41.434V3.111A2.61,2.61,0,0,1,3.111.5H23.2a2.611,2.611,0,0,1,2.611,2.611V41.434A2.612,2.612,0,0,1,23.2,44.045" transform="translate(0.081 0.081)" fill="none"/>
+      <rect id="Rectangle_34519" data-name="Rectangle 34519" width="25.307" height="43.545" rx="2.246" transform="translate(0.581 0.581)" fill="none" stroke="#1a1818" stroke-miterlimit="10" stroke-width="1"/>
+      <rect id="Rectangle_34521" data-name="Rectangle 34521" width="19.278" height="32.459" transform="translate(3.596 5.202)" fill="none" stroke="#1a1818" stroke-miterlimit="10" stroke-width="1"/>
+      <path id="Path_106800" data-name="Path 106800" d="M13.981,35.4A1.986,1.986,0,1,1,12,33.411,1.986,1.986,0,0,1,13.981,35.4" transform="translate(1.627 5.43)" fill="#1a1818"/>
+      <line id="Line_806" data-name="Line 806" x1="9.79" y2="11.773" transform="translate(6.388 11.06)" fill="#f7f3bc"/>
+      <line id="Line_807" data-name="Line 807" x1="9.79" y2="11.773" transform="translate(6.388 11.06)" fill="none" stroke="#1a1818" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1"/>
+      <line id="Line_808" data-name="Line 808" x1="14.808" y2="18.526" transform="translate(5.831 11.122)" fill="#f7f3bc"/>
+      <line id="Line_809" data-name="Line 809" x1="14.808" y2="18.526" transform="translate(5.831 11.122)" fill="none" stroke="#1a1818" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1"/>
+      <line id="Line_810" data-name="Line 810" x1="9.294" y2="11.153" transform="translate(10.477 17.256)" fill="#f7f3bc"/>
+      <line id="Line_811" data-name="Line 811" x1="9.294" y2="11.153" transform="translate(10.477 17.256)" fill="none" stroke="#1a1818" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1"/>
+      <line id="Line_812" data-name="Line 812" y1="0.067" x2="6.6" transform="translate(9.935 2.777)" fill="#f7f3bc"/>
+      <line id="Line_813" data-name="Line 813" y1="0.067" x2="6.6" transform="translate(9.935 2.777)" fill="none" stroke="#1a1818" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1"/>
+    </g>
+  </g>
+</svg>

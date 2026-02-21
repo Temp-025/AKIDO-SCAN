@@ -1,0 +1,146 @@
+﻿@model IEnumerable<EnterpriseGatewayPortal.Core.DTOs.OrganizationBalanceSheetDTO>
+@using EnterpriseGatewayPortal.Web.Models;
+
+@{
+    ViewData["Title"] = "Balance Sheet Details";
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+{
+        new BreadCrumbModel { Title = "Payments - BalanceList", Url = "",IconKey = "wallet-subscriptionRequest"},
+    };
+}
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+@{
+    var layoutType = Context.Request.Cookies["HeaderNavigationLayout"];
+}
+@{
+    var hasData = Model != null && Model.Count() > 0;
+}
+<style>
+    .classshide {
+        display: none !important;
+    }
+</style>
+@if (Model == null || Model.Count() == 0)
+{
+    <style>
+        table {
+            height: 70% !important;
+        }
+
+        .table-hover > tbody > tr:hover > td {
+            background: none !important;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        /* Apply 100% height to all DataTables wrappers */
+        .dataTables_wrapper {
+            height: 100% !important;
+        }
+
+            /* Apply 100% height only to the second .row inside any DataTables wrapper */
+            .dataTables_wrapper > .row:nth-of-type(2) {
+                height: 100% !important;
+            }
+
+        td:not([style*="display: none"]) {
+            border-bottom-right-radius: 12px !important;
+            border-bottom-left-radius: 12px !important;
+        }
+    </style>
+}
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row">
+    <div class="col-md-12 plr">
+
+        <div class="card-body">
+            <div class="row align-items-center justify-content-between" style="padding-left: 15px; padding-right: 15px;">
+                <div class="col-md-6 col-sm-12 d-flex align-items-center plr" id="custom-search-container"></div>
+            </div>
+            <table class="table-striped table-bordered table-hover table-checkable order-column full-width table @(Model == null || Model.Count() == 0 ? "empty-table" : "")">
+                <thead>
+                    <tr>
+                        <th>Service Name</th>
+                        <th>Total Credits</th>
+                        <th>Total Debits</th>
+                        <th>Credits Available</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model!=null && Model.Count() > 0)
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.ServiceDefinitions.ServiceDisplayName</td>
+                                <td>@item.TotalCredits</td>
+                                <td>@item.TotalDebits</td>
+                                <td>@(item.TotalCredits - item.TotalDebits)</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr class="odd gradeX">
+                            <td colspan="6" align="center">No records found</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+         var layoutType = '@(layoutType ?? "")';
+        if(layoutType == "Vertical"){
+
+            $("#Payments > a")
+                .attr("aria-expanded", "true")
+                .addClass("active");
+
+            $("#Payments")
+                .addClass("submenu-active show");
+
+            $("#Payments .submenu")
+                .addClass("show");
+
+            $('#Balance-Sheets').addClass('active');
+
+            $('#homeMenu').addClass('breadcrumb-item').append('Payments > Balance Sheet');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#BalanceSheetsMenu').addClass('active');
+
+        }
+        $('#networkOverlay').hide();
+        document.getElementById("navigationNetworkOverlay").style.display = "none";
+
+
+        var table = $(".table").DataTable({
+               "bLengthChange": false,
+               "searching": true,
+                "paging": '@hasData.ToString().ToLower()',
+                "info": '@hasData.ToString().ToLower()',
+               //  "dom": '<"top"f>rt<"bottom"ip><"clear">', // Keep 'f' for the search input only
+               "initComplete": function () {
+                   // Move the search bar into our custom container
+                   $(".dataTables_filter").appendTo("#custom-search-container");
+                   $('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+                   $('.dataTables_filter label').contents().filter(function () {
+                       return this.nodeType === 3;
+                   }).remove();
+
+               }
+
+           });
+    });
+</script>

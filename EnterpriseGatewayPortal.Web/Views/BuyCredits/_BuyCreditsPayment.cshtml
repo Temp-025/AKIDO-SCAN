@@ -1,0 +1,135 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.BuyCredits.CreditsSummeryViewModel
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+
+<style>
+    table {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+</style>
+
+<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title s3">
+                <span class="text-capitalize s3" style="font-size: 18px">
+                    Payment Info
+                </span>
+            </h5>
+            <button type="button" class="close cross" data-dismiss="modal">
+                &times;
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="well">
+                <div class="table-wrap">
+                    <div class="table-responsive">
+                        <label class="col-form-label">Digital Signature</label>
+                        <table class="table display product-overview mb-30" id="support_table5">
+                            <thead>
+                                <tr>
+                                    <th>Credits</th>
+                                    <th>Base Price</th>
+                                    <th>Rate</th>
+                                    <th>Charges (@Model.DS_Tax%)</th>
+                                    <th>Discount (@Model.DS_Discount%)</th>
+                                    <th>Total Amount</th>
+                                                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+                               
+                                   <tr>
+                                    <td>@Model.DS_Credits</td>
+                                    <td>@Model.DS_BasePrice</td>
+                                    <td>@Model.DS_TotalRate</td>
+                                    <td>@Model.DS_TotalTax</td>
+                                    <td>@Model.DS_TotalDiscount</td>
+                                    <td>@Model.DS_TotalAmount</td>
+                                   </tr>
+                               
+                            </tbody>
+                        </table>
+
+                        <label class="col-form-label">Eseal Signature</label>
+                        <table class="table display product-overview mb-30" id="support_table5">
+                            <thead>
+                                <tr>
+                                    <th>Credits</th>
+                                    <th>Base Price</th>
+                                    <th>Rate</th>
+                                    <th>Charges (@Model.ES_Taxp%)</th>
+                                    <th>Discount (@Model.ES_Discount%)</th>
+                                    <th>Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>@Model.ES_Credits</td>
+                                    <td>@Model.ES_BasePrice</td>
+                                    <td>@Model.ES_TotalsRate</td>
+                                    <td>@Model.ES_TotalTax</td>
+                                    <td>@Model.ES_TotalDiscount</td>
+                                    <td>@Model.ES_TotalAmount</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <label class="col-form-label">User Subscription</label>
+                        <table class="table display product-overview mb-30" id="support_table5">
+                            <thead>
+                                <tr>
+                                    <th>Credits</th>
+                                    <th>Base Price</th>
+                                    <th>Rate</th>
+                                    <th>Charges (@Model.US_Taxper%)</th>
+                                    <th>Discount (@Model.US_Discountper%)</th>
+                                    <th>Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr>
+                                    <td>@Model.US_Credits</td>
+                                    <td>@Model.US_BasePrice</td>
+                                    <td>@Model.US_TotalsRate</td>
+                                    <td>@Model.US_TotalTax</td>
+                                    <td>@Model.US_TotalDiscount</td>
+                                    <td>@Model.US_TotalAmount</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                       @*  <h3>Total Amount :</h3>@Model.GrandTotal *@
+                       
+                        <table class="table display product-overview mb-30" id="support_table5">
+                            <thead>
+                                <tr>
+                                    <th>Total Amount :</th>
+                                    <th>@Model.GrandTotal</th>
+                            
+                                   
+                                </tr>
+                            </thead>
+                           
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        $('#networkOverlay').hide();
+
+    });
+</script>

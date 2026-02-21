@@ -1,0 +1,289 @@
+﻿@model IEnumerable<EnterpriseGatewayPortal.Web.ViewModel.VerifyWalletCredential.VerifyCredentialListViewModel>
+
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+{
+        new BreadCrumbModel { Title = "QR - Subscription Requests",Url = "",IconKey="QRMSR"},
+    };
+}
+
+@{
+    ViewData["Title"] = "Wallet";
+}
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+@{
+    var hasData = Model != null && Model.Count() > 0;
+}
+
+<style>
+    /* Customizing the popup */
+    .swal-popup {
+        border-radius: 12px;
+        padding: 20px;
+        color: white;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Title Styling */
+    .swal-title {
+        font-family: 'Arial', sans-serif;
+        font-size: 23px !important;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: Black;
+    }
+
+    /* Input Field Styling */
+    .swal-input {
+        width: 84%;
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        margin-bottom: 15px;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.3s;
+        color: black !important;
+    }
+
+        .swal-input:focus {
+            border-color: #2575fc;
+        }
+
+    /* Confirm Button Styling */
+    .swal-confirm-button {
+        background-color: #2575fc;
+        color: white;
+        font-size: 16px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        .swal-confirm-button:hover {
+            background-color: #6a11cb;
+        }
+
+    /* Cancel Button Styling */
+    .swal-cancel-button {
+        background-color: #FF3636 !important;
+        color: white;
+        font-size: 16px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        .swal-cancel-button:hover {
+            background-color: #ddd;
+        }
+
+    .classshide {
+        display: none !important;
+    }
+</style>
+
+@if (Model == null || Model.Count() == 0)
+{
+    <style>
+        table {
+            height: 70% !important;
+        }
+
+        .table-hover > tbody > tr:hover > td {
+            background: none !important;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        .dataTables_wrapper {
+            height: 100% !important;
+        }
+
+        .dataTables_wrapper > .row:nth-of-type(2) {
+            height: 100% !important;
+        }
+
+        td:not([style*="display: none"]) {
+            border-bottom-right-radius: 12px !important;
+            border-bottom-left-radius: 12px !important;
+        }
+    </style>
+}
+
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" style="height:100%;">
+    <div class="col-md-12 plr">
+        @*<div class="card">*@
+            <div class="card-body">
+
+                <div class="row align-items-center justify-content-between" style="padding-left: 15px; padding-right: 15px;">
+                    <!-- Left: Search bar (will be injected by DataTables) -->
+                    <div class="col-md-6 col-sm-12 d-flex align-items-center plr" id="custom-search-container"></div>
+
+                    <!-- Right: Buttons -->
+                    <div class="col-md-6 col-sm-12 plr text-right">
+                        <div class="btn-group">
+                            <a class="btn btn-other" asp-action="List">
+                                <img src="~/assets/images/refresh.png" alt="refresh Icon" width="17" height="17" style=" margin-right: 7px; opacity: 1; position: relative; bottom: -2px;">
+                                Refresh
+                            </a>
+                        </div>
+
+
+                    </div>
+                </div>
+                <table id="CredentialVerifyTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table">
+                    <thead>
+                        <tr>
+                            <th hidden> Id</th>
+                            <th>Credential Name</th>
+                            <th>organization Name</th>
+
+                            <th>Created Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || Model.Count() == 0)
+                        {
+                            <tr>
+                                <td style="display: none;"></td>
+                                <td style="text-align:center" valign="top" colspan="6" class="dataTables_empty">
+                                    <img class="NoRecordsCls" src="~/assets/images/No-Records-icon.svg" alt="No records" style=" display:block; margin:0 auto 8px;">
+                                    <p class="NoRecordFound-paragarph">No records found</p>
+                                    @*<p class="NoRecordTable-Text">Get started by clicking on 'Create'</p>*@
+                                </td>
+
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr class="odd gradeX">
+                                    <td hidden>@item.id</td>
+                                    <td>@item.credentialName</td>
+                                    <td>@item.organizationName</td>
+
+                                    <td>@item.createdDate.ToString("dd/MM/yyyy")</td>
+
+
+                                    <td>
+                                        @if (string.IsNullOrWhiteSpace(item.status))
+                                        {
+                                            <span class="status-tag status-na">N/A</span>
+                                        }
+                                        else
+                                        {
+                                        var status = item.status.Trim().ToLower();
+                                        var statusCapitalized = char.ToUpper(status[0]) + status.Substring(1);
+                                        var cssClass = status switch
+                                        {
+                                            "active" => "status-tag status-active",
+                                            "failed" => "status-tag status-failed",
+                                            "In Progress" => "status-tag status-inprogress",
+                                            _ => "status-tag status-na"
+                                        };
+                                        <span class="@cssClass">@statusCapitalized</span>
+                                        }
+                                    </td>
+
+
+                                    <td class="valigntop">
+
+                                        <div class="btn-group">
+                                            <button class="btn btn-xs deepPink-bgcolor no-margin" type="button" data-toggle="dropdown"
+                                                    aria-expanded="false">
+                                                Actions
+                                                <i class="fa fa-angle-down"></i>
+                                            </button>
+                                            <ul class="dropdown-menu pull-left" role="menu">
+                                                <li>
+                                                    <a asp-action="ViewVerifyCredentialRequestDetails" asp-route-id="@item.id">
+                                                        <img src="~/assets/images/Eye_View_Icon.svg"/>
+                                                        View
+                                                    </a>
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        @*</div>*@
+    </div>
+</div>
+@section scripts {
+    <script>
+        var walletCertificateStatus = @Json.Serialize(ViewBag.WalletCertificateStatus);
+
+        $(document).ready(function () {
+
+            $("#QR-Manager > a")
+                .attr("aria-expanded", "true")
+                .addClass("active");
+
+            $("#QR-Manager")
+                .addClass("submenu-active show");
+
+            $("#QR-Manager .submenu")
+                .addClass("show");
+
+            $('#QR-Requests').addClass('active');
+
+             document.getElementById("navigationNetworkOverlay").style.display = "none";
+            $('#networkOverlay').hide();
+
+
+            $('#homeMenu').addClass('breadcrumb-item').append('Qr Credential > Subscribed Requests');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+
+
+          var table = $("#CredentialVerifyTable").DataTable({
+            "bLengthChange": false,
+            "searching": true,
+            "paging": @hasData.ToString().ToLower(),
+            "info": @hasData.ToString().ToLower(),
+
+            //  "dom": '<"top"f>rt<"bottom"ip><"clear">', // Keep 'f' for the search input only
+            "initComplete": function () {
+                // Move the search bar into our custom container
+                $(".dataTables_filter").appendTo("#custom-search-container");
+                $('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+                $('.dataTables_filter label').contents().filter(function () {
+                    return this.nodeType === 3;
+                }).remove();
+
+            }
+
+        });
+
+        });
+
+    </script>
+}

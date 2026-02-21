@@ -1,0 +1,289 @@
+﻿@model IEnumerable<EnterpriseGatewayPortal.Web.ViewModel.VerifyWalletCredential.VerifyCredentialListViewModel>
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+{
+        new BreadCrumbModel { Title = "Wallet - Subscribed Credentials",Url = "", IconKey = "wallet-subscribedCredentials"},
+    };
+}
+
+
+@{
+    ViewData["Title"] = "Wallet";
+}
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+
+}
+@{
+    var hasData = Model != null && Model.Count() > 0;
+}
+
+<script>
+    const customSwal = Swal.mixin({
+        customClass: {
+            popup: 'custom-swal-popup',
+            title: 'custom-swal-title',
+            htmlContainer: 'custom-swal-content',
+            confirmButton: 'custom-swal-confirm-btn',
+            cancelButton: 'custom-swal-cancel-btn'
+        },
+        buttonsStyling: false
+    });
+</script>
+
+<style>
+    .classshide {
+        display: none !important;
+    }
+</style>
+@if (Model == null || Model.Count() == 0)
+{
+    <style>
+        table {
+            height: 70% !important;
+        }
+
+        .table-hover > tbody > tr:hover > td {
+            background: none !important;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        /* Apply 100% height to all DataTables wrappers */
+        .dataTables_wrapper {
+            height: 100% !important;
+        }
+
+            /* Apply 100% height only to the second .row inside any DataTables wrapper */
+            .dataTables_wrapper > .row:nth-of-type(2) {
+                height: 100% !important;
+            }
+
+        td:not([style*="display: none"]) {
+            border-bottom-right-radius: 12px !important;
+            border-bottom-left-radius: 12px !important;
+        }
+    </style>
+}
+
+<style>
+    .wid {
+        width: 120px !important;
+    }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" style="height:100%;">
+    <div class="col-md-12">
+
+        <div class="card-body">
+
+
+            <div class="row align-items-center justify-content-between" style="padding-left: 15px; padding-right: 15px;">
+                <!-- Left: Search bar (will be injected by DataTables) -->
+                <div class="col-md-6 col-sm-12 d-flex align-items-center plr" id="custom-search-container"></div>
+
+                <!-- Right: Buttons -->
+                <div class="col-md-6 col-sm-12 plr text-right">
+                    <div class="btn-group">
+                        <a class="btn btn-other" asp-action="List">
+                            <svg width="17" height="17" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="padding-top:2.5px; margin-right: 3px;">
+                                <path d="M30 7.0001V13.0001C30 13.2653 29.8946 13.5197 29.7071 13.7072C29.5196 13.8947 29.2652 14.0001 29 14.0001H23C22.7348 14.0001 22.4804 13.8947 22.2929 13.7072C22.1053 13.5197 22 13.2653 22 13.0001C22 12.7349 22.1053 12.4805 22.2929 12.293C22.4804 12.1055 22.7348 12.0001 23 12.0001H26.425L23.1012 8.9551L23.07 8.9251C21.6801 7.53571 19.9116 6.58667 17.9854 6.19653C16.0593 5.80639 14.0609 5.99245 12.2399 6.73147C10.4188 7.47049 8.85594 8.7297 7.74641 10.3518C6.63688 11.9739 6.02991 13.887 6.00132 15.852C5.97273 17.8171 6.52379 19.747 7.58565 21.4007C8.64752 23.0544 10.1731 24.3585 11.9719 25.1502C13.7706 25.9419 15.7628 26.186 17.6995 25.8521C19.6361 25.5181 21.4315 24.621 22.8612 23.2726C23.054 23.0903 23.3113 22.992 23.5766 22.9994C23.8418 23.0067 24.0933 23.1192 24.2756 23.312C24.458 23.5047 24.5562 23.7621 24.5489 24.0273C24.5415 24.2926 24.429 24.544 24.2362 24.7263C22.0131 26.8348 19.0639 28.007 16 28.0001H15.835C13.8697 27.9732 11.941 27.4639 10.2186 26.5171C8.49619 25.5702 7.03272 24.2148 5.95681 22.5699C4.88091 20.925 4.22552 19.041 4.04824 17.0835C3.87096 15.126 4.17723 13.155 4.94013 11.3435C5.70302 9.53213 6.89918 7.93583 8.42348 6.69496C9.94777 5.45409 11.7535 4.60664 13.6821 4.22709C15.6106 3.84753 17.6028 3.9475 19.4836 4.5182C21.3645 5.08891 23.0763 6.11287 24.4687 7.5001L28 10.7251V7.0001C28 6.73488 28.1053 6.48053 28.2929 6.29299C28.4804 6.10545 28.7348 6.0001 29 6.0001C29.2652 6.0001 29.5196 6.10545 29.7071 6.29299C29.8946 6.48053 30 6.73488 30 7.0001Z" fill="#4B4F58" />
+                            </svg>Refresh
+                        </a>
+                    </div>
+
+                    &nbsp;&nbsp;&nbsp;
+                    <div class="btn-group">
+                        <a id="addRow1" class="btn btn-primary uaeid-primary" onclick="handleSubscribeNewCredentialClick()">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="padding-top:2.5px; margin-right: 3px;">
+                                <path d="M15.5 8C15.5 8.16576 15.4342 8.32473 15.3169 8.44194C15.1997 8.55915 15.0408 8.625 14.875 8.625H8.625V14.875C8.625 15.0408 8.55915 15.1997 8.44194 15.3169C8.32473 15.4342 8.16576 15.5 8 15.5C7.83424 15.5 7.67527 15.4342 7.55806 15.3169C7.44085 15.1997 7.375 15.0408 7.375 14.875V8.625H1.125C0.95924 8.625 0.800269 8.55915 0.683058 8.44194C0.565848 8.32473 0.5 8.16576 0.5 8C0.5 7.83424 0.565848 7.67527 0.683058 7.55806C0.800269 7.44085 0.95924 7.375 1.125 7.375H7.375V1.125C7.375 0.95924 7.44085 0.800269 7.55806 0.683058C7.67527 0.565848 7.83424 0.5 8 0.5C8.16576 0.5 8.32473 0.565848 8.44194 0.683058C8.55915 0.800269 8.625 0.95924 8.625 1.125V7.375H14.875C15.0408 7.375 15.1997 7.44085 15.3169 7.55806C15.4342 7.67527 15.5 7.83424 15.5 8Z" fill="white" />
+                            </svg>Add
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+            <table id="CredentialVerifyTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table @(Model == null ||  Model.Count() == 0 ? "empty-table" : "")">
+                <thead>
+                    <tr>
+                        <th hidden> Id</th>
+                        <th>Credential Name</th>
+                        <th>organization Name</th>
+
+                        <th>Created Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model == null || Model.Count() == 0)
+                    {
+                        <tr>
+                            <td style="display: none;"></td>
+                            <td style="text-align:center" valign="top" colspan="6" class="dataTables_empty">
+                                <img class="NoRecordsCls" src="~/assets/images/No-Records-icon.svg" alt="No records" style=" display:block; margin:0 auto 8px;">
+                                <p class="NoRecordFound-paragarph">No records found</p>
+                                <p class="NoRecordTable-Text">Get started by clicking on 'Add' or 'Import'</p>
+                            </td>
+
+                            <td style="display: none;"></td>
+                            <td style="display: none;"></td>
+                            <td style="display: none;"></td>
+                            <td style="display: none;"></td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr class="odd gradeX">
+                                <td hidden>@item.id</td>
+                                <td>@item.credentialName</td>
+                                <td>@item.organizationName</td>
+
+                                <td>@item.createdDate.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @if (string.IsNullOrWhiteSpace(item.status))
+                                    {
+                                        <span class="status-tag status-na">N/A</span>
+                                    }
+                                    else
+                                    {
+                                        var status = item.status.Trim().ToLower();
+                                        var statusCapitalized = char.ToUpper(status[0]) + status.Substring(1);
+                                        var cssClass = status switch
+                                        {
+                                            "active" => "status-tag status-active",
+                                            "failed" => "status-tag status-failed",
+                                            "In Progress" => "status-tag status-inprogress",
+                                            "approval required" => "status-tag wid status-na",
+                                            _ => "status-tag status-na"
+                                        };
+                                        <span class="@cssClass">@statusCapitalized</span>
+                                    }
+                                </td>
+
+
+                                <td class="valigntop">
+
+                                    <div class="btn-group">
+                                        <button class="btn btn-xs deepPink-bgcolor no-margin" type="button" data-toggle="dropdown"
+                                                aria-expanded="false">
+                                            Actions
+                                            <i class="fa fa-angle-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-left" role="menu">
+
+                                            <li class="table-dropdown-li">
+                                                <a asp-action="ViewVerifyCredentialDetails" asp-route-id="@item.id">
+                                                    <img src="~/assets/images/Eye_View_Icon.svg" alt="edit" style="position: relative;bottom: 1px;width: 18px;height: 18px;" />View
+                                                </a>
+                                            </li>
+
+                                            <li class="table-dropdown-li">
+                                                <a asp-action="EditCredentialSubscribtionDetails"
+                                                   asp-route-CredentialUId="@item.credentialId"
+                                                   asp-route-id="@item.id">
+                                                    <img src="~/assets/images/Pencil-edit-icon.svg" alt="edit" style="position: relative;bottom: 1px;width: 18px;height: 18px;" />Edit
+                                                </a>
+                                            </li>
+
+                                        </ul>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+@section scripts {
+    <script>
+        var walletCertificateStatus = @Json.Serialize(ViewBag.WalletCertificateStatus);
+
+        $(document).ready(function () {
+
+            $("#Wallet-Manager > a")
+                .attr("aria-expanded", "true")
+                .addClass("active");
+
+            $("#Wallet-Manager")
+                .addClass("submenu-active show");
+
+            $("#Wallet-Manager .submenu")
+                .addClass("show");
+
+            $('#Wallet-Subs').addClass('active');
+
+            $('#networkOverlay').hide();
+
+
+            $('#homeMenu').addClass('breadcrumb-item').append('Wallet > Wallet Credential verification');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            document.getElementById("navigationNetworkOverlay").style.display = "none";
+
+
+            var table = $("#CredentialVerifyTable").DataTable({
+                "bLengthChange": false,
+                "searching": true,
+                 "paging": @hasData.ToString().ToLower(),
+                "info": @hasData.ToString().ToLower(),
+                //  "dom": '<"top"f>rt<"bottom"ip><"clear">', // Keep 'f' for the search input only
+                "initComplete": function () {
+                    // Move the search bar into our custom container
+                    $(".dataTables_filter").appendTo("#custom-search-container");
+                    $('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+                    $('.dataTables_filter label').contents().filter(function () {
+                        return this.nodeType === 3;
+                    }).remove();
+
+                }
+
+            });
+
+        });
+
+        // $("#SubscribeNewCredentialButton").click(function () {
+        //     if (walletCertificateStatus) {
+        //         document.getElementById("navigationNetworkOverlay").style.display = "block";
+        //         window.location.href = "@Url.Action("SubscribeNewCredentialList", "WalletCredentialVerification")";
+        //     } else {
+
+        //         Swal.fire({ icon: 'error', title: "Access Denied", text: "You are not authorized to Subscribe New Credential. Please contact the UAEID Admin." });
+        //     }
+
+
+        // });
+
+        function handleSubscribeNewCredentialClick() {
+            if (walletCertificateStatus) {
+                document.getElementById("navigationNetworkOverlay").style.display = "block";
+                window.location.href = "@Url.Action("SubscribeNewCredentialList", "WalletCredentialVerification")";
+            } else {
+                customSwal.fire({
+                    icon: 'error',
+                    title: "Access Denied",
+                    text: "You are not authorized to Subscribe New Credential. Please contact the UAEID Admin."
+                });
+            }
+        }
+
+
+
+
+
+
+    </script>
+}

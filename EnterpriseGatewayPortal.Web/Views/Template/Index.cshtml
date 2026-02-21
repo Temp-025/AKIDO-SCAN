@@ -1,0 +1,233 @@
+﻿@model EnterpriseGatewayPortal.Web.Models.Template.UpdateTemplatesViewModel
+@using EnterpriseGatewayPortal.Web.Models 
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+
+@{
+    var signData = "data:image/png;base64," + Model.TemplateList.FirstOrDefault(x => x.Id == Model.SignatureTemplate).SamplePreview;
+    var esealData = "data:image/png;base64," + Model.TemplateList.FirstOrDefault(x => x.Id == Model.ESealTemplate).SamplePreview;
+
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+    {
+        new BreadCrumbModel { Title = "Organization - Signature Templates",Url = "" , IconKey = "org-sign-temp"}
+    };
+
+}
+@{
+    var layoutType = Context.Request.Cookies["HeaderNavigationLayout"];
+}
+
+<style>
+    /* Add a common style for shaded borders */
+    .borderBox {
+        border: 1px solid #E1E3E5;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        height: 350px;
+    }
+
+    /* Style for the image preview container */
+    .preview-container {
+        max-height: 250px;
+        padding: 10px;
+        border-radius: 5px;
+        height: 380px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #fff;
+    }
+
+        /* Center the image within the preview container */
+        .preview-container img {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+
+    /* Style for the form controls */
+    .form-control {
+        margin-bottom: 10px;
+    }
+
+    .classshide {
+        display: none !important;
+    }
+
+    /* ----------- Select dropdown css -------------*/
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+        .select2-container .select2-selection--single {
+            border-radius: 8px;
+            align-items: center;
+            box-sizing: border-box;
+            justify-content: center;
+            height: 40px !important;
+            border: 1px solid #E2E8F0 !IMPORTANT;
+            color: #3E4046 !important;
+        }
+
+    .selection {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #3E4046 !important;
+        font-size: 14px;
+        font-family: inherit;
+        padding: 5px 10px;
+    }
+
+
+    /* Remove default arrow */
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border: none !important; /* removes default triangle */
+    }
+
+    /* Add your custom arrow */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        //background: url('@Url.Content("~/assets/images/dropDown-icon-brown.svg")'); /*previously used*/
+        //background: url('@Url.Content("~/assets/images/imgDropDownBrown.png")');
+        background: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M27.0613 13.0612L17.0613 23.0612C16.9219 23.2011 16.7563 23.312 16.574 23.3877C16.3917 23.4634 16.1962 23.5024 15.9988 23.5024C15.8013 23.5024 15.6059 23.4634 15.4235 23.3877C15.2412 23.312 15.0756 23.2011 14.9363 23.0612L4.93626 13.0612C4.65446 12.7794 4.49615 12.3972 4.49615 11.9987C4.49615 11.6002 4.65446 11.218 4.93626 10.9362C5.21805 10.6544 5.60024 10.4961 5.99876 10.4961C6.39727 10.4961 6.77946 10.6544 7.06126 10.9362L16 19.875L24.9388 10.935C25.2205 10.6532 25.6027 10.4949 26.0013 10.4949C26.3998 10.4949 26.782 10.6532 27.0638 10.935C27.3455 11.2168 27.5039 11.599 27.5039 11.9975C27.5039 12.396 27.3455 12.7782 27.0638 13.06L27.0613 13.0612Z' fill='%2392722A'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-size: 16px 16px;
+        width: 19px;
+        top: 11px;
+        vertical-align: middle;
+        height: 100%;
+    }
+
+    .select2-search__field{
+         display: none !important;
+    }
+
+
+    .select2-container .select2-dropdown.select2-dropdown--below {
+        top: -5px !important;
+    }
+
+    .select2-container .select2-search.select2-search--dropdown {
+        padding: 0 !important;
+    }
+
+    .card-custom{
+        margin-left:0 !important;
+        margin-right:0 !important;
+        border:none !important;
+    }
+
+    .main-dashboard{
+        margin-top:100px !important;
+    }
+
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body pt">
+                <form class="plr" asp-action="Update" style="padding:0px 30px;">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <h5>Signature Template</h5>
+                            <div class="borderBox card-box">
+                                <div class="form-group" style="margin-bottom: 0px;">
+                                   @* <div class="custom-select1">*@
+                                        <select asp-for="SignatureTemplate" class="form-control select2">
+                                        @foreach (var template in Model.TemplateList.Where(x => x.Type.ToLower() == "sign"))
+                                        {
+                                            <option data-preview="@template.SamplePreview" value="@template.Id">@template.DisplayName</option>
+                                        }
+                                    </select>
+                                   
+                                    <span asp-validation-for="SignatureTemplate" class="text-danger"></span>
+
+                                </div>
+                                <div class="form-group preview-container">
+                                    <img id="signatureTemplatePreviewImage" src="@signData" style="max-width: 65%;" />
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <h5>ESeal Template</h5>
+                            <div class="borderBox card-box">
+                                <div class="form-group" style="margin-bottom: 0px;">
+                                   @* <div class="custom-select1">*@
+                                        <select asp-for="ESealTemplate" class="form-control select2">
+                                        @foreach (var template in Model.TemplateList.Where(x => x.Type.ToLower() == "eseal"))
+                                        {
+                                            <option data-preview="@template.SamplePreview" value="@template.Id">@template.DisplayName</option>
+                                        }
+                                    </select>
+                                    
+                                    <span asp-validation-for="ESealTemplate" class="text-danger"></span>
+                                </div>
+                                <div class="form-group preview-container">
+                                    <img id="eSealTemplatePreviewImage" src="@esealData" style="max-width: 40%;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-primary uaeid-primary" type="submit">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* <script src="~/lib/jquery-validation/dist/jquery.validate.min.js" asp-append-version="true"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js" asp-append-version="true"></script>
+<script src="~/lib/jquery-ajax-unobtrusive/jquery.unobtrusive-ajax.min.js" asp-append-version="true"></script> *@
+<script>
+    $(document).ready(function () {
+        //$('#overlay').show();
+         document.getElementById("navigationNetworkOverlay").style.display = "none";
+          $('#networkOverlay').hide();
+            var layoutType = '@(layoutType ?? "")';
+            if(layoutType == "Vertical"){
+
+                    $("#OrgDetailsModle > a")
+                        .attr("aria-expanded", "true")
+                        .addClass("active");
+
+                    $("#OrgDetailsModle")
+                        .addClass("submenu-active show");
+
+                    $("#OrgDetailsModle .submenu")
+                        .addClass("show");
+
+                    $('#SignatureTemplates').addClass('active');
+
+                    $('#homeMenu').addClass('breadcrumb-item').append('Organization Details > Signature Templates');
+                    $('#mainMenu').removeClass('breadcrumb-item');
+                    $('#subMenu').removeClass('breadcrumb-item');
+                }
+                 $('.select2').select2();
+       
+            });
+
+    $('#SignatureTemplate').change(function () {
+        var preview = $('option:selected', this).attr('data-preview');
+        $("#signatureTemplatePreviewImage").attr("src", "data:image/png;base64," + preview);
+    });
+
+    $('#ESealTemplate').change(function () {
+        var preview = $('option:selected', this).attr('data-preview');
+        $("#eSealTemplatePreviewImage").attr("src", "data:image/png;base64," + preview);
+    });
+</script>

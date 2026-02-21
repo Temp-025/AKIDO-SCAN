@@ -1,0 +1,239 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.DataPivot.DataPivotViewModel
+
+@{
+    ViewData["Title"] = " DataPivots New";
+}
+
+<style>
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+        .select2-container .select2-selection--single {
+            height: 35px !important;
+        }
+
+    .selection {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #555555b3;
+        font-size: 14px;
+        font-family: inherit;
+    }
+
+    .custom-check-box {
+        margin-right: 5px;
+        -webkit-print-color-adjust: exact;
+        vertical-align: top;
+        background-repeat: no-repeat;
+        background-position: 50%;
+        background-size: contain;
+        position: relative !important;
+        width: 1.125rem;
+        height: 1.125rem;
+        background-color: #fff;
+        border: .125rem solid rgba(0,0,0,0.3);
+    }
+
+    i {
+        color: #808080e0;
+    }
+
+    .popup {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        float: right;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    .popuptext {
+        visibility: hidden;
+        min-width: 200px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 5px;
+        position: relative;
+        z-index: 1111;
+        right: 3%;
+        margin-bottom: 35px;
+        margin-top: -60px;
+    }
+    /* The actual popup */
+    .popup .popuptext {
+        visibility: hidden;
+        min-width: 200px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 5px;
+        position: relative;
+        z-index: 1111;
+        right: 3%;
+        /* top: -43%; */
+        /* bottom: -28%; */
+        margin-bottom: 0px;
+        margin-top: -60px;
+    }
+
+        /* Popup arrow */
+        .popup .popuptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+
+    .popup:hover + .popuptext {
+        visibility: visible;
+        -webkit-animation: fadeIn 1s;
+        animation: fadeIn 1s;
+    }
+
+    .custom-check-box:hover {
+        outline: auto;
+        outline-color: #5d9ceca3;
+    }
+</style>
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+
+<div class="row">
+
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body">
+                <form enctype="multipart/form-data" asp-action="CreateData">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <input asp-for="Id" class="form-control" hidden />
+
+                            <div class="form-group">
+                                <label asp-for="Name" class="col-form-label s3"></label>
+                                <input asp-for="Name" class="form-control" />
+                                
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                          @* <div class="form-group">
+                                <label asp-for="OrgnizationId" class="col-form-label s3">Organization Name</label>
+                                <select asp-for="OrgnizationId" class="form-control"
+                                    asp-items="Model.OrganizatioList">
+                                    <option value="">-- Select Organization --</option>
+                                </select>
+                                <span asp-validation-for="OrgnizationId" class="text-danger"></span>
+                            </div>*@
+                           
+                           
+                            <div class="form-group">
+                                <label asp-for="Scopes" class="col-form-label s3">Profile</label>
+                                <select asp-for="Scopes" class="form-control"
+                                        asp-items="Model.ScopesList">
+                                    <option value="">-- Select Profile --</option>
+                                </select>
+                                <span asp-validation-for="Scopes" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="AuthScheme" class="col-form-label s3"></label>
+                                <select asp-for="AuthScheme" class="form-control"
+                                        asp-items="@Model.AuthSchemeList">
+                                    <option value="">-- Select Authentication Scheme --</option>
+                                </select>
+
+                                <span asp-validation-for="AuthScheme" class="text-danger"></span>
+                            </div>
+                           
+                            <div class="form-group">
+                                <label asp-for="DisplayName" class="col-form-label s3">Description</label>
+                                <input asp-for="DisplayName" class="form-control" />
+                                <span asp-validation-for="DisplayName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="AttributeConfiguration" class="col-form-label s3">Attribute Configuration</label>
+                                <textarea asp-for="AttributeConfiguration" class="form-control"></textarea>
+                                <span asp-validation-for="AttributeConfiguration" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+
+                           
+                            <div class="form-group">
+                                <label asp-for="Serviceurl" class="col-form-label s3">Service Url</label>
+                                <textarea asp-for="Serviceurl" class="form-control" rows="1"></textarea>
+                                <span asp-validation-for="Serviceurl" class="text-danger"></span>
+                            </div>
+                             <div class="form-group">
+                                <label asp-for="ClientId" class="col-form-label s3">Client Id</label>
+                                <input asp-for="ClientId" class="form-control"/>
+                                <span asp-validation-for="ClientId" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="ClientSecret" class="col-form-label s3"> Client Secret</label>
+                                <input asp-for="ClientSecret" class="form-control" />
+                                <span asp-validation-for="ClientSecret" class="text-danger"></span>
+                            </div>
+                            <div class="form-group signing">
+                                <label asp-for="Cert" class="col-form-label"></label>
+                                <div class="popup"><i class="fa fa-info-circle"></i></div>
+                                <div class="popuptext">upload certificate for request signing purpose</div>
+                                <input asp-for="Cert" accept=".crt,.cer" class="form-control" />
+                                <span asp-validation-for="Cert" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding-right: 10px">
+                        <div style="float: left;">
+                            <b>NOTE: </b>(*) Mark fields are mandatory.
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-primary greenButton" type="submit">
+                                Save
+                            </button>
+                            &nbsp;&nbsp;
+
+                            <a asp-action="List" class="btn btn-danger">
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+
+            var DataPivotLink = document.getElementById('MultiPivotModle').querySelector('.nav-link');
+            DataPivotLink.click();
+            $('#homeMenu').addClass('breadcrumb-item').append('Multi Pivot Service > Data Pivots > Create');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#DataPivotMenu').addClass('active');
+            $('#networkOverlay').hide();
+            $("#OrganizationId").select2();
+        });
+    </script>
+}

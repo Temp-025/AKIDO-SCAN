@@ -1,0 +1,127 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <noscript>Please enable java script in your browser.</noscript>
+    <title>Account Activation Success</title>
+    <link rel="icon" type="image/x-icon" href="~/assets/UAEIDfavicon.png" />
+
+    <link href="~/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <script src="~/global_assets/js/main/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/global_assets/js/main/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    <link rel="stylesheet" href="~/assets/appcss/RegistrationPage.css" asp-append-version="true">
+
+    <link href="~/lib/sweetalert/dist/sweetalert.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <script src="~/assets/js/sweetalert2@11.js"></script>
+
+</head>
+<body>
+    @{
+        await Html.RenderPartialAsync("_AlertBox");
+    }
+    <section class="myform-area">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="form-area" id="AuthenticationProvision" style="height:300px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0px !important;">
+                        <img src="@Url.Content("~/assets/images/Success.svg")">
+                        <div class="header" style="padding:0px !important;">Account Activation Success</div>
+                        <div class="activationDiv" style="padding-top: 10px;">
+                            <form action="ForgotPassword" method="POST" id="Loginform">
+
+                                <div class="form-group" style="padding:0px !important;margin:0px !important; ">
+                                    @if (ViewBag.Message != null)
+                                    {
+                                        <p class="welcome">  @ViewBag.Message</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="welcome"> All set! Your password has been changed. </p>
+                                    }
+                                </div>
+
+                                <div class="myform-button" style="margin-top: 0px">
+                                    <div class="d-flex justify-content-center">
+
+                                        @if (ViewBag.isForgotPassword == "True")
+                                        {
+                                            <a href='@Url.Action("Index", "Login")' class="btn btn-primary uaeid-primary" type="submit" id="checkUser" style="padding-left: 22px !important;">
+                                                Login
+                                                <i class="icon-circle-right2 ml-2"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href='@Url.Action("Index2", "Logout")' class="btn btn-primary uaeid-primary" type="submit" id="checkUser" style="padding-left: 22px !important;">
+                                                Login
+                                                <i class="icon-circle-right2 ml-2"></i>
+                                            </a>
+                                        }
+
+                                    </div>
+                                </div>
+
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        Swal = Swal.mixin({
+        customClass: {
+            popup: 'custom-swal-popup',
+            title: 'custom-swal-title',
+            htmlContainer: 'custom-swal-content',
+            confirmButton: 'custom-swal-confirm-btn',
+            cancelButton: 'custom-swal-cancel-btn'
+        },
+        buttonsStyling: false
+    });
+
+    const originalSwalFire = Swal.fire;
+
+    Swal.fire = function (options) {
+        if (typeof options === "string") {
+            options = { title: options };
+        }
+
+        const type = options.icon || options.type || "info";
+        let iconHtml = "";
+
+        switch (type) {
+            case "info":
+                iconHtml = '<img src="@Url.Content("~/assets/images/Info.svg")" class="custom-swal-icon">';
+                break;
+            case "warning":
+                iconHtml = '<img src="@Url.Content("~/assets/images/Warning.svg")" class="custom-swal-icon">';
+                break;
+            case "error":
+                iconHtml = '<img src="@Url.Content("~/assets/images/Error.svg")" class="custom-swal-icon">';
+                break;
+            case "success":
+                iconHtml = '<img src="@Url.Content("~/assets/images/Success.svg")" class="custom-swal-icon">';
+                break;
+            default:
+                iconHtml = "";
+        }
+
+        options.iconHtml = iconHtml;
+        options.icon = undefined;
+
+        return originalSwalFire.call(this, options);
+    };
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32421.90
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnterpriseGatewayPortal.Web", "EnterpriseGatewayPortal.Web\EnterpriseGatewayPortal.Web.csproj", "{655F1CCC-3A7F-4C5F-8173-2B4A85BBE624}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnterpriseGatewayPortal.Core", "EnterpriseGatewayPortal.Core\EnterpriseGatewayPortal.Core.csproj", "{5719119B-B723-45E4-B89B-4C0A9EBC8607}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{655F1CCC-3A7F-4C5F-8173-2B4A85BBE624}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{655F1CCC-3A7F-4C5F-8173-2B4A85BBE624}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{655F1CCC-3A7F-4C5F-8173-2B4A85BBE624}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{655F1CCC-3A7F-4C5F-8173-2B4A85BBE624}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5719119B-B723-45E4-B89B-4C0A9EBC8607}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5719119B-B723-45E4-B89B-4C0A9EBC8607}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5719119B-B723-45E4-B89B-4C0A9EBC8607}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5719119B-B723-45E4-B89B-4C0A9EBC8607}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CF0878ED-BD87-4863-AEC5-D581201F7EAB}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,114 @@
+﻿@using EnterpriseGatewayPortal.Web.Models
+@model EnterpriseGatewayPortal.Core.DTOs.VerificationMethodStatusDTO
+
+@{
+    ViewData["Title"] = "Verification Method Status";
+
+    // Step flow logic based on backend Status
+    var steps = new List<StepModel>
+{
+        new StepModel { StepNumber = 1, StepName = "Request Sent", Status = "incomplete" },
+        new StepModel { StepNumber = 2, StepName = "Approval Pending", Status = "incomplete" },
+        new StepModel { StepNumber = 3, StepName = "Approved", Status = "incomplete" }
+    };
+
+    switch (Model.RequestStatus?.ToUpper())
+    {
+        case "PENDING":
+        case "INPROGRESS":
+            steps[0].Status = "success";
+            steps[1].Status = "inprogress";
+            break;
+
+        case "APPROVED":
+            steps[0].Status = "success";
+            steps[1].Status = "success";
+            steps[2].Status = "success";
+            break;
+
+        case "REJECTED":
+            steps[0].Status = "success";
+            steps[1].Status = "error";
+            break;
+
+        default:
+            steps[0].Status = "inprogress";
+            break;
+    }
+}
+
+<style>
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+        font-family: "Inter", sans-serif;
+        color: black;
+    }
+
+    .status-container {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #e7e9e8;
+    }
+</style>
+
+<div class="d-flex justify-content-between flex-row px-2">
+    <h5 class="sub-label">Verification Method Status</h5>
+</div>
+
+<div class="col-md-12 plr">
+    <div class="card-custom">
+        <div class="card-body">
+            <form class="row">
+                <div class="col-md-6">
+                    <div>
+                        <label>Method Name</label>
+                        <input type="text" class="form-control" value="@Model.MethodName" readonly />
+                    </div>
+                    <div>
+                        <label>Method Id</label>
+                        <input type="text" class="form-control" value="@Model.MethodUid" readonly style="font-family:monospace" />
+                    </div>
+                    <div>
+                        <label>Requested Date</label>
+                        <input type="text" class="form-control"
+                               value="@(DateTime.TryParse(Model.RequestedDate, out var reqDate)
+                      ? reqDate.ToString("dd-MMM-yyyy hh:mm tt")
+                      : "--")"
+                               readonly />
+                    </div>
+                    <div>
+                        <label>Pricing</label>
+                        <input type="text" class="form-control" value="@($"{Model.Pricing} AED")" readonly />
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div>
+                        <label>Approved On</label>
+                        <input type="text" class="form-control" readonly
+                               value="@(DateTime.TryParse(Model.ModifiedDate, out var modDate)
+                                        ? modDate.ToString("dd-MMM-yyyy hh:mm tt")
+                                        : "--")" />
+                    </div>
+
+                    <div class="status-container">
+                        <label>Status</label>
+                        <partial name="_Stepper" model="steps" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        const data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+        console.log("Verification Status Data:", data);
+
+        $('#networkOverlay').hide();
+        $('#Kyc-Methods').addClass('active');
+    });
+</script>

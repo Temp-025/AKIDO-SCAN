@@ -1,0 +1,106 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.KYCMethods.AllRequestedMethodsViewModel
+
+@if (Model.AllRequestedMethods != null && Model.AllRequestedMethods.Any())
+{
+    <div class="methods-list">
+        @foreach (var method in Model.AllRequestedMethods)
+        {
+            <div class="kyc-card" data-name="@method.MethodName.ToLower()">
+
+                <!-- Header & Action Button -->
+                <div class="kyc-header">
+                    <div class="kyc-title">@method.MethodName</div>
+                    <button type="button" class="btn btn-primary uaeid-primary view-details-btn"
+                            data-methoduid="@method.MethodUid"
+                            data-methodname="@method.MethodName"
+                            data-pricing="@method.Pricing"
+                            data-status="@method.Status"
+                            data-description="@method.Description"
+                            data-methodtype="@method.MethodType"
+                            data-processingtime="@method.ProcessingTime"
+                            data-confidencethreshold="@method.ConfidenceThreshold"
+                            data-requeststatus="@method.RequestStatus"
+                            data-isrequested="@method.IsRequested.ToString()"
+                            data-targetsegments='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(method.TargetSegments ?? new List<string>()))'
+                            data-mandatory='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(method.MandatoryAttributes ?? new List<string>()))'
+                            data-optional='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(method.OptionalAttributes ?? new List<string>()))'>
+                        View Details
+                    </button>
+                </div>
+
+                <!-- Method Type -->
+                <div class="kyc-method-type">@method.MethodType</div>
+
+                <hr />
+
+                <!-- Approval + Approved On -->
+                <div class="d-flex align-items-center justify-content-between mx-2 flex-wrap">
+
+                    <!-- Left: Approval Status Badge -->
+                    <div class="d-flex align-items-center" style="gap:10px;">
+                        <span style="font-weight:500;color:black;">Approval Status:</span>
+                        <div class="status-badge
+                            @(method.RequestStatus.ToLower() == "approved" ? "status-approved" :
+                              method.RequestStatus.ToLower() == "pending" ? "status-pending" :
+                              method.RequestStatus.ToLower() == "rejected" ? "status-rejected" : "status-default")"
+                             style="display: inline-flex; width:fit-content; align-items:center; gap:6px; padding:4px 10px; border-radius:6px; font-weight:600; font-size:14px;">
+
+                            <i class="ph
+                                @(method.RequestStatus.ToLower() == "approved" ? "ph-check-circle" :
+                                  method.RequestStatus.ToLower() == "pending" ? "ph-clock" :
+                                  method.RequestStatus.ToLower() == "rejected" ? "ph-x-circle" : "ph-question")"
+                               style="font-size:16px;"></i>
+
+                            <span>
+                                @($"{char.ToUpper(method.RequestStatus[0])}{method.RequestStatus.Substring(1).ToLower()}")
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Right: Approved On / Rejected On -->
+                    @if (method.RequestStatus?.ToLower() == "approved" || method.RequestStatus?.ToLower() == "rejected")
+                    {
+                        <div class="d-flex flex-row" style="gap:10px;">
+                            <span style="font-weight:500;color:black;">
+                                @(method.RequestStatus.ToLower() == "approved" ? "Approved On:" : "Rejected On:")
+                            </span>
+                            <span style="font-weight:400;color:black;">
+                                @(
+                                    DateTime.TryParse(method.ModifiedDate, out var dtt)
+                                        ? dtt.ToString("d MMMM yyyy")
+                                        : "-"
+                                )
+                            </span>
+                        </div>
+                    }
+                </div>
+
+                <!-- Requested Details -->
+                <div class="d-flex flex-column mt-2" style="gap:4px;">
+                    <div class="d-flex flex-row" style="gap:10px;">
+                        <span style="font-weight:500;color:gray;">Requested On:</span>
+                        <span style="font-weight:400;color:gray;">
+                            @(
+                                DateTime.TryParse(method.RequestedDate, out var dt)
+                                    ? dt.ToString("d MMMM yyyy")
+                                    : "-"
+                            )
+                        </span>
+                    </div>
+
+                    @*<div class="d-flex flex-row" style="gap:10px;">
+                        <span style="font-weight:500;color:black;">Requested By:</span>
+                        <span style="font-weight:400;color:black;">
+                            kumarpenke460@gmail.com
+                        </span>
+                    </div>*@
+                </div>
+
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="no-results">No KYC method requests found.</div>
+}

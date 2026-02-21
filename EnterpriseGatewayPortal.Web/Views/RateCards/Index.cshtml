@@ -1,0 +1,191 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.RateCards.RateCardsListViewModel
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    ViewData["Title"] = "Rate Cards";
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+{
+        new BreadCrumbModel { Title = "Payments - Rate Cards" , Url = "", IconKey = "payments-rateCards"},
+    };
+}
+@{
+    var layoutType = Context.Request.Cookies["NavigationLayout"];
+}
+@{
+    var hasData = Model != null && Model.RateCards.Count() > 0;
+}
+<style>
+    .classshide {
+        display: none !important;
+    }
+
+    .table tbody td {
+        padding: 11px !important;
+        color: #333 !important;
+        vertical-align: middle;
+    }
+</style>
+@if (Model == null || Model.RateCards.Count() == 0)
+{
+    <style>
+        table {
+            height: 70% !important;
+        }
+
+        .table-hover > tbody > tr:hover > td {
+            background: none !important;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        /* Apply 100% height to all DataTables wrappers */
+        .dataTables_wrapper {
+            height: 100% !important;
+        }
+
+            /* Apply 100% height only to the second .row inside any DataTables wrapper */
+            .dataTables_wrapper > .row:nth-of-type(2) {
+                height: 100% !important;
+            }
+
+        td:not([style*="display: none"]) {
+            border-bottom-right-radius: 12px !important;
+            border-bottom-left-radius: 12px !important;
+        }
+    </style>
+}
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" style="height:100%;">
+    <div class="col-md-12 plr">
+
+        <div class="card-body">
+
+            <div class="row align-items-center justify-content-between" style="padding-left: 15px; padding-right:15px;">
+                <!-- Left: Search bar (will be injected by DataTables) -->
+                <div class="col-md-6 col-sm-12 d-flex align-items-center plr" id="custom-search-container"></div>
+
+                <!-- Right: Buttons -->
+                <div class="col-md-6 col-sm-12 plr text-right">
+                    <div class="btn-group mr-2">
+
+                        <a class="btn btn-other" asp-controller="RateCards" asp-action="Index">
+                            <img src="~/assets/images/refresh.png"
+                                 alt="refresh Icon"
+                                 width="17" height="17"
+                                 style=" margin-right: 7px; opacity: 1; position: relative; bottom: -2px;">Refresh
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+            <table id="rateCardsTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table @(Model.RateCards == null || Model.RateCards.Count() == 0 ? "empty-table" : "")">
+                <thead>
+                    <tr>
+                        <th>Service Name</th>
+                        @*<th>Stakeholder</th>*@
+                        <th>Fee (AED)</th>
+                        <th>Tax (%)</th>
+                        <th>Valid From</th>
+                        <th>Valid To</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @if (Model.RateCards == null || Model.RateCards.Count() == 0)
+                    {
+                        <tr>
+                            <td style="display: none;"></td>
+                            <td style="text-align:center" valign="top" colspan="6" class="dataTables_empty">
+                                <img class="NoRecordsCls" src="~/assets/images/No-Records-icon.svg" alt="No records" style=" display:block; margin:0 auto 8px;">
+                                <p class="NoRecordFound-paragarph">No records found</p>
+                                <p class="NoRecordTable-Text">Get started by clicking on 'Add' or 'Import'</p>
+                            </td>
+
+                            <td style="display: none;"></td>
+                            <td style="display: none;"></td>
+                            <td style="display: none;"></td>
+                            <td style="display: none;"></td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.RateCards)
+                        {
+                            <tr class="odd gradeX">
+
+
+                                <td>@(string.IsNullOrWhiteSpace(item.ServiceDefinitions.ServiceDisplayName) ? "" : item.ServiceDefinitions.ServiceDisplayName)</td>
+                                @*<td>@(string.IsNullOrWhiteSpace(item.StakeHolder) ? "N/A" : item.StakeHolder)</td>*@
+                                <td>@(string.IsNullOrWhiteSpace(item.Rate.ToString()) ? "N/A" : item.Rate)</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.Tax.ToString()) ? "N/A" : item.Tax)</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.RateEffectiveFrom) ? "N/A" : item.RateEffectiveFrom)</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.RateEffectiveTo) ? "N/A" : item.RateEffectiveTo)</td>
+
+                            </tr>
+                        }
+                    }
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+</div>
+<script>
+
+	$(document).ready(function () {
+
+		$('#networkOverlay').hide();
+        //$('#navigationNetworkOverlay').hide();
+           document.getElementById("navigationNetworkOverlay").style.display = "none";
+
+        $("#Payments > a")
+            .attr("aria-expanded", "true")
+            .addClass("active");
+
+        $("#Payments")
+            .addClass("submenu-active show");
+
+        $("#Payments .submenu")
+            .addClass("show");
+
+        $('#Rate-Cards').addClass('active');
+
+		var layoutType = '@(layoutType ?? "")';
+		if (layoutType == "Vertical") {
+			var RateCardsLink = document.getElementById('PaymentsModle').querySelector('.nav-link');
+			RateCardsLink.click();
+			$('#homeMenu').addClass('breadcrumb-item').append('Payments > Rate Cards > List');
+			$('#mainMenu').removeClass('breadcrumb-item');
+			$('#subMenu').removeClass('breadcrumb-item');
+			$('#RateCardsMenu').addClass('active');
+
+		}
+		var table = $("#rateCardsTable").DataTable({
+			"bLengthChange": false,
+            "searching": true,
+             "paging": @hasData.ToString().ToLower(),
+ "info": @hasData.ToString().ToLower(),
+			"initComplete": function () {
+				// Move the search bar into our custom container
+				$(".dataTables_filter").appendTo("#custom-search-container");
+				$('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+				$('.dataTables_filter label').contents().filter(function () {
+					return this.nodeType === 3;
+				}).remove();
+
+			}
+			//"order": [[0, 'desc']]
+			// "sorting": true
+
+
+		});
+
+	});
+
+</script>

@@ -1,0 +1,465 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.BuyCredits.AvailableCreditsViewModel
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+<style>
+    #ServicesA {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .modal-body table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        .modal-body table th,
+        .modal-body table td {
+            border: 1px solid #dee2e6; /* Add borders to table cells */
+            padding: 8px;
+            text-align: left;
+        }
+
+        .modal-body table th {
+            background-color: #f8f9fa; /* Add background color to table header */
+        }
+
+    .classshide {
+        display: none !important;
+    }
+
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" id="firstDiv" style="display:block;">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header" style="background: #fff; color: black;border-bottom: 2px solid #f3f3f3; font-size:20px; margin-top:0;">
+                Buy Credits
+            </div>
+            <div class="card-body">
+               
+                <ul id="ServicesA">
+                    @for (int i = 0; i < Model.SpocServices.Count; i++)
+                    {
+                        <li>
+                            <div class="form-group">
+                                @{
+                                    var serviceId = "service_" + i + "__ID";
+                                    var inputName = "service_" + i + "__name";
+                                    var input = "credits_" + i + "__number";
+                                    var viewPrice = "View_" + i + "__price";
+                                    var validationMessage = "Span_" + i + "__text";
+                                    var validationerrorMessage = "SpanError_" + i + "__text";                                    
+                                }
+                              
+                                <div class="row" style="margin-bottom:-18px;">
+                                    <input type="hidden" id="@serviceId" value="@Model.SpocServices[i].Id" />
+
+                                    <label class="col-form-label col-sm-2" id="@inputName" style="margin-left:150px;">@Model.SpocServices[i].ServiceDisplayName</label>
+                                    <div class="col-sm-6">
+                                        <div class="input-group">
+                                            <input class="form-control" style="width:50%;max-width: 200px;margin-right: 13px;" id="@input" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength="7" onblur="getRateCard('@input','@i')"
+                                                    />
+                                            <span class="input-group-btn">
+                                                <button type="button" class="btn rounded-circle" id="@viewPrice" style="background-color: #f3f3f3;">
+                                                    <img src="~/assets/images/discounts.svg" style="height: 24px;" />
+                                                </button>
+                                            </span>
+                                        </div>
+                                        <span id=@validationMessage style="color:green;"></span>
+                                        <span id=@validationerrorMessage class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <span class="text-danger"></span>
+                            </div>
+                        </li>
+                    }
+                </ul>
+                <div class="d-flex justify-content-end" style="padding-top: 31px;">
+                    <button type="button" class="btn btn-primary" id="buyCredits" onclick="getDigitalSignatureData()">Buy Credits</button>
+
+                </div>
+              
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="digitalSignatureModal" tabindex="-1" role="dialog" aria-labelledby="digitalSignatureModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="digitalSignatureModalLabel">Digital Signature Discounts</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table>
+                   
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Volume</th>
+                            <th>Discount(%)</th>
+                        </tr>
+                    </thead>
+              
+                    <tbody>
+                        @{
+                            int count = 1; // Initialize a counter variable
+                        }
+
+                        @foreach (var item in Model.volumesRanges)
+                        {
+                            if (item.SpocserviceID == "1")
+                            {
+                                <tr>
+                                    <td>@count</td>
+                                    <td>@item.volumeFrom-@item.volumeTo</td>
+                                    <td>@item.discountPercentage</td>
+                                </tr>
+                             
+                             count++;                             
+                                
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="esealSignature" tabindex="-1" role="dialog" aria-labelledby="esealSignatureModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="digitalSignatureModalLabel">Eseal Signature Discounts</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table>
+                    
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Volume</th>
+                            <th>Discount(%)</th>
+                        </tr>
+                    </thead>
+                   
+                    <tbody>
+                        @{
+                            int count1 = 1; // Initialize a counter variable
+                        }
+
+                        @foreach (var item in Model.volumesRanges)
+                        {
+                            if (item.SpocserviceID == "2")
+                            {
+                                <tr>
+                                    <td>@count1</td>
+                                    <td>@item.volumeFrom-@item.volumeTo</td>
+                                    <td>@item.discountPercentage</td>
+                                </tr>
+
+                                count1++;
+
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="userSubscription" tabindex="-1" role="dialog" aria-labelledby="userSubscriptionModalLable" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="digitalSignatureModalLabel">User Subscription Discounts</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table>
+                    
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Volume</th>
+                            <th>Discount(%)</th>
+                        </tr>
+                    </thead>
+                
+                    <tbody>
+                        @{
+                            int count2 = 1; // Initialize a counter variable
+                        }
+
+                        @foreach (var item in Model.volumesRanges)
+                        {
+                            if (item.SpocserviceID == "7")
+                            {
+                                <tr>
+                                    <td>@count2</td>
+                                    <td>@item.volumeFrom-@item.volumeTo</td>
+                                    <td>@item.discountPercentage</td>
+                                </tr>
+
+                                count2++;
+
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="organizationDiv">
+
+</div>
+<div id="paymentInitiateDiv">
+</div>
+
+@section scripts {
+<script>
+
+    var OrgId = '@Html.Raw(Model.orgId)';
+
+    $(document).ready(function () {
+
+        var BuyCreditsLink = document.getElementById('PaymentsModle').querySelector('.nav-link');
+        BuyCreditsLink.click();
+        $('#homeMenu').addClass('breadcrumb-item').append('Payments > Buy Credits');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        $('#buyCreditsMenu').addClass('active');
+            $('#networkOverlay').hide();
+
+        $('#View_0__price').click(function () {
+            $('#digitalSignatureModal').modal('show');
+        });
+
+        $('#View_1__price').click(function () {
+            $('#esealSignature').modal('show');
+        });
+
+        $('#View_2__price').click(function () {
+            $('#userSubscription').modal('show');
+        });
+
+    });
+    
+    function spanFunction() {
+        
+        var inputValue = document.getElementById(inputId).value;
+        var spanId = inputId.replace('credits_', 'Span_') + "__text";
+        document.getElementById(spanId).textContent = inputValue;
+    }
+
+    function getDigitalSignatureData() {
+        
+        var dSCredits;
+        var dSDiscount;
+        var dSDisplayName;
+        var dSTax;
+        var esCredits;
+        var esDiscount;
+        var esDisplayName;
+        var esTax;
+        var usCredits;
+        var usDiscount;
+        var usDisplayName;
+        var usTax
+        for (var i = 0; i < priceSummaryList.length; i++) {
+            var item = priceSummaryList[i];
+            if (item.DisplayName === "DIGITAL SIGNATURE") {
+                dSCredits = item.Credits;
+                dSDiscount = item.Discount;
+                dSDisplayName = item.DisplayName;
+                dSTax = item.Tax;
+                
+            }
+            if (item.DisplayName === "ESEAL SIGNATURE") {
+                esCredits = item.Credits;
+                esDiscount = item.Discount;
+                esDisplayName = item.DisplayName;
+                esTax = item.Tax;
+                
+            }
+            if (item.DisplayName === "USER SUBSCRIPTION") {
+                usCredits = item.Credits;
+                usDiscount = item.Discount;
+                usDisplayName = item.DisplayName;
+                usTax = item.Tax;               
+            }
+            
+        }
+        var data = {
+            Digital_signature_credits: dSCredits,
+            Digital_signature_Discount: dSDiscount,
+            Digital_signature_Display: dSDisplayName,
+            Digital_signature_Tax: dSTax,
+            Eseal_signature_credits: esCredits,
+            Eseal_signature_Discount: esDiscount,
+            Eseal_signature_Display: esDisplayName,
+            Eseal_signature_Tax: esTax,
+            User_credits: usCredits,
+            User_Discount: usDiscount,
+            User_Display: usDisplayName,
+            User_Tax: usTax
+            
+        }
+        sendData(data)
+    }
+
+    function sendData(data) {
+       
+        var PostPaid = true;
+        $.ajax({
+           
+            url: '@Url.Action("CreateBill", "BuyCredits")',
+            type: 'POST',
+            cache: false,
+            contentType: 'application/json; charset=utf-8', 
+            processData: false, 
+            data: JSON.stringify(priceSummaryList),
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+
+                $('#overlay').hide();
+            },
+            success: function (data) {
+                if (data != null) {
+                  
+                    $('#modalDialogContentDiv').html(data);
+                    $('#modalDialogDiv').modal('show');                  
+                }
+                else {
+                    Swal.fire({ icon: 'error', title: "Error", text: "Failed to get payment info" });
+                }
+            },
+            error: function (xhr, status, error) {
+                
+                console.log('Error sending data:');
+            }
+        });
+    }
+
+    function getRateCard(inputId,index) {
+       
+        var credits = document.getElementById("credits_" + index + "__number").value;
+        var requestData = {
+         serviceId : document.getElementById("service_" + index + "__ID").value,
+         Credits: credits,
+         orgId : OrgId
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("PriceSummary", "BuyCredits")',
+            data: requestData,
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+                $('#overlay').hide();
+            },
+            success: function (response) {
+                if (response.message !== "false") {
+                    var messageValue = response.message;
+                    var name = response.displayName;
+                    var tax = response.tax;
+                    var serviceId = response.serviceId;
+                    var previlageServiceID = response.previlageServiceID;
+                    displaySpan(messageValue, index);
+                    priceSummery(response.message, response.rate, name, credits, tax, serviceId, previlageServiceID);
+                }
+                else {
+                    displayErrorSpan(index);
+                }
+            },
+            error: function (response) {
+                console.log('Error sending data:');
+            }
+        });
+
+                    
+    }
+
+    function displaySpan(value, index) {
+      
+        var spanId = "Span_" + index + "__text";
+        var errorSpanId = "SpanError_" + index + "__text";
+        if (value > 0) { 
+            $('#' + errorSpanId).text("");
+            $('#' + spanId).text(value + "% discount applied");
+        }
+        else{
+            $('#' + spanId).text("");
+        }
+        
+    }
+
+    function displayErrorSpan(index) { 
+       
+        var spanId = "Span_" + index + "__text";
+        var errorSpanId = "SpanError_" + index + "__text";
+        $('#' + spanId).text("");
+        $('#' + errorSpanId).text("Please Enter Valid Credits");
+    }
+
+    var priceSummaryList = [];
+
+    function priceSummery(message, rate, displayName, credits, tax, serviceId, previlageServiceID) {
+        
+        // Check if DisplayName already exists in the priceSummaryList
+        var existingIndex = priceSummaryList.findIndex(function (item) {
+            return item.DisplayName === displayName;
+        });
+
+        if (existingIndex !== -1) {
+            // If DisplayName already exists, update the existing object
+            priceSummaryList[existingIndex].Credits = credits;
+            priceSummaryList[existingIndex].Tax = tax;
+            priceSummaryList[existingIndex].ServiceId = serviceId;
+        } else {
+            // If DisplayName doesn't exist, add a new object to the list
+            var data = {
+                Credits: credits,
+                Discount : message,
+                Tax: tax,
+                Rate: rate,
+                DisplayName: displayName,
+                ServiceId: serviceId,
+                OrgId: OrgId,
+                previlageServiceID: previlageServiceID,
+            };
+            priceSummaryList.push(data);
+        }
+    }
+ 
+</script>
+}

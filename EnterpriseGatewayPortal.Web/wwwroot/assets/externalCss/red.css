@@ -1,0 +1,585 @@
+
+/* ---------------------------------------------------
+    SIDEBAR jquery yellow
+----------------------------------------------------- */
+
+.list-unstyled {
+    padding-left: 0;
+    list-style: none;
+    font-size: 13px;
+}
+/*Hover Styling*/
+#sidebar ul li a:hover {
+    color: #FFFFFF;
+    background-color: #15294B;
+}
+
+#pageSubmenu li a:hover {
+    color: #ffb400;
+    background: transparent !important;
+}
+
+#pageSubmenu li a {
+    margin-left: 20px;
+}
+
+#homeSubmenu li a:hover {
+    color: #ffb400;
+    background: transparent !important;
+}
+
+#registrationAuthority li a {
+    margin-left: 10px;
+}
+
+#homeSubmenu li a {
+    margin-left: 10px;
+}
+
+#SessionSubmenu li a {
+    margin-left: 0px;
+}
+
+#OauthSamlSubmenu li a {
+    margin-left: 0px;
+}
+
+#AccessFilterSubmenu li a {
+    margin-left: 0px;
+}
+
+#ConfigurationSubmenu li a {
+    margin-left: 0px;
+}
+
+#electronicSignature li a {
+    margin-left: 10px;
+}
+
+#priceModel li a {
+    margin-left: 10px;
+}
+
+#activityReports li a {
+    margin-left: 10px;
+}
+
+#portalSettings li a {
+    margin-left: 10px;
+}
+
+#sidebar ul li a:hover i.dashboardNew-icon {
+    content: url(../../assets/images/DashboardNew.svg)
+}
+
+
+#sidebar ul li a:hover i.organizationNew-icon {
+    content: url(../../assets/images/OrganizationNew.svg)
+}
+
+#sidebar ul li a:hover i.applicationsNew-icon {
+    content: url(../../assets/images/ApplicationsNew.svg)
+}
+
+#sidebar ul li a:hover i.templatesNew-icon {
+    content: url('../../assets/images/Signature TemplatesNew.svg')
+}
+
+#sidebar ul li a:hover i.BusinessUserNew-icon {
+    content: url('../../assets/images/Business UserNew.svg')
+}
+
+#sidebar ul li a:hover i.AdminLog-icon {
+    content: url('../../assets/images/admin_log_reports_W.svg')
+}
+
+#sidebar ul li a:hover i.DigitalForm-icon {
+    content: url('../../assets/images/DigitalForm.svg')
+}
+
+#sidebar ul li a:hover i.Beneficiaries-icon {
+    content: url('../../assets/images/Beneficiaries_W.svg')
+}
+
+#sidebar ul li a:hover i.DocumentSigning-icon {
+    content: url('../../assets/images/Document_Signing-W.svg')
+}
+
+#sidebar ul li a:hover i.Roles-icon {
+    content: url('../../assets/images/roles_W.svg')
+}
+
+#sidebar ul li a:hover i.usersNew-icon {
+    content: url(../../assets/images/UsersNew.svg)
+}
+
+#sidebar ul li a:hover i.SignatureDelegation-icon {
+    content: url(../../assets/images/SignatureDelegateSVG.svg)
+}
+
+#sidebar ul li a:hover i.eseal-icon {
+    content: url('../../assets/images/E-SEal Icon.svg')
+}
+
+#sidebar ul li a:hover i.wallet-icon {
+    content: url('../../assets/images/Wallet icon.svg')
+}
+#sidebar ul li a:hover i.walletVerification-icon {
+    content: url('../../assets/images/wallet credential verification icon.svg')
+}
+
+#sidebar ul li a:hover i.members-icon {
+    content: url(../../assets/images/Commitmembers.svg)
+}
+
+#sidebar ul li a:hover i.commities-icon {
+    content: url(../../assets/images/committess.svg)
+}
+
+#sidebar ul li a:hover i.user-icon {
+    content: url(../../assets/images/User.svg)
+}
+
+#sidebar ul li a:hover i.booth-icon {
+    content: url(../../assets/images/Polling-Booth.svg)
+}
+
+#sidebar ul li a:hover i.voter-icon {
+    content: url(../../assets/images/voter.svg)
+}
+
+
+#sidebar ul li a:hover i.registration-authority-icon {
+    content: url(../../assets/images/registration_authority_icon_yellow.svg)
+}
+
+#sidebar ul li a:hover i.digital-authentication-icon {
+    content: url(../../assets/images/digital_authentication_icon_yellow.svg)
+}
+
+#sidebar ul li a:hover i.electronic-signature-icon {
+    content: url(../../assets/images/electronic_signature_icon_yellow.svg)
+}
+
+#sidebar ul li a:hover i.price-model-icon {
+    content: url(../../assets/images/price_model_icon_yellow.svg)
+}
+
+#sidebar ul li a:hover i.activity-reports-icon {
+    content: url(../../assets/images/activity_reports_icon_yellow.svg)
+}
+
+#sidebar ul li a:hover i.portal-settings-icon {
+    content: url(../../assets/images/settings_icon_yellow.svg)
+}
+
+#sidebar ul li a:hover i.eseal-registration-icon {
+    content: url(../../assets/images/esealYellow.svg)
+}
+
+
+/*Active Styling*/
+#sidebar ul li.active {
+    background: #15294B;
+    color: #FFFFFF;
+}
+
+#sidebar ul .nav-data.active {
+    background: #25406e;
+    color: #FFFFFF;
+}
+
+
+#sidebar ul.list-unstyled li.active {
+    color: #FFFFFF;
+    background: #15294B;
+    
+}
+
+
+#sidebar ul.list-unstyledData li.active {
+    color: #FFFFFF;
+    background: #25406e;
+    list-style-type: none;
+}
+
+
+#pageSubmenu li.active {
+    color: #ffb400;
+    background: transparent !important;
+}
+
+#homeSubmenu li.active {
+    color: #ffb400;
+    background: transparent !important;
+}
+
+#electronicSig li.active {
+    color: #ffb400;
+    background: transparent !important;
+}
+
+#reports li.active {
+    color: #ffb400;
+    background: transparent !important;
+}
+
+#settings li.active {
+    color: #ffb400;
+    background: transparent !important;
+}
+
+
+
+#sidebar ul.list-unstyled li i.dashboardNew-icon {
+    width: 40px;
+    content: url(../../assets/images/DashboardNew.svg)
+}
+
+#sidebar ul.list-unstyled li.active i.dashboardNew-icon {
+    width: 40px;
+    content: url(../../assets/images/DashboardNew.svg)
+}
+
+#sidebar ul.list-unstyled li i.organizationNew-icon {
+    width: 40px;
+    content: url(../../assets/images/OrganizationNew.svg)
+}
+
+#sidebar ul.list-unstyled li.active i.organizationNew-icon {
+    width: 40px;
+    content: url(../../assets/images/OrganizationNew.svg)
+}
+
+#sidebar ul.list-unstyled li i.applicationsNew-icon {
+    width: 40px;
+    content: url(../../assets/images/ApplicationsNew.svg)
+}
+
+#sidebar ul.list-unstyled li.active i.applicationsNew-icon {
+    width: 40px;
+    content: url(../../assets/images/ApplicationsNew.svg)
+}
+
+#sidebar ul.list-unstyled li i.templatesNew-icon {
+    width: 40px;
+    content: url('../../assets/images/Signature TemplatesNew.svg')
+}
+
+#sidebar ul.list-unstyled li.active i.templatesNew-icon {
+    width: 40px;
+    content: url('../../assets/images/Signature TemplatesNew.svg')
+}
+
+#sidebar ul.list-unstyled li i.BusinessUserNew-icon {
+    width: 40px;
+    content: url('../../assets/images/Business UserNew.svg')
+}
+
+#sidebar ul.list-unstyled li i.AdminLog-icon {
+    width: 40px;
+    content: url('../../assets/images/admin_log_reports_W.svg')
+}
+
+#sidebar ul.list-unstyled li i.DigitalForm-icon {
+    width: 40px;
+    content: url('../../assets/images/DigitalForm.svg')
+}
+
+#sidebar ul.list-unstyled li i.Beneficiaries-icon {
+    width: 40px;
+    content: url('../../assets/images/Beneficiaries_W.svg')
+}
+
+#sidebar ul.list-unstyled li i.DocumentSigning-icon {
+    width: 40px;
+    content: url('../../assets/images/Document_Signing-W.svg')
+}
+
+#sidebar ul.list-unstyled li i.Roles-icon {
+    width: 40px;
+    content: url('../../assets/images/roles_W.svg')
+}
+
+#sidebar ul.list-unstyled li.active i.BusinessUserNew-icon {
+    width: 40px;
+    content: url('../../assets/images/Business UserNew.svg')
+}
+
+#sidebar ul.list-unstyled li.active i.AdminLog-icon {
+    width: 40px;
+    content: url('../../assets/images/admin_log_reports_W.svg')
+}
+
+#sidebar ul.list-unstyled li.active i.DigitalForm-icon {
+    width: 40px;
+    content: url('../../assets/images/DigitalForm.svg')
+}
+
+#sidebar ul.list-unstyled li.active i.Beneficiaries-icon {
+    width: 40px;
+    content: url('../../assets/images/Beneficiaries_W.svg')
+}
+
+#sidebar ul.list-unstyled li.active i.DocumentSigning-icon {
+    width: 40px;
+    content: url('../../assets/images/Document_Signing-W.svg')
+}
+
+#sidebar ul.list-unstyled li.active i.Roles-icon {
+    width: 40px;
+    content: url('../../assets/images/roles_W.svg')
+}
+
+#sidebar ul.list-unstyled li i.usersNew-icon {
+    width: 40px;
+    content: url(../../assets/images/UsersNew.svg)
+}
+
+#sidebar ul.list-unstyled li i.SignatureDelegation-icon {
+    width: 40px;
+    content: url(../../assets/images/SignatureDelegateSVG.svg)
+}
+
+#sidebar ul.list-unstyled li.active i.usersNew-icon {
+    width: 40px;
+    content: url(../../assets/images/UsersNew.svg)
+}
+
+#sidebar ul.list-unstyled li.active i.SignatureDelegation-icon {
+    width: 40px;
+    content: url(../../assets/images/SignatureDelegateSVG.svg)
+}
+
+
+#sidebar ul.list-unstyled li i.eseal-icon {
+    width: 40px;
+    content: url('../../assets/images/E-SEal Icon.svg')
+}
+
+
+
+#sidebar ul.list-unstyled li.active i.eseal-icon {
+    width: 40px;
+    content: url('../../assets/images/E-SEal Icon.svg')
+}
+#sidebar ul.list-unstyled li i.wallet-icon {
+    width: 40px;
+    content: url('../../assets/images/Wallet icon.svg')
+}
+
+#sidebar ul.list-unstyled li.active i.wallet-icon {
+    width: 40px;
+    content: url('../../assets/images/Wallet icon.svg')
+}
+
+#sidebar ul.list-unstyled li i.walletVerification-icon {
+    width: 40px;
+    content: url('../../assets/images/wallet credential verification icon.svg')
+}
+
+#sidebar ul.list-unstyled li.active i.walletVerification-icon {
+    width: 40px;
+    content: url('../../assets/images/wallet credential verification icon.svg')
+}
+
+
+#sidebar ul.list-unstyled li i.booth-icon {
+    width: 40px;
+    content: url(../../assets/images/Polling-Booth.svg);
+}
+
+#sidebar ul.list-unstyled li.active i.booth-icon {
+    width: 40px;
+    content: url(../../assets/images/Polling-Booth.svg)
+}
+
+#sidebar ul.list-unstyled li i.voter-icon {
+    width: 40px;
+    content: url(../../assets/images/voter.svg);
+}
+
+#sidebar ul.list-unstyled li.active i.voter-icon {
+    width: 40px;
+    content: url(../../assets/images/voter.svg)
+}
+
+#sidebar ul.list-unstyled li i.roles-icon {
+    width: 40px;
+    content: url(../../assets/images/Roles-icon.svg);
+}
+
+#sidebar ul.list-unstyled li.active i.roles-icon {
+    width: 40px;
+    content: url(../../assets/images/Roles-icon.svg)
+}
+
+commities-icon
+#sidebar ul.list-unstyled li i.members-icon {
+    width: 40px;
+    content: url(../../assets/images/Commitmembers.svg);
+}
+
+#sidebar ul.list-unstyled li.active i.members-icon {
+    width: 40px;
+    content: url(../../assets/images/Commitmembers.svg)
+}
+
+#sidebar ul.list-unstyled li i.commities-icon {
+    width: 40px;
+    content: url(../../assets/images/committess.svg);
+}
+
+#sidebar ul.list-unstyled li.active i.commities-icon {
+    width: 40px;
+    content: url(../../assets/images/committess.svg)
+}
+
+
+#sidebar ul.list-unstyled li i.registration-authority-icon {
+    width: 40px;
+    content: url(../../assets/images/registration_authority_icon.svg);
+}
+
+#sidebar ul.list-unstyled li.active i.registration-authority-icon {
+    width: 40px;
+    content: url(../../assets/images/registration_authority_icon_yellow.svg)
+}
+
+
+
+#sidebar ul.list-unstyled li i.digital-authentication-icon {
+    width: 40px;
+    content: url(../../assets/images/digital_authentication_icon.svg);
+}
+
+#sidebar ul.list-unstyled li.active i.digital-authentication-icon {
+    width: 40px;
+    content: url(../../assets/images/digital_authentication_icon_yellow.svg)
+}
+
+
+
+#sidebar ul.list-unstyled li i.electronic-signature-icon {
+    width: 40px;
+    content: url(../../assets/images/electronic_signatures_icon.svg);
+}
+
+#sidebar ul.list-unstyled li.active i.electronic-signature-icon {
+    width: 40px;
+    content: url(../../assets/images/electronic_signature_icon_yellow.svg)
+}
+
+
+
+#sidebar ul.list-unstyled li i.price-model-icon {
+    width: 40px;
+    content: url(../../assets/images/price_model_icon.svg);
+}
+
+#sidebar ul.list-unstyled li.active i.price-model-icon {
+    width: 40px;
+    content: url(../../assets/images/price_model_icon_yellow.svg)
+}
+
+
+
+#sidebar ul.list-unstyled li i.activity-reports-icon {
+    width: 40px;
+    content: url(../../assets/images/activity_reports_icon.svg);
+}
+
+#sidebar ul.list-unstyled li.active i.activity-reports-icon {
+    width: 40px;
+    content: url(../../assets/images/activity_reports_icon_yellow.svg)
+}
+
+
+
+#sidebar ul.list-unstyled li i.portal-settings-icon {
+    width: 40px;
+    content: url(../../assets/images/Settings.svg);
+}
+
+#sidebar ul.list-unstyled li.active i.portal-settings-icon {
+    width: 40px;
+    content: url(../../assets/images/settings_icon_yellow.svg)
+}
+
+#sidebar ul.list-unstyled li i.eseal-registration-icon {
+    width: 40px;
+    content: url(../../assets/images/eseal.svg);
+}
+
+#sidebar ul.list-unstyled li.active i.eseal-registration-icon {
+    width: 40px;
+    content: url(../../assets/images/esealYellow.svg)
+}
+
+
+#sidebar ul.list-unstyled li i.documentIssuer-icon {
+    width: 40px;
+    content: url('../../assets/images/Document_Issuer.svg')
+}
+
+#sidebar ul.list-unstyled li i.priceModel-icon {
+    width: 40px;
+    content: url('../../assets/images/price_model_icon.svg')
+}
+
+#sidebar ul.list-unstyled li i.paymentsModel-icon {
+    width: 40px;
+    content: url('../../assets/images/PaymentsSVG.svg')
+}
+
+#sidebar ul.list-unstyled li i.multiPivot-icon {
+    width: 40px;
+    content: url('../../assets/images/multi_pivot_servic-W.svg')
+}
+
+#sidebar ul.list-unstyled li i.documentVerification-icon {
+    width: 40px;
+    content: url('../../assets/images/Document_verification.svg')
+}
+
+#sidebar ul.list-unstyled li i.bulkSigning-icon {
+    width: 40px;
+    content: url('../../assets/images/bulk_sign_W.svg')
+}
+
+
+#sidebar {
+    background-color: #243757;
+}
+
+    #sidebar ul .nav-item.active {
+        background: #15294B;
+        color: #FFFFFF;
+    }
+
+    #sidebar ul .nav-data a:hover {
+        background: #25406e;
+        color: #FFFFFF;
+    }
+
+    #sidebar ul li ul li a.active {
+       
+         background: #15294B;
+        color: #FFFFFF;
+    }
+
+    #sidebar ul li ul li {
+        color: #fff;
+        list-style-type: none;
+    }
+
+.background-image {
+    background-image: url(../../assets/images/Rectangle5New.png);
+    background-repeat: no-repeat;
+    background-size: 100% 190px;
+}
+
+.nav-tabs .nav-link:focus, .nav-tabs .nav-link:hover {
+    border-color: #FFFFFF !important;
+    border-radius: 22px !important;
+}

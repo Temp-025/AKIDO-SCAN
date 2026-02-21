@@ -1,0 +1,431 @@
+﻿@using EnterpriseGatewayPortal.Web.Models
+@model EnterpriseGatewayPortal.Web.ViewModel.KYCDashboard.PrintViewModel
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+{
+        new BreadCrumbModel { Title = "Print ID Validation Report",Url = "",IconKey = "wallet-subscribedCredentials"}
+
+    };
+}
+
+<style>
+    .classshide {
+        display: none !important;
+    }
+    .pdf-primary-heading {
+        font-size: 36px;
+        font-weight: 700;
+        color: #000000;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .heading {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #92722A;
+        font-family: 'Inter';
+    }
+
+    .center-adjust {
+        max-width: 80%;
+    }
+
+    .sub-heading {
+        font-weight: 600;
+        color: #6d7f90;
+        font-size: small;
+        font-family: 'Inter';
+    }
+
+    .sub-content {
+        color: #000;
+        font-weight: 600;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        font-family: 'Inter';
+    }
+
+    .verification-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        column-gap: 40px;
+        row-gap: 14px;
+        margin-top: 15px;
+    }
+
+    .grid-override {
+        grid-template-columns: 1fr !important;
+    }
+
+    .grid-item {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+        padding-bottom: 6px;
+        word-break: break-word;
+    }
+
+    .override {
+        flex-direction: row !important;
+    }
+
+    .grid-item .label {
+        font-weight: 600;
+        color: #222;
+        flex: 1;
+        max-width: 45%;
+    }
+
+    .grid-item .value {
+        text-align: right;
+        color: #333;
+        flex: 1;
+        max-width: 55%;
+        overflow-wrap: anywhere;
+    }
+
+    .text-success {
+        color: #008a41 !important;
+    }
+
+    @@media (max-width: 768px) {
+        .verification-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .grid-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+            .grid-item .value {
+                text-align: left;
+                margin-top: 2px;
+            }
+    }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="top-actions d-flex justify-content-end mb-3 gap-2" style="padding-left: 34px; padding-right: 17px;">
+    <form method="post">
+        <input type="hidden" asp-for="ReportId" />
+        <input type="hidden" asp-for="Name" />
+        <input type="hidden" asp-for="EmirateId" />
+        <input type="hidden" asp-for="RequestDate" />
+        <input type="hidden" asp-for="ProcessingTime" />
+        <input type="hidden" asp-for="ServiceProvider" />
+        <input type="hidden" asp-for="ICPReference" />
+        <input type="hidden" asp-for="VerificationMethod" />
+        <input type="hidden" asp-for="VerificationResult" />
+        <input type="hidden" asp-for="OverallConfidence" />
+        <input type="hidden" asp-for="VerificationCost" />
+        <input type="hidden" asp-for="ConsentObtained" />
+        <input type="hidden" asp-for="DataRetention" />
+        <input type="hidden" asp-for="Status" />
+        <input type="hidden" asp-for="CertificateAuthority" />
+        <input type="hidden" asp-for="Signatory" />
+        <input type="hidden" asp-for="TimeStamp" />
+
+        <div class="d-flex justify-content-between flex-row">
+            <button class="btn btn-other d-flex justify-content-center align-items-center flex-row" onclick="@Url.Action("PrintIdValidationReportDirect","KYCDashboard")" id="printBtn">
+                <i class="ph ph-printer" style="color:black;font-size:24px;"></i>
+                Print Report
+            </button>
+            &nbsp;&nbsp;
+            <a href="#" class="btn btn-primary uaeid-primary d-flex justify-content-center align-items-center flex-row" onclick="downloadPDF()">
+                <i class="ph ph-download" style="color:white;font-size:24px;"></i>
+                Download Report
+            </a>
+        </div>
+
+    </form>
+</div>
+
+<div class="row" id="spacingCss">
+    <div class="col-md-12">
+        <div class="card-custom" style="display: flex; flex-direction: row; justify-content: center; align-items: center;">
+            <div class="card-body center-adjust">
+
+                <div class="mb-4 text-center" style="padding-left: 21px; padding-right: 26px;">
+                    <span class="pdf-primary-heading">Emirates ID Validation Report</span>
+                    <p class="text-muted">By Emirates ID Validation Platform</p>
+                    <div class="d-flex justify-content-between flex-row">
+                        <span class="text-secondary d-block">Report ID: @Model.ReportId</span>
+                        <span class="text-secondary d-block">Generated: @Model.TimeStamp</span>
+                    </div>
+                    <hr style="border: 3px solid #CBA344; opacity: 1; width: 100%;" />
+                </div>
+
+                <!-- Verification Summary -->
+                <div class="card mb-4 border-0" style="background: #f1f1f1;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center flex-row" style="gap:10px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#92722A; display:block;">
+                                <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01
+                                     C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1
+                                     c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0
+                                     C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z">
+                                </path>
+                            </svg>
+                            <span class="heading">Verification Summary</span>
+                        </div>
+                        <div class="verification-grid">
+                            <div class="grid-item">
+                                <span class="sub-heading">Customer Name:</span>
+                                <span class="sub-content">@Model.Name</span>
+                            </div>
+                            <div class="grid-item">
+                                <span class="sub-heading">Request Date:</span>
+                                <span class="sub-content">@Model.RequestDate</span>
+                            </div>
+                            <div class="grid-item">
+                                <span class="sub-heading">Emirates ID:</span>
+                                <span class="sub-content">@Model.EmirateId</span>
+                            </div>
+                            <div class="grid-item">
+                                <span class="sub-heading">Processing Time:</span>
+                                <span class="sub-content">@Model.ProcessingTime</span>
+                            </div>
+                            <div class="grid-item">
+                                <span class="sub-heading">Service Provider:</span>
+                                <span class="sub-content">@Model.ServiceProvider</span>
+                            </div>
+                            <div class="grid-item">
+                                <span class="sub-heading">ICP Reference:</span>
+                                <span class="sub-content">@Model.ICPReference</span>
+                            </div>
+                            <div class="grid-item">
+                                <span class="sub-heading">Verification Method:</span>
+                                <span class="sub-content">@Model.VerificationMethod</span>
+                            </div>
+                            <div class="grid-item">
+                                <span class="sub-heading">Verification Result:</span>
+                                <span class="sub-content text-success fw-bold">✔ @Model.VerificationResult</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Verification Details -->
+
+                <div class="card mb-4 border-0" style="background: #f1f1f1;">
+                    <div class="card-body">
+                        <span class="heading">Verification Details</span>
+                        <div class="verification-grid">
+                            <div class="grid-item override">
+                                <span class="sub-heading">Overall Confidence:</span>
+                                <span class="sub-content">@Model.OverallConfidence</span>
+                            </div>
+                            <div class="grid-item override">
+                                <span class="sub-heading">Verification Cost:</span>
+                                <span class="sub-content">@Model.VerificationCost</span>
+                            </div>
+                            <div class="grid-item override">
+                                <span class="sub-heading">Consent Obtained:</span>
+                                <span class="sub-content">@Model.ConsentObtained</span>
+                            </div>
+                            <div class="grid-item override">
+                                <span class="sub-heading">Data Retention:</span>
+                                <span class="sub-content">@Model.DataRetention</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Digital Signature -->
+
+
+                <div class="card mb-4 border-0" style="background-color: #e8f8ec !important;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center flex-row" style="gap:10px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check-icon">
+                                <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+                                <path d="m9 12 2 2 4-4"></path>
+                            </svg>
+                            <span class="heading" style="color: #31a337 !important;">Digital Signature</span>
+                        </div>
+                        <div class="verification-grid grid-override">
+                            <div class="grid-item override">
+                                <span class="sub-heading">Status:</span>
+                                <span class="sub-content">@Model.Status</span>
+                            </div>
+                            <div class="grid-item override">
+                                <span class="sub-heading">Certificate Authority:</span>
+                                <span class="sub-content">@Model.CertificateAuthority</span>
+                            </div>
+                            <div class="grid-item override">
+                                <span class="sub-heading">Signatory:</span>
+                                <span class="sub-content">@Model.Signatory</span>
+                            </div>
+                            <div class="grid-item override">
+                                <span class="sub-heading">Timestamp:</span>
+                                <span class="sub-content">@Model.TimeStamp</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+
+<script>
+
+    $(document).ready(function () {
+
+         $('#networkOverlay').hide();
+         document.getElementById("navigationNetworkOverlay").style.display = "none";
+
+
+
+    });
+
+    function openPrintPage() {
+        const viewModel = {
+            ReportId: '@Model.ReportId',
+            TimeStamp: '@Model.TimeStamp',
+            Name: '@Model.Name',
+            RequestDate: '@Model.RequestDate',
+            EmirateId: '@Model.EmirateId',
+            ProcessingTime: '@Model.ProcessingTime',
+            ServiceProvider: '@Model.ServiceProvider',
+            ICPReference: '@Model.ICPReference',
+            VerificationMethod: '@Model.VerificationMethod',
+            VerificationResult: '@Model.VerificationResult',
+            OverallConfidence: '@Model.OverallConfidence',
+            VerificationCost: '@Model.VerificationCost',
+            ConsentObtained: '@Model.ConsentObtained',
+            DataRetention: '@Model.DataRetention',
+            Status: '@Model.Status',
+            CertificateAuthority: '@Model.CertificateAuthority',
+            Signatory: '@Model.Signatory'
+        };
+
+        // Send data to controller via POST
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("DownloadPrint", "KYCDashboard")',
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(viewModel),
+            success: function (html) {
+                // Open returned HTML in a new window and trigger print
+                const printWindow = window.open('', '', 'width=1000,height=800');
+                printWindow.document.write(html);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+
+
+    function downloadPDF() {
+        
+        const viewModel = {
+            ReportId: '@Model.ReportId',
+            TimeStamp: '@Model.TimeStamp',
+            Name: '@Model.Name',
+            RequestDate: '@Model.RequestDate',
+            EmirateId: '@Model.EmirateId',
+            ProcessingTime: '@Model.ProcessingTime',
+            ServiceProvider: '@Model.ServiceProvider',
+            ICPReference: '@Model.ICPReference',
+            VerificationMethod: '@Model.VerificationMethod',
+            VerificationResult: '@Model.VerificationResult',
+            OverallConfidence: '@Model.OverallConfidence',
+            VerificationCost: '@Model.VerificationCost',
+            ConsentObtained: '@Model.ConsentObtained',
+            DataRetention: '@Model.DataRetention',
+            Status: '@Model.Status',
+            CertificateAuthority: '@Model.CertificateAuthority',
+            Signatory: '@Model.Signatory'
+        };
+
+        $.ajax({
+            type: "POST",
+            headers: {
+                "XSRF-TOKEN": $('input[name="__RequestVerificationToken"]').val()
+            },
+            url:  '@Url.Action("DownloadPdf", "KYCDashboard")',
+            data: JSON.stringify(viewModel),
+            contentType: 'application/json',
+            dataType: "json",
+            error: ajaxErrorHandler,
+            beforeSend: function () {
+                $('#overlay1').show();
+            },
+            complete: function () {
+                $('#overlay1').hide();
+            },
+            success: function (data) {
+                if (data.status == "Success") {
+                    saveByteArray("IdValidationData_Report", data.result)
+                }
+                if (data.status == "Failed") {
+                    Swal.fire({ icon: 'error', title: "Error", text: data.message });
+                }
+            }
+        });
+
+
+    }
+
+
+      function saveByteArray(name, bytes) {
+            var myBytes = base64ToArrayBuffer(bytes);
+            var blob = new Blob([myBytes], { type: "application/pdf" });
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            let fileName = name + ".pdf";
+            link.download = fileName;
+            link.click();
+            //var myBytes = base64ToArrayBuffer(bytes);
+            //var blob = new Blob([myBytes], { type: "application/pdf" });
+            //var link = window.URL.createObjectURL(blob);
+            //window.open(link, '', 'height=650,width=840');
+      }
+
+        function base64ToArrayBuffer(base64) {
+            var binaryString = window.atob(base64);
+            var binaryLen = binaryString.length;
+            var bytes = new Uint8Array(binaryLen);
+            for (var i = 0; i < binaryLen; i++) {
+                var ascii = binaryString.charCodeAt(i);
+                bytes[i] = ascii;
+            }
+            return bytes;
+        }
+
+        document.getElementById("printBtn").addEventListener("click", function (e) {
+            e.preventDefault(); // stop default submit
+
+            fetch("@Url.Action("PrintIdValidationReportDirect", "KYCDashboard")", {
+                method: "POST",
+                body: new FormData(this.form)
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                var url = URL.createObjectURL(blob);
+                var iframe = document.createElement("iframe");
+                iframe.style.display = "none";
+                iframe.src = url;
+                document.body.appendChild(iframe);
+                iframe.onload = function () {
+                    iframe.contentWindow.print();
+                };
+            });
+        });
+
+</script>

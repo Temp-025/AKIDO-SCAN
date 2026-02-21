@@ -1,0 +1,312 @@
+﻿@using Newtonsoft.Json;
+@model IEnumerable<EnterpriseGatewayPortal.Core.DTOs.OrganizationPaymentHistoryDTO>
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+{
+        new BreadCrumbModel { Title = "Payments - Payment History" , Url = "", IconKey="payments-paymentHistory"}
+    };
+}
+@{
+    var layoutType = Context.Request.Cookies["HeaderNavigationLayout"];
+}
+@{
+    var hasData = Model != null && Model.Count() > 0;
+}
+<style>
+    table {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+    .classshide {
+        display: none !important;
+    }
+
+    /* Default state */
+    .info-cell .info-text {
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        color: #92722A;
+    }
+
+    .info-cell {
+        color: #000;
+        text-align: left;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+        .info-cell .info-icon {
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
+            cursor: pointer;
+            filter: brightness(0);
+            transition: all 0.3s ease;
+        }
+
+        .info-cell:hover .info-text {
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            color: #92722A;
+        }
+
+        .info-cell:hover .info-icon {
+            filter: brightness(0) saturate(100%) invert(48%) sepia(71%) saturate(500%) hue-rotate(25deg) brightness(95%);
+        }
+</style>
+@if (Model == null || Model.Count() == 0)
+{
+    <style>
+        table {
+            height: 70% !important;
+        }
+
+        .table-hover > tbody > tr:hover > td {
+            background: none !important;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        /* Apply 100% height to all DataTables wrappers */
+        .dataTables_wrapper {
+            height: 100% !important;
+        }
+
+            /* Apply 100% height only to the second .row inside any DataTables wrapper */
+            .dataTables_wrapper > .row:nth-of-type(2) {
+                height: 100% !important;
+            }
+
+        td:not([style*="display: none"]) {
+            border-bottom-right-radius: 12px !important;
+            border-bottom-left-radius: 12px !important;
+        }
+    </style>
+}
+
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row">
+    <div class="col-md-12 plr">
+
+        <div class=card-body>
+
+            <div class="row align-items-center justify-content-between" style="padding-left: 15px; padding-right:15px;">
+                <!-- Left: Search bar (will be injected by DataTables) -->
+                <div class="col-md-6 col-sm-12 d-flex align-items-center plr" id="custom-search-container"></div>
+
+                <!-- Right: Buttons -->
+                <div class="col-md-6 col-sm-12 plr text-right">
+                    <div class="btn-group mr-2">
+
+                        <a class="btn btn-other" asp-controller="PaymentHistory" asp-action="OrgPaymentList">
+                            <img src="~/assets/images/refresh.png"
+                                 alt="refresh Icon"
+                                 width="17" height="17"
+                                 style=" margin-right: 7px; opacity: 1; position: relative; bottom: -2px;">Refresh
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+            <table class="table-striped table-bordered table-hover table-checkable order-column full-width table @(Model == null || Model.Count() == 0 ? "empty-table" : "")">
+                <thead>
+                    <tr>
+                        <th hidden>Id</th>
+                        <th>Payment Channel</th>
+                        <th>Total Amount Paid</th>
+                        <th>Transaction Reference Id</th>
+                        @* <th>Inovice Number</th>*@
+                        <th>Status</th>
+                        <th>Created On</th>
+
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Count() > 0)
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td hidden>@item.Id</td>
+
+                                @if (!String.IsNullOrEmpty(item.PaymentChannel))
+                                {
+                                    <td>@item.PaymentChannel</td>
+                                }
+                                else
+                                {
+                                    <td>N/A</td>
+                                }
+                                @if (item.TotalAmount != 0)
+                                {
+                                    <td>@item.TotalAmount</td>
+                                }
+                                else
+                                {
+                                    <td>N/A</td>
+                                }
+                                @if (!String.IsNullOrEmpty(item.TransactionReferenceId))
+                                {
+                                    <td>@item.TransactionReferenceId</td>
+                                }
+                                else
+                                {
+                                    <td>N/A</td>
+                                }
+                                @* @if (!String.IsNullOrEmpty(item.InvoiceNumber))
+                                    {
+                                        <td>@item.InvoiceNumber</td>
+                                    }
+                                    else
+                                    {
+                                        <td>N/A</td>
+                                    }*@
+                                @if (!String.IsNullOrEmpty(item.PaymentStatus))
+                                {
+                                    <td>@item.PaymentStatus</td>
+                                }
+                                else
+                                {
+                                    <td>N/A</td>
+                                }
+                                @*<td>@item.CreatedOn</td>*@
+                                <td>@item.CreatedOn.ToString("yyyy-MM-dd")</td>
+
+                                <td class="valigntop">
+                                    <div class="">
+                                        <button class="btn btn-xs deepPink-bgcolor no-margin Actions_btn" type="button" data-toggle="dropdown" style="font-size:0.8rem;"
+                                                aria-expanded="false">
+                                            Actions
+                                            <i class="fa fa-angle-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-left" role="menu">
+
+                                            <li class="table-dropdown-li">
+                                                <a asp-action="View" asp-controller="PaymentHistory" asp-route-ackId="@item.AggregatorAcknowledgementId" onclick="document.getElementById('navigationNetworkOverlay').style.display='block'">
+                                                    <img src="~/assets/images/Eye_View_Icon.svg" alt="edit" style="position: relative;bottom: 1px;width: 18px;height: 18px;" />View
+                                                </a>
+                                            </li>
+                                            @if (item.PaymentChannel.ToLower() != "manual")
+                                            {
+                                                <li class="table-dropdown-li">
+                                                    <a onclick="showPaymentInfo('@item.PaymentInfo')">
+                                                        <img src="~/assets/images/InfoIcon.svg"
+                                                             alt="More info"
+                                                             title="More info"
+                                                             class="info-icon" style="position: relative;bottom: 1px;width: 18px;height: 18px;" />Payment Info
+                                                    </a>
+                                                </li>
+                                            }
+
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td style="display: none;"></td>
+                            <td style="text-align:center" valign="top" colspan="6" class="dataTables_empty">
+                                <img class="NoRecordsCls" src="~/assets/images/No-Records-icon.svg" alt="No records" style=" display:block; margin:0 auto 8px;">
+                                <p class="NoRecordFound-paragarph">No records found</p>
+                                <p class="NoRecordTable-Text">Get started by clicking on 'Create'</p>
+                            </td>
+
+                            <td style="display: none;"></td>
+                            <td style="display: none;"></td>
+                            <td style="display: none;"></td>
+                            <td style="display: none;"></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+
+    $(document).ready(function () {
+
+        $('#PaymentHistoryMenu').addClass('active');
+        $('#networkOverlay').hide();
+           document.getElementById("navigationNetworkOverlay").style.display = "none";
+        var layoutType = '@(layoutType ?? "")';
+        if(layoutType == "Vertical"){
+
+            $("#Payments > a")
+                .attr("aria-expanded", "true")
+                .addClass("active");
+
+            $("#Payments")
+                .addClass("submenu-active show");
+
+            $("#Payments .submenu")
+                .addClass("show");
+
+            $('#Payment-History').addClass('active');
+
+            $('#homeMenu').addClass('breadcrumb-item').append('Payments > Payment History');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+        }
+        var table = $(".table").DataTable({
+            "bLengthChange": false,
+             "paging": @hasData.ToString().ToLower(),
+ "info": @hasData.ToString().ToLower(),
+            "order": [0,'desc'],
+               "initComplete": function () {
+           // Move the search bar into our custom container
+           $(".dataTables_filter").appendTo("#custom-search-container");
+           $('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+           $('.dataTables_filter label').contents().filter(function () {
+               return this.nodeType === 3;
+           }).remove();
+
+    }
+        });
+
+
+    });
+
+    function showPaymentInfo(paymentInfo) {
+        var dataToSend = { paymentInfo: paymentInfo };
+        $.ajax({
+            url: '@Url.Action("GetPaymentInfo", "PaymentHistory")',
+            data: dataToSend,
+            type: "GET",
+            /*contentType: "json",*/
+            error: ajaxErrorHandler,
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+                $('#overlay').hide();
+            },
+            success: function (data) {
+                if (data != null) {
+                    $('#modalDialogContentDiv').html(data);
+                    $('#modalDialogDiv').modal('show');
+                }
+                else {
+                    Swal.fire({ icon: 'error', title: "Error", text: "Failed to get payment info" });
+                }
+            }
+        });
+    }
+</script>
+

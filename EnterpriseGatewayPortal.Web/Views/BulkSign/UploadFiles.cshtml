@@ -1,0 +1,1109 @@
+﻿@model IEnumerable<EnterpriseGatewayPortal.Core.DTOs.DocumentsTemplatesListDTO>
+@using EnterpriseGatewayPortal.Web.Models;
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+    {
+        new BreadCrumbModel { Title = "Bulk Sign", Url = Url.Action("GetBulkSigDataList","BulkSign") },
+        new BreadCrumbModel { Title = "Perform New Bulk Sign", Url = "" }
+    };
+}
+
+@{
+    var layoutType = Context.Request.Cookies["NavigationLayout"];
+}
+
+<style>
+    .form-group {
+        /* width: 496px !important; */ /* changed for path flow */
+        width: 100%;
+        max-width: 100%;
+    }
+
+        .form-group input[type="radio"].styled-radio {
+            border: 1px solid #ddd;
+            margin-right: 5px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        /* Optional: Style for labels */
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+    /* ----------- Select dropdown css -------------*/
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+        .select2-container .select2-selection--single {
+            border-radius: 8px;
+            align-items: center;
+            box-sizing: border-box;
+            justify-content: center;
+            height: 40px !important;
+            border: 1px solid #E2E8F0 !IMPORTANT;
+            color: #3E4046 !important;
+        }
+
+    .selection {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #3E4046 !important;
+        font-size: 14px;
+        font-family: inherit;
+        padding: 5px 10px;
+    }
+
+
+    /* Remove default arrow */
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border: none !important; /* removes default triangle */
+    }
+
+    /* Add your custom arrow */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+       
+        background: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M27.0613 13.0612L17.0613 23.0612C16.9219 23.2011 16.7563 23.312 16.574 23.3877C16.3917 23.4634 16.1962 23.5024 15.9988 23.5024C15.8013 23.5024 15.6059 23.4634 15.4235 23.3877C15.2412 23.312 15.0756 23.2011 14.9363 23.0612L4.93626 13.0612C4.65446 12.7794 4.49615 12.3972 4.49615 11.9987C4.49615 11.6002 4.65446 11.218 4.93626 10.9362C5.21805 10.6544 5.60024 10.4961 5.99876 10.4961C6.39727 10.4961 6.77946 10.6544 7.06126 10.9362L16 19.875L24.9388 10.935C25.2205 10.6532 25.6027 10.4949 26.0013 10.4949C26.3998 10.4949 26.782 10.6532 27.0638 10.935C27.3455 11.2168 27.5039 11.599 27.5039 11.9975C27.5039 12.396 27.3455 12.7782 27.0638 13.06L27.0613 13.0612Z' fill='%2392722A'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-size: 16px 16px;
+        width: 19px;
+        top: 11px;
+        vertical-align: middle;
+        height: 100%;
+    }
+
+    .select2-search__field {
+        display: none !important;
+    }
+
+
+    .select2-container .select2-dropdown.select2-dropdown--below {
+        top: -5px !important;
+    }
+
+    .select2-container .select2-search.select2-search--dropdown {
+        padding: 0 !important;
+    }
+
+    .classshide {
+        display: none !important;
+    }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" id="spacingCss">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <form id="my-dropzone" class="">
+                            <div class="form-group" style="margin-bottom: 12px !important;">
+                                <label for="inputField1" style="font-weight: 600; font-size: 13.5px;">
+                                    Transaction Name<span style="color: red;">*</span>
+                                </label>
+                                <input class="form-control" type="text" id="inputField1" placeholder="" />
+                            </div>
+
+                            <div class="form-group classshide">
+                                <label style="font-weight: 600; font-size: 13.5px;">
+                                    Upload Type<span class="text-danger">*</span>
+                                </label>
+                                @* <div>
+                                        <input type="radio" class="styled-radio" style="font-weight: 600; font-size: 13.5px;" name="selectionType" id="fileRadio" onclick="showFileInput()" checked>
+                                        Files
+                                    </div>
+                                    <div>
+                                        <input type="radio" class="styled-radio" style="font-weight: 600; font-size: 13.5px;" name="selectionType" id="folderRadio" onclick="showFolderInput()">
+                                        Folder
+                                    </div> *@
+                                <div>
+                                    <input type="radio" class="styled-radio" style="font-weight: 600; font-size: 13.5px;" name="selectionType" id="PathRadio" onclick="showPathForm()">
+                                    Path
+                                </div>
+                            </div>
+
+                            @*  <div class="form-group" id="fileinputdisplay" style="position: absolute;">
+                                    <label for="fileInput" style="font-weight: 600; font-size: 13.5px;">Upload Files<span style="color: red;">*</span></label>
+                                    <input class="form-control" type="file" id="fileInput" multiple onchange="handleSelection(event)" />
+                                </div>
+
+                                <div class="form-group" id="folderinputdisplay" style="visibility: hidden; position: absolute;">
+                                    <label for="folderInput" style="font-weight: 600; font-size: 13.5px;">Upload Folder<span style="color: red;">*</span><span style="color: dodgerblue; font-size: 13px !important;">(Note: please select a folder)</span></label>
+                                    <input class="form-control" type="file" id="folderInput" multiple webkitdirectory onchange="handleSelection1(event)" />
+                                </div> *@
+
+                            <div class="form-group" id="selectSource" style="visibility:hidden;">
+                                <label for="sourcepath" style="font-weight: 600; font-size: 13.5px;">Source Path<span style="color: red;">*</span></label>
+                                <input class="form-control" type="text" id="sourcepath" placeholder="" />
+                            </div>
+
+                           
+                        </form>
+                    </div>
+
+
+                    <div class="col-md-6">
+                        <form id="my-dropzone" class="dropzone">
+                            <div class="form-group" style="margin-bottom: 11px !important;">
+                                <label for="DocumentTemplate" style="font-weight: 600; font-size: 13.5px;">Document Template<span style="color: red;">*</span></label>
+                                <select class="form-control select2" id="DocumentTemplate" name="templates">
+                                    @{
+                                        foreach (var item in Model)
+                                        {
+                                            <option value=@item._id>@item.TemplateName</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="selectDestination" style="visibility:hidden;">
+                                @* position: absolute; *@
+                                <label for="destinationpath" style="font-weight: 600; font-size: 13.5px;">Destination Path<span style="color: red;">*</span></label>
+                                <input class="form-control" type="text" id="destinationpath" placeholder="" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end" style="padding-top: 31px;">
+                    <button class="btn btn-primary uaeid-primary" id="getFiles" type="button" style="float:right;visibility: hidden;" onclick="getFiles()">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row" style="background-color:white; visibility:hidden" id="fileTableContainer">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center justify-content-between plr" style="padding-left: 15px !important; padding-right: 15px;">
+                    <!-- Left: Search bar (will be injected by DataTables) -->
+                    <div class="col-md-6 col-sm-12 d-flex align-items-center" id="custom-search-container"></div>
+
+                    <div class="col-md-6 col-sm-12 text-right" style="margin-bottom: -14px;">
+                        <div class="" style="padding-right: 112px;">
+                            <button class="btn btn-primary uaeid-primary" id="uploadfiles" type="button" style="visibility:hidden;position:absolute" onclick="uploadFiles()">Upload files</button>
+                        </div>
+                        <div class="" style="padding-right: 112px;">
+                            <button class="btn btn-primary uaeid-primary" id="bulksignbutton" type="button" style="visibility:hidden;position:absolute" onclick="PerformBulkSign()">Bulk sign</button>
+                        </div>
+
+                        <div class="" style="padding-right: 112px;">
+                            <button class="btn btn-primary uaeid-primary" id="sendrequest" type="button" style="visibility:hidden;position:absolute" onclick="SendRequest()">Send Request</button>
+                        </div>
+                        <div class="" style="padding-right: 112px;">
+                            <button class="btn btn-primary uaeid-primary" id="saverequest" type="button" style="visibility:hidden" onclick="SaveRequest()">Save Request</button>
+                        </div>
+                    </div>
+
+                </div>
+                <table id="scopesTable" style="visibility:hidden; display:none;" class="table-striped table-bordered table-hover table-checkable order-column full-width table">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <table id="FilesTable" style="visibility:hidden" class="table-striped table-bordered table-hover table-checkable order-column full-width table">
+                    <thead>
+                        <tr>
+                            <th>FileName</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+           @* <div class="d-flex justify-content-end" style="padding-top: 1px;">
+                <div>
+                    <button class="btn btn-primary uaeid-primary" id="uploadfiles" type="button" style="visibility:hidden;position:absolute" onclick="uploadFiles()">Upload files</button>
+                </div>
+                <div>
+                    <button class="btn btn-primary uaeid-primary" id="bulksignbutton" type="button" style="visibility:hidden;position:absolute" onclick="PerformBulkSign()">Bulk sign</button>
+                </div>
+
+                <div>
+                    <button class="btn btn-primary uaeid-primary" id="sendrequest" type="button" style="visibility:hidden;position:absolute" onclick="SendRequest()">Send Request</button>
+                </div>
+                <div>
+                    <button class="btn btn-primary uaeid-primary" id="saverequest" type="button" style="visibility:hidden" onclick="SaveRequest()">Save Request</button>
+                </div>
+            </div>*@
+        </div>
+    </div>
+</div>
+
+<div id="file-list"></div>
+
+@* <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.2/dist/dropzone.js"></script> *@
+@* <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> *@
+<script src="~/assets/js/jquery-3.6.0.min.js"></script>
+<script src="~/assets/js/dropzone.js"></script>
+<script>
+    var EachFileSize = 10;
+    var NumberOfFiles = 10;
+    var AllFileSize = 10;
+    var templateList = @Html.Raw(Json.Serialize(Model));
+
+    $(document).ready(function () {
+        document.getElementById("navigationNetworkOverlay").style.display = "none";
+           var layoutType = '@(layoutType ?? "")';
+        if(layoutType == "Vertical"){
+       
+        $('#homeMenu').addClass('breadcrumb-item').append('Bulksign > Perform new Bulk Sign');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        $('#TransactionMenuItem').addClass('active');
+        }
+        $('#networkOverlay').hide();
+
+       
+
+
+        $('.select2').select2();
+        showPathForm();
+        getFileConfiguration();
+    });
+    var selectedFiles = [];
+    var CorelationId = "";
+
+    function handleSelection(event) {
+        var fileInput = document.getElementById('fileInput');
+        if ($.fn.DataTable.isDataTable('#scopesTable')) {
+            $('#scopesTable').DataTable().destroy();
+        }
+        selectedFiles = [];
+        if (fileInput.files.length > NumberOfFiles) {
+            Swal.fire({
+                type: 'info',
+                title: 'Alert',
+                text: 'You can only select up to  ' + NumberOfFiles + ' files.'
+            });
+            document.getElementById('fileInput').value = '';
+            return;
+        }
+
+        for (var i = 0; i < fileInput.files.length; i++) {
+            var fileSize = fileInput.files[i].size;
+            var maxSize = EachFileSize * 1024 * 1024;
+
+            if (fileSize > maxSize) {
+                Swal.fire.fire({
+                    type: 'info',
+                    title: 'Alert',
+                    text: 'File size should be less than' + EachFileSize + '.'
+                });
+                return;
+            }
+        }
+
+        for (var i = 0; i < fileInput.files.length; i++) {
+            selectedFiles.push(fileInput.files[i]);
+        }
+
+        AddTableData();
+    }
+
+    function handleSelection1(event) {
+        var fileInput = document.getElementById('folderInput');
+
+        if ($.fn.DataTable.isDataTable('#scopesTable')) {
+            $('#scopesTable').DataTable().destroy();
+        }
+
+        selectedFiles = [];
+
+        if (fileInput.files.length > NumberOfFiles) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Alert',
+                text: 'You can only select up to  ' + NumberOfFiles + ' files.'
+            });
+            document.getElementById('folderInput').value = '';
+            return;
+        }
+
+        for (var i = 0; i < fileInput.files.length; i++) {
+            var fileName = fileInput.files[i].name; // Get only the file name
+            var fileSize = fileInput.files[i].size;
+            var maxSize = EachFileSize * 1024 * 1024;
+
+            if (fileSize > maxSize) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Alert',
+                    text: 'File size should be less than ' + EachFileSize + '.'
+                });
+                return;
+            }
+
+            // Create a new File object with the updated name
+            var updatedFile = new File([fileInput.files[i]], fileName, { type: fileInput.files[i].type });
+            selectedFiles.push(updatedFile);
+        }
+
+        AddTableData();
+    }
+
+    function uploadFiles() {
+        var transactionName = document.getElementById('inputField1').value;
+        if (transactionName === null || transactionName.trim() === '') {
+            Swal.fire({
+                icon: 'info',
+                title: "Upload files",
+                text: "TransactionName should not be null",
+                showCancelButton: false,
+                closeOnConfirm: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    return;
+                }
+            });
+        }
+        if (selectedFiles.length > 0) {
+            var formData = new FormData();
+            for (var i = 0; i < selectedFiles.length; i++) {
+                formData.append('files', selectedFiles[i]);
+            }
+            formData.append('displayName', document.getElementById('inputField1').value);
+            formData.append('id', document.getElementById('DocumentTemplate').value);
+            $.ajax({
+                url: '@Url.Action("SendFiles", "BulkSign")',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function () {
+                    $('#overlay').show();
+                },
+                complete: function () {
+                    $('#overlay').hide();
+                },
+                success: function (response) {
+                    if (response.success == true) {
+                        CorelationId = response.correlationid;
+                        Swal.fire({
+                            icon: 'success',
+                            title: "Upload files",
+                            text: response.message,
+                            showCancelButton: false,
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                            }
+                        });
+
+                        UpdateDetails();
+                        $('#my-dropzone input, #my-dropzone select').prop('readonly', true);
+                        document.getElementById('uploadfiles').style.visibility = 'hidden';
+                        document.getElementById('fileInput').disabled = true;
+                        document.getElementById('folderInput').disabled = true;
+                        document.getElementById('DocumentTemplate').disabled = true;
+                        document.getElementById('fileRadio').disabled = true;
+                        document.getElementById('folderRadio').disabled = true;
+                        document.getElementById('PathRadio').disabled = true;
+                        if (response.ispreparator) {
+                            ActivateSendRequestButton();
+                        }
+                        else {
+                            ActivateBulkSignButton();
+                        }
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: "Upload files",
+                            text: response.message,
+                            showCancelButton: false,
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                            }
+                        });
+
+                    }
+                },
+                error: function (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Upload files",
+                        text: "Failed to upload files",
+                        showCancelButton: false,
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                        }
+                    });
+
+                }
+            });
+        } else {
+            console.log('No files selected.');
+        }
+    }
+
+    function AddTableData() {
+        var tableBody = document.getElementById('scopesTable').getElementsByTagName('tbody')[0];
+
+        tableBody.innerHTML = "";
+
+        for (var i = 0; i < selectedFiles.length; i++) {
+            var row = tableBody.insertRow(i);
+            var cell1 = row.insertCell(0);
+
+            cell1.textContent = selectedFiles[i].name;
+
+        }
+
+        var tableContainer = document.getElementById('fileTableContainer');
+        tableContainer.style.visibility = selectedFiles.length > 0 ? 'visible' : 'hidden';
+        document.getElementById('scopesTable').style.diaplay = 'none';
+        document.getElementById('scopesTable').style.visibility = 'visible';
+        ActivateUploadfilesButton();
+        debugger;
+        $('#scopesTable').DataTable({
+            
+            searching: true,
+            ordering: true,
+            paging: true,
+            lengthChange: false,
+             "initComplete": function () {
+                // Move the search bar into our custom container
+                $(".dataTables_filter").appendTo("#custom-search-container");
+                $('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+                $('.dataTables_filter label').contents().filter(function () {
+                    return this.nodeType === 3;
+                }).remove();
+
+            }
+        });
+        var tableElement = document.getElementById('scopesTable');
+        tableElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function showFileInput() {
+        $('#my-dropzone').css('visibility', 'visible');
+        $('#PathSelection').css('visibility', 'hidden');
+        document.getElementById('folderInput').value = '';
+        document.getElementById('fileinputdisplay').style.visibility = 'visible';
+        document.getElementById('folderinputdisplay').style.visibility = 'hidden';
+        document.getElementById('selectDestination').style.visibility = 'hidden';
+        document.getElementById('selectSource').style.visibility = 'hidden';
+        document.getElementById('getFiles').style.visibility = 'hidden';
+        $('#scopesTable').css('visibility', 'hidden');
+        $('#scopesTable').css('display', 'none');
+        $('#uploadfiles').css('visibility', 'hidden');
+        $('#fileTableContainer').css('visibility', 'hidden');
+        if ($.fn.DataTable.isDataTable('#scopesTable')) {
+            $('#scopesTable').DataTable().destroy();
+        }
+        selectedFiles = [];
+        var tableBody = document.getElementById('scopesTable').getElementsByTagName('tbody')[0];
+
+        tableBody.innerHTML = "";
+    }
+
+    function showFolderInput() {
+        $('#my-dropzone').css('visibility', 'visible');
+        $('#PathSelection').css('visibility', 'hidden');
+        document.getElementById('fileinputdisplay').style.visibility = 'hidden';
+        document.getElementById('folderinputdisplay').style.visibility = 'visible';
+        document.getElementById('selectDestination').style.visibility = 'hidden';
+        document.getElementById('selectSource').style.visibility = 'hidden';
+        document.getElementById('getFiles').style.visibility = 'hidden';
+        document.getElementById('fileInput').value = '';
+        $('#scopesTable').css('visibility', 'hidden');
+        $('#scopesTable').css('display', 'none');
+        $('#uploadfiles').css('visibility', 'hidden');
+        $('#fileTableContainer').css('visibility', 'hidden');
+        if ($.fn.DataTable.isDataTable('#scopesTable')) {
+            $('#scopesTable').DataTable().destroy();
+        }
+        selectedFiles = [];
+        var tableBody = document.getElementById('scopesTable').getElementsByTagName('tbody')[0];
+
+        tableBody.innerHTML = "";
+    }
+
+    // function PerformBulkSign() {
+    //     var correlationId = CorelationId;
+    //     $.ajax({
+    //         url: '@Url.Action("PerformBulkSign", "BulkSign")',
+    //         method: 'POST',
+    //         contentType: "application/json",
+    //         data: JSON.stringify(correlationId),
+    //         beforeSend: function () {
+    //             $('#overlay6').show();
+    //         },
+    //         complete: function () {
+    //             $('#overlay6').hide();
+    //         },
+    //         success: function (response) {
+    //             if (response.success == false) {
+    //                 Swal.fire({ type: 'info', title: "Bulk Signing", text: response.message, showCancelButton: false, closeOnConfirm: true }, function (isConfirm) {
+    //                     if (isConfirm) {
+    //                     }
+    //                 });
+    //             }
+    //             else {
+    //                 var url = '@Url.Action("DocumentDetails", "BulkSign")' + '?correlationId=' + correlationId;
+    //                 window.location.href = url;
+    //             }
+    //         },
+    //         error: function (error) {
+    //             Swal.fire({ type: 'error', title: "Bulk Signing", text: "Error Performing Bulk Signing", showCancelButton: false, closeOnConfirm: true }, function (isConfirm) {
+    //                 if (isConfirm) {
+    //                 }
+    //             });
+    //             console.error('Error Performing Bulksign:', error);
+    //         }
+    //     });
+    // }
+
+
+           function PerformBulkSign() {
+                    var correlationId = CorelationId;
+                    var tempId = $('#DocumentTemplate').val();
+                    var signcord = "";
+                    var esealcord = "";
+                    for (var i = 0; i < templateList.length; i++) {
+                        if (templateList[i]._id == tempId) {
+                            signcord = templateList[i].annotations;
+                            esealcord = templateList[i].esealAnnotations;
+                        }
+                    }
+
+                    if (esealcord !== null) {
+                        var responseFlag = true;
+                        $.ajax({
+                            url: '@Url.Action("GetOrganizationStatus", "BulkSign")',
+                            type: 'GET',
+                            success: function (response) {
+                                if (!response.success) {
+
+                                   Swal.fire({
+                                      icon: 'info',
+                                      title: 'Info',
+                                      text: `Sorry you can not perform eseal operation, please contact organization`
+                                    }).then((result) => {
+                                      if (result.isConfirmed) {
+                                        // Redirect to DocumentDetails with correlationId query parameter
+                                        const url = '@Url.Action("DocumentDetails", "BulkSign")' + '?correlationId=' + correlationId;
+                                        window.location.href = url;
+                                      }
+                                    });
+
+                                    responseFlag = false;
+                                } else {
+                                    responseFlag = true;
+                                    PerformBulkSigning(correlationId, signcord, esealcord);
+                                }
+                            },
+                            error: ajaxErrorHandler
+                        });
+                    }
+                    else {
+                        PerformBulkSigning(correlationId, signcord, esealcord);
+                    }
+           }
+
+
+           function PerformBulkSigning(correlationId, signcord, esealcord) {
+                $.ajax({
+                    url: '@Url.Action("PerformBulkSign", "BulkSign")',
+                    method: 'POST',
+                    contentType: "application/json",
+                    data: JSON.stringify(correlationId),
+                    beforeSend: function () {
+                        $('#overlay6').show();
+                    },
+                    complete: function () {
+                        $('#overlay6').hide();
+                    },
+                    success: function (response) {
+                        if (response.success == false) {
+                            Swal.fire({
+                                icon: 'info',
+                                title: "Server Message",
+                                text: response.message,
+                                showCancelButton: true,
+                                confirmButtonText: 'Retry',
+                                cancelButtonText: 'Cancel'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    PerformBulkSign();
+                                }
+
+                            });
+
+                        }
+                        else {
+
+                            // Swal.fire({
+                            //     title: "Info",
+                            //     text: "Document Signing is initiated.",
+                            //     type: "info",
+                            //     allowOutsideClick: false,
+                            //     showConfirmButton: true,
+                            // }, function (isConfirm) {
+                            //     if (isConfirm) {
+                            //         //window.location.href = "/BulkSign/BulkSigningStatus?correlationId=" + correlationId;
+                            //         var url = '@Url.Action("DocumentDetails", "BulkSign")' + '?correlationId=' + correlationId;
+                            //         window.location.href = url;
+                            //     }
+                            // });
+                            var url = '@Url.Action("DocumentDetails", "BulkSign")' + '?correlationId=' + correlationId;
+                                    window.location.href = url;
+
+                        }
+                    },
+                    error: ajaxErrorHandler
+                });
+           }
+
+
+
+    function SendRequest() {
+        var correlationId = CorelationId;
+        $.ajax({
+            url: '@Url.Action("SendRequest", "BulkSign")',
+            method: 'POST',
+            contentType: "application/json",
+            data: JSON.stringify(correlationId),
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+                $('#overlay').hide();
+            },
+            success: function (response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: "Send Request",
+                    text: response.message,
+                    showCancelButton: false,
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("GetSentBulkSignList", "BulkSign")';
+                    }
+                });
+
+            },
+            error: function (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: "Send Request",
+                    text: "Failed to Send Request",
+                    showCancelButton: false,
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                    }
+                });
+
+                console.error('Error Performing Bulksign:', error);
+                if (error.responseText) {
+                    console.error('Error Response:', error.responseText);
+                }
+            }
+        });
+    }
+
+    function ModifyTableData() {
+        var tableBody = document.getElementById('scopesTable').getElementsByTagName('tbody')[0];
+
+        tableBody.innerHTML = "";
+
+        for (var i = 0; i < selectedFiles.length; i++) {
+            var row = tableBody.insertRow(i);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+
+            cell1.textContent = selectedFiles[i].name;
+
+            // Replace the delete button with a success icon
+            var successIcon = document.createElement('i');
+            successIcon.classList.add('fa', 'fa-check-circle', 'fa-2x', 'text-success');
+            successIcon.style.cursor = 'pointer';
+            successIcon.onclick = function () {
+            };
+
+
+            cell2.appendChild(successIcon);
+        }
+
+        var tableContainer = document.getElementById('fileTableContainer');
+        tableContainer.style.visibility = selectedFiles.length > 0 ? 'visible' : 'hidden';
+    }
+
+    function ActivateBulkSignButton() {
+        document.getElementById('bulksignbutton').style.visibility = 'visible';
+    }
+
+    function ActivateSendRequestButton() {
+        document.getElementById('sendrequest').style.visibility = 'visible';
+    }
+
+    function ActivateUploadfilesButton() {
+        document.getElementById('uploadfiles').style.visibility = 'visible';
+    }
+
+    function ActivateSaveRequestButton() {
+        document.getElementById('saverequest').style.visibility = 'visible';
+    }
+
+    function showPathForm() {
+        $('#fileinputdisplay').css('visibility', 'hidden');
+        $('#folderinputdisplay').css('visibility', 'hidden');
+        $('#selectSource').css('visibility', 'visible');
+        $('#selectDestination').css('visibility', 'visible');
+        $('#getFiles').css('visibility', 'visible');
+        $('#scopesTable').css('visibility', 'hidden');
+        $('#scopesTable').css('display', 'none');
+        $('#fileTableContainer').css('visibility', 'hidden');
+        $('#uploadfiles').css('visibility', 'hidden');
+        $('#scopesTable').DataTable().destroy();
+        $('#uploadfiles').css('visibility', 'hidden');
+        $('#fileInput').val('');
+        if ($.fn.DataTable.isDataTable('#scopesTable')) {
+            $('#scopesTable').DataTable().destroy();
+        }
+        selectedFiles = [];
+        var tableBody = document.getElementById('scopesTable').getElementsByTagName('tbody')[0];
+
+        tableBody.innerHTML = "";
+    }
+
+    function showFilesForm() {
+        $('#fileinputdisplay').css('visibility', 'visible');
+        $('#folderinputdisplay').css('visibility', 'visible');
+        $('#selectSource').css('visibility', 'hidden');
+        $('#selectDestination').css('visibility', 'hidden');
+        $('#getFiles').css('visibility', 'hidden');
+        $('#FilesTable').css('visibility', 'hidden');
+    }
+
+    function getFiles() {
+        var sourcePath = $('#sourcepath').val().trim();
+        var destinationPath = $('#destinationpath').val().trim();
+        var transactionName = $('#inputField1').val().trim();
+        var templateId = $('#DocumentTemplate').val();
+        if (sourcePath === null || sourcePath.trim() === '' || destinationPath === null || destinationPath.trim() === '' || transactionName === null || transactionName.trim() === '') {
+            Swal.fire({
+                icon: 'info',
+                title: "Upload files",
+                text: "Transaction Name or Source or destination path should not be empty",
+                showCancelButton: false,
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                }
+            });
+
+            return;
+        }
+        var dataToSend = {
+            SourcePath: sourcePath,
+            DestinationPath: destinationPath,
+            TransactionName: transactionName,
+            TemplateId: $('#DocumentTemplate').val()
+        };
+
+        $.ajax({
+            url: '@Url.Action("getFiles", "BulkSign")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(dataToSend),
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+                $('#overlay').hide();
+            },
+            success: function (response) {
+                if (response.success) {
+                    AddFilesData(response.result);
+                   // document.getElementById('fileRadio').disabled = true;
+                    // document.getElementById('folderRadio').disabled = true;
+                    document.getElementById('PathRadio').disabled = true;
+                    CorelationId = response.correlationid;
+                    document.getElementById('uploadfiles').style.visibility = 'hidden';
+                    document.getElementById('selectSource').disabled = true;
+                    document.getElementById('selectDestination').disabled = true;
+                    document.getElementById('DocumentTemplate').disabled = true;
+                    document.getElementById('saverequest').style.visibility = 'hidden';
+                    document.getElementById('getFiles').style.visibility = 'hidden';
+                    // Swal.fire({
+                    //     type: 'success',
+                    //     title: "Save Request",
+                    //     text: response.message,
+                    //     showCancelButton: false,
+                    //     closeOnConfirm: true
+                    // }, function (result) {
+                    //     if (result) {
+                    //     }
+                    // });
+                    if (response.ispreparator) {
+                        ActivateSendRequestButton();
+                    }
+                    else {
+                        ActivateBulkSignButton();
+                    }
+                }
+                else {
+                    Swal.fire({
+                        icon: 'info',
+                        title: "Save Request",
+                        text: response.message,
+                        showCancelButton: false,
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                        }
+                    });
+
+                }
+
+            },
+            error: function (error) {
+                console.error('Ajax call failed', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: "Save Request",
+                    text: "Failed to upload files",
+                    showCancelButton: false,
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                    }
+                });
+
+            }
+        });
+    }
+
+    function SaveRequest() {
+        var sourcePath = $('#sourcepath').val();
+        var destinationPath = $('#destinationpath').val();
+        var transactionName = $('#inputField1').val();
+        var templateId = $('#DocumentTemplate').val();
+        if (sourcePath === null || sourcePath.trim() === '' || destinationPath === null || destinationPath.trim() === '' || transactionName === null || transactionName.trim() === '') {
+            Swal.fire({
+                icon: 'info',
+                title: "Upload files",
+                text: "Transaction Name or Source or destination path should not be empty",
+                showCancelButton: false,
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    return;
+                }
+            });
+
+        }
+        var dataToSend = {
+            SourcePath: $('#sourcepath').val(),
+            DestinationPath: $('#destinationpath').val(),
+            TransactionName: $('#inputField1').val(),
+            TemplateId: $('#DocumentTemplate').val()
+        };
+
+        $.ajax({
+            url: '@Url.Action("SaveRequestByPath", "BulkSign")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(dataToSend),
+            success: function (response) {
+                if (response.success == true) {
+                    CorelationId = response.correlationid;
+                    document.getElementById('uploadfiles').style.visibility = 'hidden';
+                    document.getElementById('selectSource').disabled = true;
+                    document.getElementById('selectDestination').disabled = true;
+                    document.getElementById('DocumentTemplate').disabled = true;
+                    document.getElementById('saverequest').style.visibility = 'hidden';
+                    ModifyTableData();
+                    Swal.fire({
+                        icon: 'success',
+                        title: "Save Request",
+                        text: response.message,
+                        showCancelButton: false,
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                        }
+                    });
+
+                    if (response.ispreparator) {
+                        ActivateSendRequestButton();
+                    }
+                    else {
+                        ActivateBulkSignButton();
+                    }
+
+                }
+                else {
+                    Swal.fire({
+                        icon: 'info',
+                        title: "Save Request",
+                        text: response.message,
+                        showCancelButton: false,
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                        }
+                    });
+
+                }
+
+            },
+            error: function (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: "Save Request",
+                    text: "Failed to upload files",
+                    showCancelButton: false,
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                    }
+                });
+
+            }
+        });
+    }
+
+    function AddFilesData(filesArray) {
+        var tableContainer = document.getElementById('fileTableContainer');
+        tableContainer.style.visibility = filesArray.length > 0 ? 'visible' : 'hidden';
+        var tableBody = document.getElementById('FilesTable').getElementsByTagName('tbody')[0];
+
+        tableBody.innerHTML = "";
+
+        for (var i = 0; i < filesArray.length; i++) {
+            var row = tableBody.insertRow(i);
+            var cell1 = row.insertCell(0);
+            cell1.textContent = filesArray[i];
+
+        }
+        // var tableContainer = document.getElementById('fileTableContainer');
+        // tableContainer.style.visibility = 'visible';
+
+        $('#FilesTable').css('visibility', 'visible');
+        $('#scopesTable').DataTable().destroy();
+        $('#scopesTable').css('visibility', 'hidden');
+        $('#scopesTable').css('display', 'none');
+        debugger;
+        $('#FilesTable').DataTable({
+            searching: true,
+            ordering: true,
+            paging: true,
+            lengthChange: false,
+            "initComplete": function () {
+                // Move the search bar into our custom container
+                $(".dataTables_filter").appendTo("#custom-search-container");
+                $('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+                $('.dataTables_filter label').contents().filter(function () {
+                    return this.nodeType === 3;
+                }).remove();
+
+            }
+        });
+    }
+
+    function getFileConfiguration() {
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetFileConfiguration", "BulkSign")',
+            success: function (data) {
+                EachFileSize = data.eachFileSize;
+                NumberOfFiles = data.numberOfFiles;
+                AllFileSize = data.allFileSize;
+            },
+            error: function (error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+
+    function UpdateDetails() {
+        var corelationid = CorelationId;
+        $.ajax({
+            url: '@Url.Action("UpdateDocumentDetails", "BulkSign")',
+            method: 'GET',
+            data: { correlationId: corelationid },
+            success: function (data) {
+                if (data.totalFileCount > 0) {
+                    var fileArray = data.fileArray;
+                    if (data.totalFileCount === data.successFileCount) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: "Upload files",
+                            text: "All files uploaded successfully",
+                            showCancelButton: false,
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: "Upload files",
+                            text: `${data.successFileCount} out of ${data.totalFileCount} uploaded`,
+                            showCancelButton: false,
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                            }
+                        });
+                    }
+
+                    updateTable(fileArray);
+                }
+            },
+            error: function (error) {
+                console.error('Error calling UpdateDocumentDetails:', error);
+            }
+        });
+    }
+
+    function updateTable(fileArray) {
+        var tableBody = document.getElementById('scopesTable').getElementsByTagName('tbody')[0];
+        tableBody.innerHTML = "";
+        for (var i = 0; i < fileArray.length; i++) {
+            var row = document.createElement('tr');
+            var fileNameCell = document.createElement('td');
+            var successCell = document.createElement('td');
+
+            fileNameCell.textContent = fileArray[i].fileName;
+            if (fileArray[i].status === 'success') {
+                var successIcon = document.createElement('i');
+                successIcon.classList.add('fa', 'fa-check-circle', 'fa-2x', 'text-success');
+                successIcon.style.cursor = 'pointer';
+                successCell.appendChild(successIcon);
+            }
+            else {
+                var failedIcon = document.createElement('i');
+                failedIcon.classList.add('fa', 'fa-times-circle', 'fa-2x', 'text-danger');
+                failedIcon.style.cursor = 'pointer';
+
+                successCell.appendChild(failedIcon);
+            }
+            row.appendChild(fileNameCell);
+            row.appendChild(successCell);
+
+            tableBody.appendChild(row);
+        }
+    }
+</script>

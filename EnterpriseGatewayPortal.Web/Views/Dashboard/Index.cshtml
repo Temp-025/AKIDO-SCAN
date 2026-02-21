@@ -1,0 +1,1379 @@
+﻿@using System.Security.Claims
+@using EnterpriseGatewayPortal.Web.Models
+@inject IHttpContextAccessor httpContextAccessor
+
+<link href="~/global_assets/autoComplete/css/autoComplete2.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+@{
+    var IDPLogin = User.FindFirst("IDPLogin").Value;
+    var userExist = User.FindFirst("UserExist").Value;
+    var userRoleName = User.FindFirst("userRoleName")?.Value;
+    var organizationName = User.FindFirst("OrganizationName").Value;
+    var name = User.FindFirst(ClaimTypes.Name)?.Value;
+    var layoutType = Context.Request.Cookies["NavigationLayout"];
+    var adminUserExist = User.FindFirst("AdminUserExist").Value;
+    var businessUserExist = User.FindFirst("UserExist").Value;
+    var KYCAdminExist = User.FindFirst("KYCAdminUserExist").Value;
+
+}
+
+@if (TempData["Alert"] != null)
+{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+@{
+    var themeType = "Uaeid";
+}
+
+<style>
+
+
+	.classshide {
+		display: none;
+	}
+
+	/* =========================
+		   Dashboard Layout & Cards
+		========================= */
+	.Details-box,
+	.FirstDetails-box,
+	.SecondDetails-box,
+	.ThirdDetails-box {
+		width: 100%;
+		max-width: 300px; /* smaller cards */
+		min-width: 220px;
+		aspect-ratio: 2.2 / 1; /* slightly shorter height */
+		border-radius: 1rem;
+		padding: 1.25rem; /* reduced padding */
+		box-sizing: border-box;
+		box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 0.75rem; /* tighter spacing */
+		transition: all 0.3s ease-in-out;
+	}
+
+	/* Different card colors */
+	.Details-box {
+		background: #f5f5f5;
+	}
+
+	.FirstDetails-box {
+		background: #fff2d9;
+	}
+
+	.SecondDetails-box {
+		background: #e0f7fa;
+	}
+
+	.ThirdDetails-box {
+		background: #f3e5f5;
+	}
+
+	/* Small label box inside cards */
+	.small-box,
+	.small-box1,
+	.small-box2,
+	.small-box3 {
+		padding: 0.25rem 0.5rem;
+		font-size: 0.75rem; /* smaller font */
+		font-weight: 600;
+		border-radius: 0.65rem;
+		display: inline-block;
+		margin-bottom: 0.4rem;
+		color: #333;
+	}
+
+	.small-box {
+		background: #ffe0b2;
+	}
+
+	.small-box1 {
+		background: #dcedc8;
+	}
+
+	.small-box2 {
+		background: #b2ebf2;
+	}
+
+	.small-box3 {
+		background: #e1bee7;
+	}
+
+	/* Circle indicators */
+	.circle,
+	.circle1,
+	.circle2,
+	.circle3 {
+		width: 2rem;
+		height: 2rem;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.85rem;
+		font-weight: bold;
+		color: #fff;
+	}
+
+	.circle {
+		background: #ff9800;
+	}
+
+	.circle1 {
+		background: #8bc34a;
+	}
+
+	.circle2 {
+		background: #00bcd4;
+	}
+
+	.circle3 {
+		background: #9c27b0;
+	}
+
+	/* =========================
+		   Select2 Custom Dropdowns
+		   ========================= */
+	/* ----------- Select dropdown css -------------*/
+
+	.select2-container {
+		width: 100% !important;
+	}
+
+		.select2-container .select2-selection--single {
+			border-radius: 8px;
+			align-items: center;
+			box-sizing: border-box;
+			justify-content: center;
+			height: 40px !important;
+			border: 1px solid #C3C6CB;
+			box-shadow: 0px 1px 2px 0px #0000001A !important;
+			color: #3E4046 !important;
+		}
+
+	.selection {
+		width: 100% !important;
+	}
+
+	.select2-container--default .select2-selection--single .select2-selection__rendered {
+		color: #3E4046 !important;
+		font-size: 14px;
+		font-family: inherit;
+		padding: 5px 10px;
+	}
+
+
+	/* Remove default arrow */
+	.select2-container--default .select2-selection--single .select2-selection__arrow b {
+		border: none !important; /* removes default triangle */
+	}
+
+	/* Add your custom arrow */
+	.select2-container--default .select2-selection--single .select2-selection__arrow {
+		// background: url('@Url.Content("~/assets/images/dropDown-icon-brown.svg")');
+		background: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M27.0613 13.0612L17.0613 23.0612C16.9219 23.2011 16.7563 23.312 16.574 23.3877C16.3917 23.4634 16.1962 23.5024 15.9988 23.5024C15.8013 23.5024 15.6059 23.4634 15.4235 23.3877C15.2412 23.312 15.0756 23.2011 14.9363 23.0612L4.93626 13.0612C4.65446 12.7794 4.49615 12.3972 4.49615 11.9987C4.49615 11.6002 4.65446 11.218 4.93626 10.9362C5.21805 10.6544 5.60024 10.4961 5.99876 10.4961C6.39727 10.4961 6.77946 10.6544 7.06126 10.9362L16 19.875L24.9388 10.935C25.2205 10.6532 25.6027 10.4949 26.0013 10.4949C26.3998 10.4949 26.782 10.6532 27.0638 10.935C27.3455 11.2168 27.5039 11.599 27.5039 11.9975C27.5039 12.396 27.3455 12.7782 27.0638 13.06L27.0613 13.0612Z' fill='%2392722A'/%3E%3C/svg%3E");
+		//background: url('@Url.Content("~/assets/images/imgDropDownBrown.png")');
+		background-repeat: no-repeat;
+		background-size: 16px 16px;
+		width: 19px;
+		top: 11px;
+		vertical-align: middle;
+		height: 100%;
+	}
+
+	.select2-search__field {
+		display: none !important;
+	}
+
+
+
+	.select2-container .select2-dropdown.select2-dropdown--below {
+		top: -5px !important;
+	}
+
+	.select2-container .select2-search.select2-search--dropdown {
+		padding: 0 !important;
+	}
+	/* =========================
+		Responsive Layout Fixes
+		========================= */
+	.dashboard-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem; /* reduced gap */
+		justify-content: space-evenly;
+	}
+
+	.card-custom {
+		border-radius: 0.85rem;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		padding: 1rem;
+		background: #fff;
+		flex: 1;
+		min-width: 250px;
+	}
+
+	/* Text scaling */
+	h3, h4, h5 {
+		font-size: clamp(0.9rem, 1vw, 1.1rem);
+		font-weight: 600;
+		margin: 0.4rem 0;
+	}
+
+	p, span, label {
+		font-size: clamp(0.75rem, 0.9vw, 0.9rem);
+	}
+
+	/* =========================
+		   Media Queries
+		   ========================= */
+	@@media (max-width: 1270px) {
+		.dashboard-row {
+			justify-content: center;
+		}
+	}
+
+	@@media (max-width: 1024px) {
+		.dashboard-row {
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.Details-box,
+		.FirstDetails-box,
+		.SecondDetails-box,
+		.ThirdDetails-box {
+			max-width: 85%;
+		}
+	}
+
+	@@media (max-width: 845px) {
+		.sidebar {
+			display: none;
+		}
+
+		.dashboard-row {
+			gap: 0.75rem;
+		}
+	}
+
+	@@media (max-width: 499px) {
+		.Details-box,
+		.FirstDetails-box,
+		.SecondDetails-box,
+		.ThirdDetails-box {
+			min-width: 100%;
+			padding: 1rem;
+		}
+
+		.small-box,
+		.small-box1,
+		.small-box2,
+		.small-box3 {
+			font-size: 0.7rem;
+		}
+	}
+
+	@@media (min-width: 1366px) and (min-height: 768px) {
+		.Details-box,
+		.FirstDetails-box,
+		.SecondDetails-box,
+		.ThirdDetails-box {
+			max-width: 300px; /* tighter max width */
+			min-width: 240px;
+			aspect-ratio: 2.3/1; /* slightly flatter so height fits */
+			padding: 1.25rem; /* controlled padding */
+		}
+
+		h3, h4, h5 {
+			font-size: 1rem;
+		}
+
+		p, span, label {
+			font-size: 0.85rem;
+		}
+
+		.circle,
+		.circle1,
+		.circle2,
+		.circle3 {
+			width: 2rem;
+			height: 2rem;
+			font-size: 0.8rem;
+		}
+
+		.dashboard-row {
+			gap: 1rem; /* smaller spacing between cards */
+		}
+	}
+
+	.main-dashboard{
+		margin-top:80px !important;
+	}
+
+</style>
+
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+@if (layoutType == "BusinessUserLayout")
+{
+    <div class="" style="
+		background-repeat: no-repeat;
+		background-color: #F9F7ED;
+		background-size: 123% 569px;
+		background-position: bottom center;
+		justify-content: center;
+		height: 100%;
+		display: flex;">
+        <div class="col-md-12 mobile-main" style="top: 0; left: 0; padding: 20px; align-items: center; align-content: center; display: flex; justify-content: center; flex-direction: row;">
+
+            <div style=" background-image: url('@Url.Content("~/assets/images/NewFrame.svg")'); background-repeat: no-repeat; height: 85%;width: 85%; background-position: center; background-size: contain;">
+                <div class="row" style="height: 100%; padding: 20px 50px;">
+                    <div class="col-md-12" style="justify-content: left; display: flex; align-items: center; margin-left: 37px;">
+                        <div class="welcome-container">
+                            <div class="row" id="imgrow" style="display: flex; align-items: center; vertical-align: middle;">
+                                <div class="col-md-12">
+                                    <p id="welcomeText" style="text-align: left; color: #92722A; width: 64%; font-family: 'Inter'; font-weight: 800; font-size: 42px; line-height: 100%;">
+                                        Welcome to Enterprise Gateway Portal
+                                    </p>
+                                    <p style="text-align: left; color: #B68A35; font-family: Barlow Condensed; font-weight: 400; font-size: 33.28px; line-height: 100%; width: 64%;">
+                                        Organization Name: @User.Claims.FirstOrDefault(c => c.Type == "OrganizationName")?.Value
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+else if (businessUserExist == "true" && adminUserExist == "false" && KYCAdminExist == "false")
+{
+    <div class="" style="
+		background-repeat: no-repeat;
+		background-color: #F9F7ED;
+		background-size: 123% 569px;
+		background-position: bottom center;
+		justify-content: center;
+		height: 100%;
+		display: flex;">
+        <div class="col-md-12 mobile-main" style="top: 0; left: 0; padding: 20px; align-items: center; align-content: center; display: flex; justify-content: center; flex-direction: row;">
+
+            <div style=" background-image: url('@Url.Content("~/assets/images/NewFrame.svg")'); background-repeat: no-repeat; height: 85%;width: 85%; background-position: center; background-size: contain;">
+                <div class="row" style="height: 100%; padding: 20px 50px;">
+                    <div class="col-md-12" style="justify-content: left; display: flex; align-items: center; margin-left: 37px;">
+                        <div class="welcome-container">
+                            <div class="row" id="imgrow" style="display: flex; align-items: center; vertical-align: middle;">
+                                <div class="col-md-12">
+                                    <p id="welcomeText" style="text-align: left; color: #92722A; width: 64%; font-family: 'Inter'; font-weight: 800; font-size: 42px; line-height: 100%;">
+                                        Welcome to Enterprise Gateway Portal
+                                    </p>
+                                    <p style="text-align: left; color: #B68A35; font-family: Barlow Condensed; font-weight: 400; font-size: 33.28px; line-height: 100%; width: 64%;">
+                                        Organization Name: @User.Claims.FirstOrDefault(c => c.Type == "OrganizationName")?.Value
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+else if (layoutType == "AdminLayout" || layoutType == null)
+{
+    <div class="">
+        <div class="col-md-12 mobile-main plr">
+
+            <div class="flex-col">
+                <div class="container-fluid plr">
+                    <!-- Row 1: Dashboard Cards -->
+                    <div class="row mobile-view-d mb-4" style="justify-content: center; gap: 20px; padding: 0px 14px;flex-wrap:nowrap;">
+                        <!-- Admin Users -->
+                        <div class="stat-card-m" onclick="adminusersList()">
+                            <div class="stat-header">
+                                <div class="stat-icon-wrapper">
+                                    <img src="~/assets/images/AdminIcon.svg" height="24" width="24" />
+                                    <img src="~/assets/images/AdminIcon_filled.svg" height="24" width="24" />
+                                </div>
+                                <div class="stat-text">
+                                    <div class="stat-label-light">Number of</div>
+                                    <div class="stat-label-bold">Admin Users</div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="stat-footer">
+                                <div class="stat-value" id="adminusercount">--</div>
+                                <div class="stat-icon-swap">
+                                    <img src="~/assets/images/arrow_circle_up_right.svg" class="icon-default" height="32" />
+                                    <img src="~/assets/images/arrow_circle_up_right_white.svg" class="icon-hover" height="32" />
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Business Users -->
+                        <div class="stat-card-m" onclick="businessuserList()">
+                            <div class="stat-header">
+                                <div class="stat-icon-wrapper">
+                                    <img src="~/assets/images/Business User Dashboard Icon.svg" height="24" width="24" />
+                                    <img src="~/assets/images/Business User Dashboard Icon_filled.svg" height="24" width="24" />
+                                </div>
+                                <div class="stat-text">
+                                    <div class="stat-label-light">Number of</div>
+                                    <div class="stat-label-bold">Business Users</div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="stat-footer">
+                                <div class="stat-value" id="userscount">--</div>
+                                <div class="stat-icon-swap">
+                                    <img src="~/assets/images/arrow_circle_up_right.svg" class="icon-default" height="32" />
+                                    <img src="~/assets/images/arrow_circle_up_right_white.svg" class="icon-hover" height="32" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Beneficiaries -->
+                        @*<div class="stat-card-m" onclick="beneficiariesList()">
+                            <div class="stat-header">
+                                <div class="stat-icon-wrapper">
+                                    <img src="~/assets/images/BenificaryUaeidIcon.svg" height="24" width="24" />
+                                    <img src="~/assets/images/BenificaryUaeidIcon_filled.svg" height="24" width="24" />
+                                </div>
+                                <div class="stat-text">
+                                    <div class="stat-label-light">Number of</div>
+                                    <div class="stat-label-bold">Beneficiaries</div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="stat-footer">
+                                <div class="stat-value" id="BeneficiariesCount">--</div>
+                                <div class="stat-icon-swap">
+                                    <img src="~/assets/images/arrow_circle_up_right.svg" class="icon-default" height="32" />
+                                    <img src="~/assets/images/arrow_circle_up_right_white.svg" class="icon-hover" height="32" />
+                                </div>
+                            </div>
+                        </div>*@
+
+						<!--Active Credentials-->
+                        <div class="stat-card-m" onclick="credentialsList()">
+                            <div class="stat-header">
+                                <div class="stat-icon-wrapper">
+                                    <img src="~/assets/images/WalletUaeidIcon.svg" height="24" width="24" />
+                                    <img src="~/assets/images/WalletUaeidIcon_filled.svg" height="24" width="24" />
+                                </div>
+                                <div class="stat-text">
+                                    <div class="stat-label-light">Number of</div>
+                                    <div class="stat-label-bold">Active Credentials</div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="stat-footer">
+                                <div class="stat-value" id="BeneficiariesCount">--</div>
+                                <div class="stat-icon-swap">
+                                    <img src="~/assets/images/arrow_circle_up_right.svg" class="icon-default" height="32" />
+                                    <img src="~/assets/images/arrow_circle_up_right_white.svg" class="icon-hover" height="32" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Business Applications -->
+                        <div class="stat-card-m" onclick="applicationList()">
+                            <div class="stat-header">
+                                <div class="stat-icon-wrapper">
+                                    <img src="~/assets/images/Business Applications Icon.svg" height="24" width="24" />
+                                    <img src="~/assets/images/Business Applications Icon_filled.svg" height="24" width="24" />
+                                </div>
+                                <div class="stat-text">
+                                    <div class="stat-label-light">Number of</div>
+                                    <div class="stat-label-bold shrink">Business Applications</div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="stat-footer">
+                                <div class="stat-value" id="Applicationscount">--</div>
+                                <div class="stat-icon-swap">
+                                    <img src="~/assets/images/arrow_circle_up_right.svg" class="icon-default" height="32" />
+                                    <img src="~/assets/images/arrow_circle_up_right_white.svg" class="icon-hover" height="32" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Row 2: Graph and Timeline -->
+                    <div class="row mobile-view" style="padding: 0px 10px; margin-bottom:40px !important;padding-bottom:40px !important;">
+                        <!-- Graph Section -->
+                        <div class="col-md-6 mobile" style="padding-right: 10px !important; padding-left: 10px !important;">
+                            <div class="panel panel-default main-graph-pannel h-100">
+                                <div class="panel-heading" style="font-size:16px;">
+                                    @*<i class="fa fa-bar-chart" aria-hidden="true"></i>&nbsp;&nbsp;*@
+                                    Statistics
+                                </div>
+
+                                <div class="row mobile-options px-3 py-2">
+                                    <div class="col-md-6 mobile-select mb-2">
+
+                                        <select onchange="selectOnChange()" id="serviceSelect" class="form-control select2" style="box-shadow: none !important; border: 1px solid #E1E3E5 !important;">
+                                            <option value="DigitalAuthentications" selected>Digital Authentications</option>
+                                            @*<option value="Signatures">Signatures</option>*@
+                                        </select>
+
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+
+                                        <select id="serviceProviderName" class="form-control select2" onchange="selectServiceProvider()" style="box-shadow: none !important; border: 1px solid #E1E3E5 !important;">
+                                            <option value="AllApplications" selected>All Applications</option>
+                                        </select>
+
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; justify-content: space-between; align-items: center;padding:0em 1em;">
+                                    <!-- Toggle Buttons (Success/Fail) -->
+                                    <div style="display: flex; gap: 1rem; align-items: center;padding:0 1em;width:50%;">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" checked onchange="toggleSeries(0, this)">
+                                            <span class="legend-icon active">
+                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                                     xmlns="http://www.w3.org/2000/svg">
+                                                    <rect y="7" width="16" height="2" fill="#92722A" />
+                                                    <circle cx="8" cy="8" r="3.5" fill="white" stroke="#92722A" />
+                                                </svg>
+                                            </span>
+                                            Success
+                                        </label>
+
+                                        <label class="toggle-label">
+                                            <input type="checkbox" checked onchange="toggleSeries(1, this)">
+                                            <span class="legend-icon active">
+                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                                     xmlns="http://www.w3.org/2000/svg">
+                                                    <rect y="7" width="16" height="2" fill="#C5C7CD" />
+                                                    <circle cx="8" cy="8" r="3.5" fill="white" stroke="#C5C7CD" />
+                                                </svg>
+                                            </span>
+                                            Fail
+                                        </label>
+                                    </div>
+
+                                    <!-- Range Selector -->
+                                    <div class="range-selector">
+                                        <button class="range-button active" id="weekly-button" onclick="changeDuration('week')">Weekly</button>
+                                        <button class="range-button" onclick="changeDuration('month')">Monthly</button>
+                                        <button class="range-button" onclick="changeDuration('year')">Yearly</button>
+                                    </div>
+                                </div>
+
+
+                                <div id="chart" style="width: 100%; margin: auto; padding: 0 1em;"></div>
+
+
+
+                                <div id="signatureTypes" class="row" style="width: 100%;align-items: center;justify-content: space-evenly;margin: auto auto; display:none">
+                                    <label>
+                                        <input type="radio" name="signatureType" value="pades" />PADES
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="signatureType" value="xades" />XADES
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="signatureType" value="cades" />CADES
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="signatureType" value="eseal" />ESEAL
+                                    </label>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-6 mobile" style="padding-right: 10px !important; padding-left: 10px !important;">
+                            <div class="panel panel-default" style="height: 485px !important; border: 1px rgba(226, 232, 240, 1) solid !important; box-shadow: none !important; border-radius: 12px !important;">
+                                <div class="panel-heading" style="font-size:16px;">
+                                    @*<i class="fa fa-clock-o" aria-hidden="true"></i>&nbsp;&nbsp;*@
+                                    Activity Timeline
+                                </div>
+                                <hr style="margin:0px 15px !important;" />
+                                <div id="overlayAdminTimeline" class="p-3">
+                                    <div class="cv-spinner center">
+                                        <span class="spinner"></span>
+                                    </div>
+                                </div>
+                                <div id="AdminTimelineDiv"></div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+
+
+
+        </div>
+    </div>
+}
+
+@*<script src="~/assets/js/ApexChart.js" asp-append-version="true"></script>*@
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="~/assets/js/bootstrap3-typeahead.min.js" asp-append-version="true"></script>
+@section scripts {
+    <script>
+		// function lockTo100Percent() {
+		// 	let zoom = window.devicePixelRatio || 1;
+
+		// 	const wrapper = document.querySelector(".flex-col");
+		// 	if (wrapper) {
+		// 		// Reset in case of multiple runs
+		// 		wrapper.style.transform = "";
+		// 		wrapper.style.transformOrigin = "top left";
+
+		// 		// Only apply scale (inverse of zoom)
+		// 		wrapper.style.transform = "scale(" + (1 / zoom) + ")";
+		// 	}
+		// }
+
+		// window.addEventListener("load", lockTo100Percent);
+		// window.addEventListener("resize", lockTo100Percent);
+		var themeType = "@themeType";
+		var isLicenceActivated = "";
+		var isLicenceActive = "";
+
+		$(document).ready(function () {
+
+
+			$('#serviceSelect').select2();
+			$('#serviceProviderName').select2();
+
+            if ('@userRoleName' === "KYCADMIN" && '@layoutType' != "BusinessUserLayout") {
+                $('#networkOverlay').show();
+				window.location.href = "@Url.Action("Index", "KYCDashboard")";
+			}
+
+			$('#networkOverlay').hide();
+			document.getElementById("navigationNetworkOverlay").style.display = "none";
+
+			if ($('#sidebar ul li.dropdown.active')) {
+				$('#sidebar ul li.dropdown.active a.nav-link.drop-logo').attr('aria-expanded', 'true');
+			}
+			var Ismodulevalid = @((ViewBag.isvalid ?? false).ToString().ToLower());
+			if (Ismodulevalid) {
+				$('#TemplateMenu a').click();
+			}
+			/*For Beadcrum Start*/
+			$('#homeMenu').addClass('breadcrumb-item').append('Dashboard');
+			$('#mainMenu').removeClass('breadcrumb-item');
+			$('#subMenu').removeClass('breadcrumb-item');
+			getOrganizationStatistics();
+			serviceProviderName();
+			getAdminTimelineActivities();
+			getOrganizationGraphDetails();
+			idpLogin = '@IDPLogin';
+			userExist = '@userExist';
+			userRole = '@userRoleName';
+
+		});
+		var successData = [];
+		var failedData = [];
+		var xAxisCategories = [];
+		var yAxisTitle;
+		var weekCount;
+		var monthCount;
+		var yearCount;
+		var weekSuccessData = [];
+		var weekFailedData = [];
+		var monthSuccessData = [];
+		var monthFailedData = [];
+		var yearSuccessData = [];
+		var yearFailedData = [];
+		var chart;
+		var identifier;
+		var signatureTypes;
+		let chartColors;
+		if (themeType === 'Uaeid') {
+			chartColors = ['#92722A', '#D1D5DB'];
+		}
+		else if (themeType === 'Yellow') {
+			chartColors = ['#77B6EA', '#E94242'];
+		}
+		else {
+			chartColors = ['#77B6EA', '#E94242'];
+		}
+
+		var options = {
+			series: [
+				{
+					name: '__placeholder__',
+					data: [null],
+					showInLegend: false
+				}
+			],
+
+			chart: {
+				height: 285,
+				type: 'area',
+				zoom: {enabled:false},
+				dropShadow: {
+					enabled: true,
+					color: '#000',
+					top: 18,
+					left: 7,
+					blur: 10,
+					opacity: 0
+				},
+				toolbar: {
+					show: false
+				},
+				fontFamily: 'Inter,sans-serif'
+				// width: '60%'
+			},
+			colors: chartColors,
+			fill: {
+				type: 'gradient',
+				gradient: {
+					shade: 'light',
+					type: "vertical",
+					shadeIntensity: 1,
+					inverseColors: false,
+					opacityFrom: 0.3,
+					opacityTo: 0.05,
+					stops: [0, 99.35, 100],
+					colorStops: [
+						[
+							{
+								offset: 0,
+								color: 'rgba(146, 114, 42, 0.3)',
+								opacity: 1
+							},
+							{
+								offset: 99.35,
+								color: 'rgba(146, 114, 42, 0.05)',
+								opacity: 1
+							}
+						],
+						[
+							{
+								offset: 0,
+								color: 'rgba(158, 162, 169, 0.3)',
+								opacity: 1
+							},
+							{
+								offset: 100,
+								color: 'rgba(158, 162, 169, 0.05)',
+								opacity: 1
+							}
+						]
+					]
+				}
+			},
+			dataLabels: {
+				enabled: false,
+			},
+			stroke: {
+				curve: 'smooth',
+				width: [1, 1]
+			},
+			//grid: {
+			//    borderColor: '#e7e7e7',
+			//    row: {
+			//        colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+			//        opacity: 0.5
+			//    },
+			//},
+			grid: {
+				borderColor: '#e0e0e0',
+				strokeDashArray: 3,
+				xaxis: {
+					lines: {
+						show: true
+					}
+				},
+				yaxis: {
+					lines: {
+						show: true
+					}
+				}
+			},
+			markers: {
+                size: 4,
+                colors: ['#fff'],
+                strokeColors: chartColors,
+                strokeWidth: 2,
+                hover: {
+                    size: 4,
+                    sizeOffset: 0
+                }
+			},
+			xaxis: {
+				categories: xAxisCategories,
+			},
+            yaxis: {
+                title: {
+                    text: yAxisTitle
+                },
+            },
+			legend: {
+				show: false
+			}
+		};
+
+		chart = new ApexCharts(document.querySelector("#chart"), options);
+		chart.render();
+
+		//function toggleSeries(index) {
+		//    if (chart && chart.w && chart.w.config && chart.w.config.series[index]) {
+		//        const seriesName = chart.w.config.series[index].name;
+		//        chart.toggleSeries(seriesName);
+
+		//        const inputs = document.querySelectorAll('.toggle-label input');
+		//        const input = inputs[index];
+		//        const legendIcon = input?.nextElementSibling;
+
+		//        if (chart.w.globals.collapsedSeriesIndices.includes(index)) {
+		//            legendIcon?.classList.add('inactive'); // Dim the icon
+		//        } else {
+		//            legendIcon?.classList.remove('inactive'); // Show normal
+		//        }
+		//    }
+		//}
+
+		function toggleSeries(index) {
+			if (!chart || !chart.w || !chart.w.config || !chart.w.config.series[index]) return;
+
+			const inputs = document.querySelectorAll('.toggle-label input');
+			const input = inputs[index];
+			const legendIcon = input?.nextElementSibling;
+
+			if (!chart.originalData) {
+				chart.originalData = chart.w.config.series.map(s => [...s.data]);
+			}
+
+			const isActive = !input.classList.contains("inactive");
+
+			if (isActive) {
+				const nullData = chart.originalData[index].map(() => null);
+				chart.updateSeries(
+					chart.w.config.series.map((s, i) =>
+						i === index ? { ...s, data: nullData } : s
+					)
+				);
+				input.classList.add("inactive");
+				legendIcon?.classList.add("inactive");
+			} else {
+				chart.updateSeries(
+					chart.w.config.series.map((s, i) =>
+						i === index ? { ...s, data: chart.originalData[index] } : s
+					)
+				);
+				input.classList.remove("inactive");
+				legendIcon?.classList.remove("inactive");
+			}
+		}
+
+
+
+		function changeDuration(duration) {
+
+			document.querySelectorAll('.range-button').forEach(btn => btn.classList.remove('active'));
+
+			document.querySelector(`.range-button[onclick*="${duration}"]`).classList.add('active');
+
+			if (duration === 'week') {
+				weekData();
+			} else if (duration === 'month') {
+				monthData();
+			} else if (duration === 'year') {
+				yearData();
+			}
+			chart.originalData = chart.w.config.series.map(s => [...s.data]);
+
+		}
+
+
+		// $("#serviceProviderName").typeahead({
+		//     minLength: 3,
+		//     source: function (request, response) {
+
+		//         $.ajax({
+		//         url: '@Url.Action("GetServiceProviderNames", "Dashboard")',
+		//             data: {
+		//                 "request": request
+		//             },
+		//             type: "GET",
+		//             contentType: "json",
+		//             beforeSend: function () {
+		//                 $('#overlay').show();
+		//             },
+		//             complete: function () {
+		//                 $('#overlay').hide();
+		//             },
+		//             success: function (data) {
+		//                 items = [];
+		//                 map = {};
+		//                 $.each(data, function (i, item) {
+		//                     var id = i;
+		//                     var name = item;
+		//                     map[name] = {
+		//                         id: id,
+		//                         name: name
+		//                     };
+		//                     items.push(name);
+		//                 });
+		//                 response(items);
+		//             },
+		//             error: ajaxErrorHandler,
+		//             failure: function (response) {
+		//                 swal({ type: 'error', title: "Error", text: "Failed to process your request" });
+		//             }
+		//         });
+		//     },
+		//     updater: function (item) {
+		//         getserviceProviderGraphDetails(item);
+		//         return item;
+		//     }
+		// });
+
+		$('input[name=signatureType]:radio').change(function () {
+			switch ($('input[name=signatureType]:checked').val()) {
+				case 'pades':
+					identifier = "PADESSignatures";
+					break;
+
+				case 'xades':
+					identifier = "XADESSignatures";
+					break;
+
+				case 'cades':
+					identifier = "CADESSignatures";
+					break;
+
+				//case 'data':
+				//    identifier = "DATASignatures";
+				//    break;
+
+				case 'eseal':
+					identifier = "ESEALSignatures";
+					break;
+			};
+			weekData();
+		});
+
+		function createCustomLegend(config) {
+			const legendContainer = document.getElementById("custom-legend");
+			const labels = config.config.labels;
+			const series = config.config.series;
+			const colors = config.config.colors;
+
+			let legendHTML = '<table style="width:100%; border-collapse: collapse; margin-top:-10px;">';
+			for (let i = 0; i < labels.length; i++) {
+				legendHTML += `
+										  <tr style="border-bottom: 1px solid #eee;">
+											<td style="padding: 8px;">
+											  <span style="display:inline-block;width:12px;height:12px;background:${colors[i]};margin-right:8px;border-radius:50%;"></span>
+											  ${labels[i]}
+											</td>
+											<td style="padding: 8px; text-align: right;">${series[i]}</td>
+										  </tr>`;
+			}
+			legendHTML += '</table>';
+			legendContainer.innerHTML = legendHTML;
+		}
+
+
+
+
+		signatureTypes = $('#signatureTypes');
+
+		function getserviceProviderGraphDetails(name) {
+			var dataToSend = { serviceProviderName: name };
+			$.ajax({
+				url: '@Url.Action("GetServiceProviderGraphDetails", "Dashboard")',
+				type: 'POST',
+				data: dataToSend,
+				dataType: 'json',
+				beforeSend: function () {
+					$('#overlay').show();
+				},
+				complete: function () {
+					$('#overlay').hide();
+				}
+			}).done(function (response) {
+				if (response.status == "Success") {
+					weekCount = response.data['weekCount'];
+					monthCount = response.data['monthCount'];
+					yearCount = response.data['yearCount'];
+
+					selectOnChange();
+				}
+				else if (response.status == "Failed") {
+					clearData();
+					showAlert('error', `${response.message}`);
+					//swal({ type: 'error', title: "Error", text: response.message });
+				}
+			}).fail(ajaxErrorHandler);
+		}
+		function selectOnChange() {
+			var selectedValue = document.getElementById("serviceSelect").value;
+			signatureTypes.hide();
+			switch (selectedValue) {
+				case 'DigitalAuthentications':
+					identifier = "DigitalAuthentications";
+					yAxisTitle = "Digital Authentications";
+					break;
+				case 'Signatures':
+					signatureTypes.show();
+					$("input[name=signatureType][value='pades']").prop('checked', true);
+					identifier = "PADESSignatures";
+					yAxisTitle = "Signatures";
+					break;
+			}
+			weekData();
+		}
+		function loadGraph() {
+			chart.updateOptions({
+				xaxis: {
+					categories: xAxisCategories,
+				},
+				yaxis: {
+					title: {
+						text: yAxisTitle
+					}
+				}
+			});
+
+			chart.updateSeries([
+				{
+					name: "Success",
+					data: successData
+				},
+				{
+					name: "Failed",
+					data: failedData
+				}
+			]);
+		}
+
+		function weekData() {
+
+			$('.chartFilterButton').removeClass('highlightBtn');
+			$('#week').addClass('highlightBtn');
+			xAxisCategories.splice(0, xAxisCategories.length);
+			weekSuccessData.splice(0, weekSuccessData.length);
+			weekFailedData.splice(0, weekFailedData.length);
+			switch (identifier) {
+				case "DigitalAuthentications":
+					$.each(weekCount, function (i, item) {
+						xAxisCategories.push(item.weekDay);
+						weekSuccessData.push(item.count.countOfAuthenticationsSuccess);
+						weekFailedData.push(item.count.countOfAuthenticationsFailed);
+						yAxisTitle = "Digital Authentications";
+					});
+					break;
+
+				case "PADESSignatures":
+					$.each(weekCount, function (i, item) {
+						xAxisCategories.push(item.weekDay);
+						weekSuccessData.push(item.count.countOfSignaturesWithPadesSuccess);
+						weekFailedData.push(item.count.countOfSignaturesWithPadesFailed);
+						yAxisTitle = "Signatures";
+					});
+					break;
+
+				case "XADESSignatures":
+					$.each(weekCount, function (i, item) {
+						xAxisCategories.push(item.weekDay);
+						weekSuccessData.push(item.count.countOfSignaturesWithXadesSuccess);
+						weekFailedData.push(item.count.countOfSignaturesWithXadesFailed);
+						yAxisTitle = "Signatures";
+					});
+					break;
+
+				case "CADESSignatures":
+					$.each(weekCount, function (i, item) {
+						xAxisCategories.push(item.weekDay);
+						weekSuccessData.push(item.count.countOfSignaturesWithCadesSuccess);
+						weekFailedData.push(item.count.countOfSignaturesWithCadesFailed);
+						yAxisTitle = "Signatures";
+					});
+					break;
+				case "ESEALSignatures":
+					$.each(weekCount, function (i, item) {
+						xAxisCategories.push(item.weekDay);
+						weekSuccessData.push(item.count.countOfSignaturesWithESealSuccess);
+						weekFailedData.push(item.count.countOfSignaturesWithESealFailed);
+						yAxisTitle = "Signatures";
+					});
+					break;
+			}
+			successData = weekSuccessData;
+			failedData = weekFailedData;
+			loadGraph();
+		}
+
+		function monthData() {
+			$('.chartFilterButton').removeClass('highlightBtn');
+			$('#monthly').addClass('highlightBtn');
+			xAxisCategories.splice(0, xAxisCategories.length);
+			monthSuccessData.splice(0, monthSuccessData.length);
+			monthFailedData.splice(0, monthFailedData.length);
+			switch (identifier) {
+				case "DigitalAuthentications":
+					$.each(monthCount, function (i, item) {
+						xAxisCategories.push(item.month);
+						monthSuccessData.push(item.count.countOfAuthenticationsSuccess);
+						monthFailedData.push(item.count.countOfAuthenticationsFailed);
+						yAxisTitle = "Digital Authentications";
+					});
+					break;
+
+				case "PADESSignatures":
+					$.each(monthCount, function (i, item) {
+						xAxisCategories.push(item.month);
+						monthSuccessData.push(item.count.countOfSignaturesWithPadesSuccess);
+						monthFailedData.push(item.count.countOfSignaturesWithPadesFailed);
+						yAxisTitle = "Signatures";
+					});
+					break;
+
+				case "XADESSignatures":
+					$.each(monthCount, function (i, item) {
+						xAxisCategories.push(item.month);
+						monthSuccessData.push(item.count.countOfSignaturesWithXadesSuccess);
+						monthFailedData.push(item.count.countOfSignaturesWithXadesFailed);
+						yAxisTitle = "Signatures";
+					});
+					break;
+
+				case "CADESSignatures":
+					$.each(monthCount, function (i, item) {
+						xAxisCategories.push(item.month);
+						monthSuccessData.push(item.count.countOfSignaturesWithCadesSuccess);
+						monthFailedData.push(item.count.countOfSignaturesWithCadesFailed);
+						yAxisTitle = "Signatures";
+					});
+					break;
+
+				case "ESEALSignatures":
+					$.each(monthCount, function (i, item) {
+						xAxisCategories.push(item.month);
+						monthSuccessData.push(item.count.countOfSignaturesWithESealSuccess);
+						monthFailedData.push(item.count.countOfSignaturesWithESealFailed);
+						yAxisTitle = "Signatures";
+					});
+					break;
+			}
+			successData = monthSuccessData;
+			failedData = monthFailedData;
+			loadGraph();
+		}
+
+		function yearData() {
+			$('.chartFilterButton').removeClass('highlightBtn');
+			$('#yearly').addClass('highlightBtn');
+			xAxisCategories.splice(0, xAxisCategories.length);
+			yearSuccessData.splice(0, yearSuccessData.length);
+			yearFailedData.splice(0, yearFailedData.length);
+			switch (identifier) {
+				case "DigitalAuthentications":
+					$.each(yearCount, function (i, item) {
+						xAxisCategories.push(item.year);
+						yearSuccessData.push(item.count.countOfAuthenticationsSuccess);
+						yearFailedData.push(item.count.countOfAuthenticationsFailed);
+						yAxisTitle = "Digital Authentications";
+					});
+					break;
+
+				case "PADESSignatures":
+					$.each(yearCount, function (i, item) {
+						xAxisCategories.push(item.year);
+						yearSuccessData.push(item.count.countOfSignaturesWithPadesSuccess);
+						yearFailedData.push(item.count.countOfSignaturesWithPadesFailed);
+						yAxisTitle = "Signatures";
+					});
+					break;
+
+				case "XADESSignatures":
+					$.each(yearCount, function (i, item) {
+						xAxisCategories.push(item.year);
+						yearSuccessData.push(item.count.countOfSignaturesWithXadesSuccess);
+						yearFailedData.push(item.count.countOfSignaturesWithXadesFailed);
+						yAxisTitle = "Signatures";
+					});
+					break;
+
+				case "CADESSignatures":
+					$.each(yearCount, function (i, item) {
+						xAxisCategories.push(item.year);
+						yearSuccessData.push(item.count.countOfSignaturesWithCadesSuccess);
+						yearFailedData.push(item.count.countOfSignaturesWithCadesFailed);
+						yAxisTitle = "Signatures";
+					});
+					break;
+
+				case "ESEALSignatures":
+					$.each(yearCount, function (i, item) {
+						xAxisCategories.push(item.year);
+						yearSuccessData.push(item.count.countOfSignaturesWithESealSuccess);
+						yearFailedData.push(item.count.countOfSignaturesWithESealFailed);
+						yAxisTitle = "Signatures";
+					});
+					break;
+			}
+			successData = yearSuccessData;
+			failedData = yearFailedData;
+			loadGraph();
+		}
+
+		function clearData() {
+			$('.chartFilterButton').removeClass('highlightBtn');
+			successData.length = 0;
+			failedData.length = 0;
+			loadGraph();
+		}
+
+		function getOrganizationStatistics() {
+			$('#overlay').show();
+			$.ajax({
+				type: "GET",
+				url: '@Url.Action("GetOrganizationStatistics", "Dashboard")',
+				datatype: "json",
+				error: ajaxErrorHandler,
+				success: function (data) {
+					$('#overlay').hide();
+					$('#Applicationscount').text(data.applicationscount);
+					$('#userscount').text(data.businessusercount);
+					$('#adminusercount').text(data.adminuserscount);
+					$('#TemplatesCount').text(data.templatescount);
+					$('#BeneficiariesCount').text(data.activeCredentialsCount);
+				}
+			});
+		}
+		function serviceProviderName() {
+			var selectElement = $('#serviceProviderName');
+			$.ajax({
+				url: '@Url.Action("GetAllServiceProviderNames", "Dashboard")',
+				type: "GET",
+				contentType: "json",
+				error: ajaxErrorHandler,
+				success: function (data) {
+					if (!data) {
+						showAlert('error', 'Service provider names not found.');
+						//swal({ type: 'error', title: "Error", text: "Service provider names not found." });
+					}
+					var currentSelection = selectElement.val();
+					for (var i = 0; i < data.length; i++) {
+						var optionHTML = '<option value="' + data[i] + '">' + data[i] + '</option>';
+						selectElement.append(optionHTML);
+					}
+				}
+			});
+		}
+		function selectServiceProvider() {
+			var selectElement = $('#serviceProviderName');
+			if (selectElement.val() == "AllApplications") {
+				getOrganizationGraphDetails();
+
+				$('.range-button').removeClass('active');
+
+				$('#weekly-button').addClass('active');
+			}
+			else {
+				getserviceProviderGraphDetails(selectElement.val());
+
+				$('.range-button').removeClass('active');
+
+				$('#weekly-button').addClass('active');
+			}
+		}
+
+		function applicationList() {
+			document.getElementById("navigationNetworkOverlay").style.display = "block";
+			window.location.href = '@Url.Action("List", "Clients")'
+		}
+
+
+		function adminusersList() {
+			document.getElementById("navigationNetworkOverlay").style.display = "block";
+			window.location.href = '@Url.Action("List", "Users")'
+		}
+		function businessuserList() {
+			document.getElementById("navigationNetworkOverlay").style.display = "block";
+			window.location.href = '@Url.Action("List", "BussinessUser")'
+		}
+		function beneficiariesList() {
+			document.getElementById("navigationNetworkOverlay").style.display = "block";
+			window.location.href = '@Url.Action("BeneficiaryList", "Beneficiaries")'
+		}
+		function credentialsList() {
+			document.getElementById("navigationNetworkOverlay").style.display = "block";
+			window.location.href = '@Url.Action("Index", "Wallet")'
+		}
+		function templatesList() {
+			if (idpLogin == "true" && userExist == "true") {
+				window.location.href = '@Url.Action("Index", "DocumentTemplates")';
+			}
+			else {
+				showAlert('info', 'Login with UAEID to access this module')
+				//swal({ type: 'info', title: "Information", text: "Login with UAEID to access this module" });
+			}
+		}
+
+		function getAdminTimelineActivities() {
+			$('#AdminTimelineDiv').empty();
+			$.ajax({
+				type: "GET",
+				url: '@Url.Action("GetAdminTimeLine", "Dashboard")',
+				datatype: "json",
+				error: ajaxErrorHandler,
+				beforeSend: function () {
+					$('#overlayAdminTimeline').show();
+				},
+				complete: function () {
+					$('#overlayAdminTimeline').hide();
+				},
+				success: function (data) {
+					$('#AdminTimelineDiv').html(data);
+				}
+				// error: dashboardAjaxErrorHandler
+			});
+		}
+
+		function getOrganizationGraphDetails() {
+			$.ajax({
+				url: '@Url.Action("GetOrganizationGraphDetails", "Dashboard")',
+				type: 'GET',
+				dataType: 'json',
+				beforeSend: function () {
+					$('#overlay').show();
+				},
+				complete: function () {
+					$('#overlay').hide();
+				}
+			}).done(function (response) {
+				if (response.status == "Success") {
+					weekCount = response.data['weekCount'];
+					monthCount = response.data['monthCount'];
+					yearCount = response.data['yearCount'];
+
+					selectOnChange();
+				}
+				else if (response.status == "Failed") {
+					clearData();
+					Swal.fire({ icon: 'error', title: "Error", text: response.message });
+				}
+			}).fail(ajaxErrorHandler);
+		}
+
+    </script>
+}

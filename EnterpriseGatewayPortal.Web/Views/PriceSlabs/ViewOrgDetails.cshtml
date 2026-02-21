@@ -1,0 +1,132 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.Priceslabs.GenericPriceSlabDetailsViewModel
+
+@using EnterpriseGatewayPortal.Web.Enums
+
+@using EnterpriseGatewayPortal.Core.DTOs
+@using EnterpriseGatewayPortal.Web.Models
+
+<style>
+    #note {
+        padding-right: 10px;
+        display: flex;
+        justify-content: flex-end;
+        padding-bottom: 15px;
+    }
+
+    .classshide {
+        display: none !important;
+    }
+</style>
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+    {
+        new BreadCrumbModel { Title = "Price slabs" , Url = Url.Action("ViewOrgDetails","PriceSlabs"), IconKey = "payments-priceSlabs"},
+        new BreadCrumbModel { Title = "View Organization price slabs" , Url = "", IconKey = "view"}
+    };
+}
+@{
+    ViewData["Title"] = "Edit";
+    ViewData["ServiceId"] = Model.ServiceId;
+}
+@{
+    string orgViewDataValue = ViewBag.viewOrgData;
+}
+@{
+    var layoutType = Context.Request.Cookies["NavigationLayout"];
+}
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" id="spacingCss">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body">
+               
+                    <div class="form-row">
+                        <div class="form-group col-md-6" style="float:left;">
+                            <input asp-for="ServiceId" hidden />
+                            <input asp-for="OrganizationUID" hidden />
+                            <div class="form-group col-md-12">
+                                <label asp-for="OrganizationName" class="col-form-label"></label>
+                                <input asp-for="OrganizationName" class="form-control" readonly />
+                                <span asp-validation-for="OrganizationName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group col-md-12">
+                                <label asp-for="ServiceDisplayName" class="col-form-label"></label>
+                                <input asp-for="ServiceDisplayName" class="form-control" readonly />
+                                <span asp-validation-for="ServiceDisplayName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-7">
+                            <partial name="_DiscountVolumeRange" for="DiscountVolumeRanges"></partial>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end ">
+                    <a type="button" asp-action="List2" class="btn btn-other">
+                        Cancel
+                    </a>
+                    </div>
+             
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        var index;
+        $(document).ready(function () {
+            document.getElementById("navigationNetworkOverlay").style.display = "none";
+                    var layoutType = '@(layoutType ?? "")';
+        if(layoutType == "Vertical"){
+            var genericDetails = document.getElementById('PaymentsModle').querySelector('.nav-link');
+            genericDetails.click();
+            $('#homeMenu').addClass('breadcrumb-item').append('Payments > Price Slabs > View');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#PriceSlabsMenu').addClass('active');
+        }
+            $('#networkOverlay').hide();
+            var serviceId = $("#ServiceId").val();
+
+            $("#discountVolumeRangetbody tr").each(function () {
+                
+                var volumeRangeFromInput = $(this).find("input[name^='DiscountVolumeRanges'][name$='.VolumeRangeFrom']");
+                var volumeRangeToInput = $(this).find("input[name^='DiscountVolumeRanges'][name$='.VolumeRangeTo']");
+                var discountInput = $(this).find("input[name^='DiscountVolumeRanges'][name$='.Discount']");
+
+                if (serviceId == 6) {
+                    discountInput.attr("min", 0);
+                    discountInput.attr("max", 100);
+                    volumeRangeToInput.attr("value", 1);
+                    volumeRangeFromInput.attr("value", 1)
+                    volumeRangeFromInput.prop("readonly", true);
+                    volumeRangeToInput.prop("readonly", true);
+                    discountInput.prop("readonly", true);
+                }
+                else {
+                    discountInput.attr("min", 1);
+                    discountInput.attr("max", 99);
+                    volumeRangeFromInput.prop("readonly", true);
+                    volumeRangeToInput.prop("readonly", true);
+                    discountInput.prop("readonly", true);
+
+                }
+            });
+        });
+
+       
+       
+
+    </script>
+}
+
+

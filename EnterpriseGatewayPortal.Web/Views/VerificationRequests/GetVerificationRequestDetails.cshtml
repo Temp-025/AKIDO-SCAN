@@ -1,0 +1,196 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.VerificationRequests.ViewVerificationRequestViewModel
+@using EnterpriseGatewayPortal.Core.Constants;
+
+@{
+    ViewData["Title"] = "Add";
+}
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+<style>
+    .custom-check-box {
+        margin-right: 5px;
+        -webkit-print-color-adjust: exact;
+        vertical-align: top;
+        background-repeat: no-repeat;
+        background-position: 50%;
+        background-size: contain;
+        position: relative !important;
+        width: 1.125rem;
+        height: 1.125rem;
+        background-color: #fff;
+        border: .125rem solid rgba(0,0,0,0.3);
+    }
+
+    .classshide {
+        display: none !important;
+    }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body">
+                <form>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <div class="form-group col-md-6" style="float:left;">
+                              
+                                <div class="form-group">
+                                    <label asp-for="IssuerOrgName" class="col-form-label">Requested Organization Name</label>
+                                    @{
+                                        string issuerOrgNameValue = Model.IssuerOrgName;
+                                        if (string.IsNullOrEmpty(issuerOrgNameValue))
+                                        {
+                                            issuerOrgNameValue = "NA";
+                                        }
+                                    }
+                                    <input asp-for="IssuerOrgName" class="form-control" tabindex="1" value="@issuerOrgNameValue" readonly />
+                                    <span asp-validation-for="IssuerOrgName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="DocumentType" class="col-form-label">Document Type</label>
+                                    @{
+                                        string documentTypeValue = Model.DocumentType;
+                                        if (string.IsNullOrEmpty(documentTypeValue))
+                                        {
+                                            documentTypeValue = "NA";
+                                        }
+                                    }
+                                    <input asp-for="DocumentType" class="form-control" tabindex="1" value="@documentTypeValue" readonly />
+                                    <span asp-validation-for="DocumentType" class="text-danger"></span>
+                                </div>
+ 
+                                <div class="form-group">
+                                    <label asp-for="VerificationType" class="col-form-label">Verification Type</label>
+                                    @{
+                                        string verificationTypeValue = Model.VerificationType;
+                                        if (string.IsNullOrEmpty(verificationTypeValue))
+                                        {
+                                            verificationTypeValue = "NA";
+                                        }
+                                    }
+                                    <input asp-for="VerificationType" class="form-control" tabindex="1" value="@verificationTypeValue" readonly />
+                                    <span asp-validation-for="VerificationType" class="text-danger"></span>
+                                </div>
+                                
+                            </div>
+                                <div class="form-group col-md-6" style="float:left;">
+
+                                <div class="form-group">
+                                    <label asp-for="CreatedAt" class="col-form-label">Request Date</label>
+                                    @{
+                                        string createdAtValue = Model.CreatedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "NA";
+                                    }
+                                    <input asp-for="CreatedAt" class="form-control" tabindex="1" value="@createdAtValue" readonly />
+                                    <span asp-validation-for="CreatedAt" class="text-danger"></span>
+                                </div>
+
+                                  <div class="form-group">
+                                    <label asp-for="RequestedBy" class="col-form-label">Requested By</label>
+                                    @{
+                                        string requestedByValue = Model.RequestedBy;
+                                        if (string.IsNullOrEmpty(requestedByValue))
+                                        {
+                                            requestedByValue = "NA";
+                                        }
+                                    }
+                                    <input asp-for="RequestedBy" class="form-control" tabindex="1" value="@requestedByValue" readonly />
+                                    <span asp-validation-for="RequestedBy" class="text-danger"></span>
+                                  </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="Status" class="col-form-label"></label>
+                                        @{
+                                            string statusValue = Model.Status;
+                                            if (string.IsNullOrEmpty(statusValue))
+                                            {
+                                                statusValue = "NA";
+                                            }
+                                        }
+                                        <input asp-for="Status" class="form-control" tabindex="1" value="@statusValue" readonly />
+                                        <span asp-validation-for="Status" class="text-danger"></span>
+                                    </div>
+                              
+
+
+                                </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end " style="padding-top: 31px;">
+                        @if (Model.Status == "New" && Model.VerificationType == "TrueCopy")
+                         {
+
+                            <a class="btn btn-primary" type="button" asp-action="GetSaveDocConfig" asp-route-id="@Model.FileId">
+                                <i class="icon-pencil"></i>Prepare TrueCopy Report
+                            </a>
+                        }
+                        @if (Model.Status == "In Progress" && Model.VerificationType == "TrueCopy")
+                        {
+
+                            <a class="btn btn-primary" type="button" asp-action="GetSaveDocConfig" asp-route-id="@Model.FileId">
+                                <i class="icon-pencil"></i>Prepare TrueCopy Report
+                            </a>
+                        }
+                        
+                        @if (Model.Status == "Completed" && Model.VerificationType == "Technical")
+                        {
+                            <a class="btn btn-primary" type="button" asp-action="DownloadCertificateForTechnical" asp-route-fileId="@Model.FileId">
+                                <i class="icon-pencil"></i>Download Technical Report
+                            </a>
+                        }
+                        @if (Model.Status == "Completed" && Model.VerificationType == VerificationTypeConstants.Qr)
+                        {
+                            <a class="btn btn-primary" type="button" asp-action="DownloadCertificateForTechnical" asp-route-fileId="@Model.FileId">
+                                <i class="icon-pencil"></i>Download QRCode Report
+                            </a>
+                        }
+                        @if (Model.Status == "Completed" && Model.VerificationType == "TrueCopy")
+                         {
+
+                            <a class="btn btn-primary" type="button" asp-action="DownloadCertificatesForTrueCopy" asp-route-fileId="@Model.FileId">
+                                <i class="icon-pencil"></i>Download TrueCopy File
+                            </a>
+                         }
+                        &nbsp; &nbsp;
+                        <a type="button" asp-action="List" class="btn btn-danger">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    }
+<script>
+   
+    $(document).ready(function () {
+       
+        if ($('#sidebar ul li.dropdown.active')) {
+            $('#sidebar ul li.dropdown.active ul').addClass('show');
+            $('#eSeal').addClass('active');
+            $('#sidebar ul li.dropdown.active a.nav-link.drop-logo').attr('aria-expanded', 'true');
+        }
+        var DocumentIssuerLink = document.getElementById('DocumentIssuerModle').querySelector('.nav-link');
+        DocumentIssuerLink.click();
+
+        /*For Beadcrum Start*/
+        $('#homeMenu').addClass('breadcrumb-item').append('Document Issuer > Verification Requests > View');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        $('#VerificationRequestsMenu').addClass('active');
+        $('#networkOverlay').hide();
+    });
+
+   
+
+</script>
+

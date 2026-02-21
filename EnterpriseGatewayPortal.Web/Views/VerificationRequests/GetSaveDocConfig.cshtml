@@ -1,0 +1,2765 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.VerificationRequests.DownloadDocViewModel
+@using System.Security.Claims;
+@using Newtonsoft.Json;
+
+
+<style>
+
+    .classshide {
+        display: none !important;
+    }
+
+
+    /* body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 20px;
+        }
+
+        .card-custom {
+            border: 1px solid #ced4da;
+            border-radius: 10px;
+            background-color: #fff;
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 10px 10px 0 0;
+            padding: 10px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }*/
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .dropzone {
+        border: 2px dashed #ced4da;
+        border-radius: 5px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        margin-bottom: 20px;
+        height: 150px;
+    }
+
+        .dropzone p {
+            margin: 0;
+            font-size: 16px;
+            color: #6c757d;
+            padding: 39px;
+        }
+
+    #thumbnail img {
+        height: 138px;
+        width: 138px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+    }
+
+    #recplist label {
+        font-weight: bold;
+    }
+
+    .recp {
+        margin-bottom: 20px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+    .modal-dialog {
+        max-width: 800px;
+        width: 570px;
+        margin: 1.75rem auto;
+    }
+
+
+    .modal-content {
+        border-radius: 10px;
+    }
+
+    /* .modal-header {
+                background-color: #007bff;
+                color: #fff;
+                border-radius: 10px 10px 0 0;
+            }*/
+
+    .modal-footer {
+        border-radius: 0 0 10px 10px;
+    }
+
+    #viewer {
+        margin-top: 20px;
+    }
+
+    .box {
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .fields-heading {
+        color: #007bff;
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+
+    .draggable-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+
+        .draggable-buttons button {
+            flex: 1 1 calc(100% - 20px);
+            margin-right: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+            .draggable-buttons button:hover {
+                background-color: #0056b3;
+            }
+
+    .recipient li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .submit-button.classshide {
+        display: none;
+    }
+
+    .borderBox {
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        height: 252px;
+    }
+
+    /* Style for the image preview container */
+    .preview-container {
+        max-height: 160px;
+        overflow: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        /* Center the image within the preview container */
+        .preview-container img {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+
+    /* Style for the form controls */
+    .form-control {
+        margin-bottom: 10px;
+    }
+
+    .custom-card {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        max-width: 665px;
+        width: 580px;
+        margin-left: 16px;
+        margin-right: 19px;
+    }
+
+        .custom-card .card-body {
+            padding: 20px;
+        }
+
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <partial name="_AlertBox" />
+            <div class="card-body" id="create">
+                <form id="createDoc" enctype="multipart/form-data" style="height: 514px">
+
+                    <div class="row" style="visibility: hidden;">
+                        <div class="col-md-6">
+                            <span class="common-heading-color" style="font-size: 16px;">
+
+                                <label asp-for="File" class="col-form-label" style="font-size: 16px;">
+                                    Upload Document<span class="text-danger">
+                                        *
+                                    </span>
+                                </label>
+
+
+                            </span>
+                            <br>
+                            &nbsp; &nbsp;
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div>
+                                        @if (Model.FileName != null)
+                                        {
+                                            <div role="button" tabindex="0" class="dropzone" onclick="open_file()">
+                                                <div style="overflow:hidden;width: 0px; height: 0px;">
+                                                    <input asp-for="File" onchange="fileSelect(event)" type="file" accept=".docx,.pdf" autocomplete="off" tabindex="-1">
+
+                                                </div>
+                                                <p>Drag 'n' drop one file here, or click to select file</p>
+                                            </div>
+                                            <br>
+                                            <div class="row" id="thumbnail">
+                                                <div class="col-md-3">
+                                                    <img src="../assets/images/thumbnail.png" style="height: 138px; width: 138px; border: ridge;">
+                                                    <br>
+                                                    <button id="removefile" class="btn btn-primary" type="button" style="margin: 4px 11px;">Remove</button>
+                                                </div>
+                                            </div>
+
+                                        }
+                                        else
+                                        {
+                                            <div role="button" tabindex="0" class="dropzone" onclick="open_file()">
+                                                <div style="overflow:hidden;width: 0px; height: 0px;">
+                                                    <input asp-for="File" onchange="fileSelect(event)" type="file" accept=".docx,.pdf" autocomplete="off" tabindex="-1">
+
+                                                </div>
+                                                <p>Drag 'n' drop one file here, or click to select file</p>
+                                            </div>
+                                            <br>
+                                            <div class="row classshide" id="thumbnail">
+                                                <div class="col-md-3">
+                                                    <img src="../assets/images/thumbnail.png" style="height: 138px; width: 138px; border: ridge;">
+                                                    <br>
+                                                    <button id="removefile" class="btn btn-primary" type="button" style="margin: 4px 11px;">Remove</button>
+                                                </div>
+                                            </div>
+
+                                        }
+
+                                        <br>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <label class="col-form-label" style="font-size: 16px;padding-left: 15px;">Settings</label>
+
+                            </div>
+                            <div class="form-group row">
+                                <label asp-for="FileName" class="col-sm-4 col-form-label"></label>
+                                <div class="col-sm-8">
+                                    <input asp-for="FileName" class="form-control" placeholder="Document Name">
+                                </div>
+                            </div>
+
+
+                            <div class="form-group row" style=" padding-left: 16px;" hidden>
+                                <label class="col-form-label" for="QrCodeRequired">Qr Code Required</label>
+                                <div>
+                                    <div class="form-check">
+
+                                        <input type="checkbox" class="custom-check-box form-check-input" id="QrCodeRequired" name="QrCodeRequired" data-val="true" data-val-required="The Order field is required." value="1"
+                                               style=" position: absolute;margin-top: 0.3rem; margin-left: 6.75rem; transform: scale(1.5);" />
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="form-group row" style="padding-left: 16px;" hidden>
+                                <label class="col-form-label" for="RecpientList_0__Eseal">Eseal Document</label>
+                                <div>
+                                    <div class="form-check">
+
+                                        <input type="checkbox" class="custom-check-box form-check-input" data-val="true" data-val-required="The Order field is required." id="RecpientList_0__Eseal" name="RecpientList[0].Eseal" value="1" style="position: absolute; margin-top: 0.3rem; margin-left: 7.6rem; transform: scale(1.5);" />
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <button type="button" class="btn btn-primary" id="Contineu" style="margin-left: 5px; visibility: hidden;">Continue</button>
+
+                    </div>
+
+
+                    <div id="recplist">
+
+                        <div class="row">
+                            <div class="col-md-4" style="visibility: hidden;"><label><span>Selected Email</span></label></div>
+                            @*<div class="col-md-1" style="margin:0px;"><label><span>Index</span></label></div>*@
+
+                            <div class="col-md-1" style="margin:0px;  visibility: hidden;"><label><span>Eseal</span></label></div>
+                            @*<div class="col-md-2"><label><span>Action</span></label></div>*@
+                            <div class="col-md-1" style="margin:0px;  visibility: hidden;"><label><span>QrCode</span></label></div>
+                        </div>
+                        <div class="row recp" id="0">
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-md-4 margin" style="visibility: hidden;">
+                                        <input class="form-control email" type="text" data-val="true" data-val-regex="Please enter valid email" data-val-required="The Email field is required." id="RecpientList_0__Email" name="RecpientList[0].Email" value="" autocomplete="off">
+                                        <span class="text-danger classshide">Please enter valid E-Mail address</span>
+                                    </div>
+                                    @* <div class="col-md-1 margin"><input maxlength="4" pattern="[0-9]{1,4}" class="form-control" style="width: 50px;" readonly="" type="number" data-val="true" data-val-required="The Order field is required." id="RecpientList_0__Order" name="RecpientList[0].Order" value="1"></div>*@
+
+                                    @* <div class="col-md-1" style="padding: 0px 20px; visibility: hidden;">
+                                    <input style="width: 40px; height: 30px;" type="checkbox" data-val="true" data-val-required="The Order field is required." id="RecpientList_0__Eseal" name="RecpientList[0].Eseal" value="1"></div>
+
+                                    <div class="col-md-1" style="padding: 0px 20px; visibility: hidden;">
+                                    <input style="width: 40px; height: 30px;" id="QrCodeRequired" Name="QrCodeRequired" type="checkbox" data-val="true" data-val-required="The Order field is required.">
+
+                                    </div>*@
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+
+                </form>
+            </div>
+
+            <div class="card-body classshide" id="viwer">
+
+                <div class="row">
+                    <div class="col col-lg-9 col-sm-9 col-md-9">
+                      @*  <div id="overlay6">
+                            <div class="cv-spinner">
+                                <span class="spinner">
+                                </span>
+                            </div>
+                            <div class="text">hi</div>
+                        </div>*@
+                        <div id='viewer' style='width: auto; height: 600px; margin: 0 auto;'></div>
+                    </div>
+                    <div class="col col-lg-3 col-sm-3 col-md-3">
+                        <div id="fields" class="box">
+                            <h3 class="fields-heading">Fields</h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="Button-Box">
+                                        <div class="draggable-buttons" draggable="true" ondragstart="dragStart(event)" ondragend='dragEnd(event, "SIGNATURE")'>
+                                            <button onclick='addField("SIGNATURE")' data_lable="Signature" text="Signature1">
+                                                Signature
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="Button-Box" id="Eseal">
+                                        <div class="draggable-buttons" draggable="true" ondragstart="dragStart(event)" ondragend='dragEnd(event, "ESEAL")'>
+                                            <button onclick='addField("ESEAL")' data_lable="Signature" text="Eseal">
+                                                Eseal
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="Button-Box" id="TRUECOPY">
+                                        <div class="draggable-buttons" draggable="true" ondragstart="dragStart(event)" ondragend='dragEnd(event, "TRUECOPY")'>
+                                            <button onclick='addField("TRUECOPY")' data_lable="TrueCopy" text="TRUECOPY" style="margin-right:-26px">True Copy Stamp</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="Button-Box classshide" id="QRCODE">
+                                        <div class="draggable-buttons" draggable="true" ondragstart="dragStart(event)" ondragend='dragEnd(event, "QRCODE")'>
+                                            <button onclick='addField("QRCODE")' data_lable="Qrcode" text="QRCODE">QR CODE</button>
+                                        </div>
+                                    </div>
+                                </div>
+                               
+                            </div>
+                        </div>
+
+                       @* <div class="box">
+                            <h3 class="fields-heading">User</h3>
+                            <ul class="recipient" id="emailList">
+                            </ul>
+                        </div>*@
+
+                        <div class="box" style="display: none;">
+                            <h3 class="fields-heading">User</h3>
+                            <ul class="recipient" id="emailList"></ul>
+                        </div>
+
+
+                        <div style="display:flex; justify-content:center;">
+                            <button class="btn btn-primary classshide" id="Send" onclick="Save()">Send</button>
+                            <button class="btn btn-primary classshide" id="Save" onclick="Save()">Apply True Copy Stamp</button>
+                            @*<button class="btn btn-primary" id="back">Back</button>*@
+                          
+                        </div>
+                        <div style="display:flex; justify-content:center;">
+                            <button class="btn btn-primary" id="ViewDigitalSigns" style="margin-top:17px">View Digital Signatures</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+
+    <script>
+        /*script for create document page*/
+        var latestEmail = "";
+        var selectedEmails = [];
+        var id = "";
+        var addedAnnotations = [];
+        var PerpareDocumentContext = {
+            receipientEmails: [],
+            receipientEmailsList: [],
+            selectuser: "",
+            docName: "",
+            fileName: "",
+            edmsId: "",
+            filesizerestrict: 15360000,
+            filesize: "15",
+            dropPoint: {},
+
+        }
+        var file;
+        var signatory = "@Model.Signatory";
+        var requestId = "@Model.RequestId";
+        var qrcodeChecked = "@Model.qrCodeRequired";
+        var esealChechked = "@Model.esealRequired";
+        var globalFile;
+        var rotationData = 0;
+         var signature_dimensions_others = {
+             width: 0,
+             height: 0,
+         }
+         var eseal_dimensions_others = {
+             width: 0,
+             height: 0,
+         }
+           var trueCopy_dimensions_others = {
+              width: 0,
+              height: 0,
+          }
+          var signature_img_others;
+         var eseal_img_others;
+         var trueCopy_img_others = '';
+         var pageHeight = 0;
+         var pageWidth = 0;
+
+        var isFileUploaded = false;
+        var config = "";
+        function base64ToBlob(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; ++i) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            console.log(Blob[bytes]);
+            return new Blob([bytes], { type: 'application/pdf' });
+        };
+
+
+        $('#signatureHidden').show();
+        $('#esealHidden').show();
+        $('#esealTemplateHidden').hide();
+        $('#signatureTemplateHidden').hide();
+
+
+        $(document).ready(function () {
+
+
+            var DocumentIssuerLink = document.getElementById('DocumentIssuerModle').querySelector('.nav-link');
+            DocumentIssuerLink.click();
+            $('#homeMenu').addClass('breadcrumb-item').append('Document Issuer > Verification Requests > Document Signing');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#VerificationRequestsMenu').addClass('active');
+            $('#networkOverlay').hide();
+            $('#emailDataTable').DataTable({
+                info: false
+            });
+            $('#overlay').show();
+                var intervalId = "";
+                intervalId = setInterval(function () {
+                    if (isWebViewLoaded) {
+                        $('#overlay').hide();
+                        get();
+                        clearInterval(intervalId);
+                    }
+                }, 3000);
+
+
+
+        });
+
+        function get() {
+
+            var url = "@Url.Action("GetPreviewDocConfig", "VerificationRequests")";
+            id = id = "@ViewBag.FileId";
+
+
+
+            $.ajax({
+                url: url + '/' + id,
+                type: 'GET',
+                success: function (resp) {
+                    if (resp.success) {
+                        var Documentbase64 = resp.resource;
+                         globalFile = base64ToBlob(Documentbase64);
+                        webviwerInstance.loadDocument(base64ToBlob(Documentbase64), { filename: 'Sample.pdf' });
+
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: resp.message,
+                            icon: 'error' // 'type' is replaced by 'icon'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '@Url.Action("List", "VerificationRequests")';
+                            }
+                        });
+
+                    }
+
+                },
+                error: function (e) {
+                    console.log(e);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Something went wrong!',
+                        icon: 'error' // 'type' is replaced with 'icon' in v2+
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '@Url.Action("List", "VerificationRequests")';
+                        }
+                    });
+
+                }
+            });
+            $("#Contineu").trigger("click");
+        }
+
+
+
+
+            var dragAndDropableDiv = $(".dropzone");
+            dragAndDropableDiv.on('dragenter', function (e) {
+                console.log("hi");
+            });
+            dragAndDropableDiv.on('dragover', function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+                console.log("hello");
+            });
+
+            //If user drop File on DropArea
+             dragAndDropableDiv.on("drop", (event) => {
+
+                event.preventDefault()
+                //getting user select file and [0] this means if user select multiple files then we'll select only the first one
+                file = event.originalEvent.dataTransfer.files[0];
+                let acceptableSize = false;
+                let acceptableExt = false;
+                if (isFileUploaded === true) {
+                    Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "File already uploaded."
+
+                });
+                    return false;
+                }
+
+                if (e.target.files[0].size > 15 * 1024 * 1024) {
+
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Info',
+                        text: "File size should be 15 MB or below."
+
+                    });
+                    return false;
+                }
+
+                acceptableSize = true;
+
+
+                if (
+                    file.type !=
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document" &&
+                    file.type !=
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" &&
+                    file.type != "application/pdf"
+                ) {
+                    Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "Only pdf are supported"
+
+                });
+                    return false;
+                }
+
+                acceptableExt = true;
+
+                var len = file.name.length;
+                if (len > 50) {
+                    Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "File name length should be less than 40 characters"
+
+                });
+                    return false;
+                }
+
+                if (!acceptableSize || !acceptableExt) {
+                    Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "Something went wrong. Try after sometime or Contact Administrator"
+
+                });
+                    return false;
+                }
+
+                $("#FileName").val(file.name);
+                PerpareDocumentContext.fileName = file.name.split(".").slice(0, -1).join(".")
+                PerpareDocumentContext.docName = file.name
+                $("#thumbnail").removeClass('classshide');
+                isFileUploaded = true;
+                $("#myModal").addClass('classshide');
+                var blob = getblob(file, file.name).then(data => {
+                    webviwerInstance.loadDocument(data, { filename: file.name });
+                });
+                 globalFile = file;
+            });
+
+
+            $("#removefile").on("click", function () {
+                $("#thumbnail").addClass("classshide")
+                $("#FileName").val("");
+                isFileUploaded = false;
+            });
+
+            $("#back").on("click", function () {
+
+                if (!$('#Send').hasClass("classshide"))
+                    $('#Send').addClass("classshide");
+                if (!$('#Save').hasClass("classshide"))
+                    $('#Save').addClass("classshide");
+                $("#Eseal").addClass("classshide");
+                $("#QRCODE").addClass("classshide");  // Hide QRCODE button
+                $("#TRUECOPY").addClass("classshide");
+                $('#viwer').addClass("classshide");
+                $('#create').removeClass("classshide");
+                $("#fields").addClass("classshide")
+
+                const { documentViewer, annotationManager } = webviwerInstance.Core;
+                const annots = annotationManager.getAnnotationsList();
+                annotationManager.deleteAnnotations(annots);
+                var fileid = "@ViewBag.FileId";
+                window.location.href = '@Url.Action("DownloadVerificationCertificate", "VerificationRequests")?fileId=' + fileid;
+
+            });
+
+        $("#ViewDigitalSigns").on("click", function () {
+
+            if (!$('#Send').hasClass("classshide"))
+                $('#Send').addClass("classshide");
+            if (!$('#Save').hasClass("classshide"))
+                $('#Save').addClass("classshide");
+            $("#Eseal").addClass("classshide");
+            $("#QRCODE").addClass("classshide");  // Hide QRCODE button
+            $("#TRUECOPY").addClass("classshide");
+            $('#viwer').addClass("classshide");
+            $('#create').removeClass("classshide");
+            $("#fields").addClass("classshide")
+
+            const { documentViewer, annotationManager } = webviwerInstance.Core;
+            const annots = annotationManager.getAnnotationsList();
+            annotationManager.deleteAnnotations(annots);
+            var fileid = "@ViewBag.FileId";
+            window.location.href = '@Url.Action("DownloadVerificationCertificate", "VerificationRequests")?fileId=' + fileid;
+
+        });
+
+
+            $("#QrCodeRequired").on("change", function () {
+                toggleQRCODEVisibility();
+            });
+
+
+
+            //$("#Contineu").on("click", function (e) {
+
+
+            //    if (!isFileUploaded) {
+            //        swal({
+            //            type: 'info',
+            //            title: 'Info',
+            //            text: 'Please upload a file ',
+            //        });
+            //        e.preventDefault();
+            //        return;
+            //    }
+
+
+
+            //    var isEmailsValid = true;
+            //    $('.email').each(function () {
+            //        if (!validateEmail(this)) {
+            //            isEmailsValid = false;
+            //        }
+            //    })
+
+            //    if (!isEmailsValid) {
+            //         swal({
+            //                type: 'info',
+            //            title: 'Info',
+            //                text: 'Please select email',
+            //            });
+            //        e.preventDefault();
+            //        return;
+            //    }
+
+            //    var EmailList = [];
+            //    PerpareDocumentContext.receipientEmails = [];
+
+            //    $('.email').each(function (i) {
+            //         var isEseal = $("#RecpientList_" + i + "__Eseal").prop("checked");
+            //        PerpareDocumentContext.receipientEmails.push({
+            //            "order": i + 1,
+            //            "email": this.value,
+            //            "eseal": isEseal
+            //        });
+            //    })
+
+            //    setTimeout(function () {
+            //        $(".toolcontainer1").addClass("classshide");
+            //    }, 5000);
+            //    PerpareDocumentContext.selectuser = PerpareDocumentContext.receipientEmails[0].email;
+            //     var isEsealChecked = $("#RecpientList_0__Eseal").prop("checked");
+            //        if (isEsealChecked) {
+            //            $("#Eseal").removeClass("classshide");
+            //        } else {
+            //            $("#Eseal").addClass("classshide");
+            //        }
+
+            //        // Add the following line to show the "Fields" div
+            //        $("#fields").removeClass("classshide");
+            //    PrepareDocument();
+            //});
+
+
+       //Actual code
+         $("#Contineu").on("click", async function (e) {
+            var docname = $('#FileName').val().trim();
+            if (docname === '' || docname === null) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: 'Please enter a document name',
+                });
+                e.preventDefault();
+                return;
+            }
+
+           var isEmailsValid = true;
+
+            $('.email').each(function () {
+                // Set the value of each input field with class '.email' to 'signatory'
+                $(this).val(signatory);
+
+                // Validate the email
+                if (!validateEmail(this)) {
+                    isEmailsValid = false;
+                }
+            });
+
+            if (!isEmailsValid) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: 'Email is Empty',
+                });
+                e.preventDefault();
+                return;
+            }
+
+            var EmailList = [];
+            PerpareDocumentContext.receipientEmails = [];
+
+            $('.email').each(function (i) {
+                var isEseal = $("#RecpientList_" + i + "__Eseal").prop("checked");
+                PerpareDocumentContext.receipientEmails.push({
+                    "order": i + 1,
+                    "email": this.value,
+                    "eseal": isEseal
+                });
+            })
+
+               setTimeout(function () {
+                    $(".toolcontainer1").addClass("classshide");
+                }, 5000);
+
+                PerpareDocumentContext.selectuser = PerpareDocumentContext.receipientEmails[0].email;
+
+                 const previwe_response =  await handlePreviewimages();
+                  //var Base64imgs = previwe_response.resource;
+                 if (previwe_response) {
+                     // Process the preview data
+
+                         signature_img_others = previwe_response.signatureImage;
+                         eseal_img_others = previwe_response.esealImage;
+                     console.log("Preview Data:", previwe_response);
+                 } else {
+                     console.warn("No preview data available.");
+                 }
+
+
+                // Add the following line to show the "Fields" div
+                $("#fields").removeClass("classshide");
+                PrepareDocument();
+
+                 const {
+                     Annotations,
+                     docViewer,
+                     CoreControls
+                 } = webviwerInstance;
+                 webviwerInstance.setLayoutMode(webviwerInstance.LayoutMode.Continuous);
+                 const layoutMode = webviwerInstance.getLayoutMode();
+
+
+
+        });
+
+
+               function SaveDocument(url, formData, esealCordinates, signCordinates, truecopyCordinates) {
+                // return new Promise(function (resolve, reject) {
+                //     $.ajax({
+                //         url: url,
+                //         data: formData,
+                //         cache: false,
+                //         contentType: false,
+                //         processData: false,
+                //         method: 'POST',
+                //         type: 'POST',
+                //         beforeSend: function () {
+                //         $('#overlay6').show();
+                //         },
+                //         complete: function () {
+                //         $('#overlay6').hide();
+                //         },
+                //         success: function (data) {
+                //             resolve(data) // Resolve promise and when success
+                //         },
+                //         error: function (err) {
+                //             reject(err) // Reject the promise and go to catch()
+                //         }
+                //     });
+                // });
+
+                     return new Promise(function (resolve, reject) {
+                     var formdata = formData;
+                     var urldata = url;
+                     var signcorddata = signCordinates;
+                     var truecopycorddata = truecopyCordinates;
+                     var esealcorddata = {};
+                     if (esealCordinates == null) {
+                         esealcorddata = {};
+
+                     }
+                     else {
+                         esealcorddata = esealCordinates;
+                     }
+
+                         // Proceed with the AJAX call
+                         $.ajax({
+                             url: url,
+                             data: formData,
+                             cache: false,
+                             contentType: false,
+                             processData: false,
+                             method: 'POST',
+                             beforeSend: function () {
+                                  $('#overlay6').show();
+                             },
+                             complete: function () {
+                                 $('#overlay6').hide();
+                             },
+                             success: function (data) {
+                                 console.log(data);
+                                 if (data.status == "Success") {
+                                     resolve(data);
+                                 }
+                                 else {
+
+                                         Swal.fire({
+    icon: 'info',                     // 'type' → 'icon'
+    title: "Info",
+    text: data.message,
+    showCancelButton: true,
+    showConfirmButton: true,
+    confirmButtonText: 'Retry'
+}).then((result) => {
+    if (result.isConfirmed) {
+        signRetry(esealcorddata, signcorddata, truecopycorddata, data);
+    } else {
+        window.location.href = '@Url.Action("Index", "Dashboard")';
+    }
+});
+
+
+                                 }
+                             },
+                             error: function (err) {
+                                 reject(err);
+                             }
+                         });
+
+                 });
+
+                 function signRetry(esealcorddata, signcorddata, truecopycorddata, data) {
+                      let DocumentName = document.getElementById("FileName").value;
+                     const blob = new Blob([globalFile], {
+                         type: globalFile.type
+                     });
+                     //var parsedModel = JSON.parse(data.result);
+                     var documentRetryViewModel = new FormData();
+                     documentRetryViewModel.append("File", blob, DocumentName);
+                    // documentRetryViewModel.append("Config", JSON.stringify(parsedModel));
+                      documentRetryViewModel.append("Config", JSON.stringify(data.result));
+
+
+                     $.ajax({
+                         url: "@Url.Action("SignVerificationRequest", "VerificationRequests")",
+                         method: 'POST',
+                         data: documentRetryViewModel,
+                         contentType: false,
+                         processData: false,
+                         beforeSend: function () {
+                              $('#overlay6').show();
+                         },
+                         complete: function () {
+                             $('#overlay6').hide();
+                         },
+                         success: function (response) {
+                            if (response.status === "Success") {
+
+    //document.getElementById('overlay10').style.display = 'flex';
+    //  timer();
+    Swal.fire({
+        title: "Success",
+        text: response.message,
+        icon: "success",
+        showCancelButton: true,
+        showConfirmButton: true,
+        confirmButtonText: 'Download Report'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            downloadTrueCopyZip();
+        } else {
+            window.location.href = '@Url.Action("List", "VerificationRequests")';
+        }
+    });
+
+} else {
+
+    Swal.fire({
+        icon: 'info',
+        title: "Info",
+        text: response.message,
+        showCancelButton: true,
+        confirmButtonText: 'Retry'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            signRetry(esealcorddata, signcorddata, truecopycorddata, data);
+        } else {
+            window.location.href = '@Url.Action("List", "VerificationRequests")';
+        }
+    });
+
+}
+
+                         },
+                         error: function (error) {
+                             setTimeout(function () {
+                                 ajaxErrorHandler(error);
+                             }, 400);
+                         }
+                     });
+                 }
+
+            }
+
+
+            async function Save() {
+
+                const { Annotations, docViewer, PDFNet, CoreControls, toolManager } = webviwerInstance;
+                const annotManager = docViewer.getAnnotationManager();
+                const fieldManager = annotManager.getFieldManager();
+                const annotationsList = annotManager.getAnnotationsList();
+                const zoom = docViewer.getZoom();
+
+                let signCheckArr = [];
+                let esealCheckArr = [];
+                let qrCheCheckArr = [];
+                let truecopyCheckArr = [];
+
+                 await Promise.all(
+                    annotationsList.map(async (annot, index) => {
+                        let recpemail = annot.getCustomData("recepient");
+
+                        if (annot.getCustomData("type") === "SIGNATURE") {
+                            signCheckArr.push(recpemail);
+                        }
+
+                        if (annot.getCustomData("type") === "ESEAL") {
+                            esealCheckArr.push(recpemail);
+                        }
+
+                        if (annot.getCustomData("type") === "QRCODE") {
+                            qrCheCheckArr.push(recpemail);
+                        }
+
+                        if (annot.getCustomData("type") === "TRUECOPY") {
+                            truecopyCheckArr.push(recpemail);
+                         }
+                    })
+                );
+
+                if (truecopyCheckArr.length === 0) {
+                     Swal.fire({
+                         icon: 'info',
+                         title: 'Info',
+                         text: `Please drop TrueCopy Signature`
+
+                     });
+                     return;
+                }
+
+                const toFindDuplicates = (arry) =>
+                    arry.filter((item, index) => arry.indexOf(item) !== index);
+
+                const duplicateSign = toFindDuplicates(signCheckArr);
+                if (duplicateSign.length !== 0) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Info',
+                        text: `Remove 1 Signature For Below Signatory: ${duplicateSign}`
+
+                    });
+                    return;
+                }
+
+                var Signatory = PerpareDocumentContext.receipientEmails;
+
+                var len = PerpareDocumentContext.receipientEmails.length;
+                //if (len != signCheckArr.length) {
+                //    swal({
+                //        type: 'info',
+                //        title: 'Info',
+                //        text: "Drop Signature  For All Signatory "
+
+                //    });
+                //    return;
+                //}
+
+                const duplicateQrElements = toFindDuplicates(qrCheCheckArr);
+                if (duplicateQrElements.length !== 0) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Info',
+                        text: `Remove 1 QrCode Signature For Below Signatory :: \n ${duplicateQrElements}`
+
+                    });
+                    return;
+                }
+
+            const duplicateTrueCopyElements = toFindDuplicates(truecopyCheckArr);
+            if (duplicateTrueCopyElements.length !== 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: `Remove 1 TrueCopy Signature For Below Signatory :: \n ${duplicateTrueCopyElements}`
+
+                });
+                return;
+            }
+
+                const duplicateElements = toFindDuplicates(esealCheckArr);
+                if (duplicateElements.length !== 0) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Info',
+                        text: `Remove 1 Eseal Signature For Below Signatory :: \n ${duplicateElements}`
+
+                    });
+                    return;
+                }
+
+                for (var i = 0; i < len; i++) {
+                    if (Signatory[i].eseal) {
+                        if (esealCheckArr.length !== 0) {
+                            if (!esealCheckArr.includes(Signatory[i].email)) {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Info',
+                                    text: `Drop Eseal Signature For Below Signatory :: \n ${Signatory[i].email}`
+
+                                });
+
+                                return;
+                            }
+                        } else {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Info',
+                                text: `add Eseal Signature For Below Signatory :: \n ${Signatory[i].email}`
+
+                            });
+
+                            return;
+                        }
+
+                    }
+                }
+
+                let signCordinates = {};
+                let esealCordinates = {};
+                let qrCordinates = {};
+                let truecopyCordinates = {};
+
+                const annotsToDelete = [];
+                /////////////////////////////////////////////////////////
+                await Promise.all(
+                    annotationsList.map(async (annot, index) => {
+
+                        let inputAnnot;
+                        let field;
+                        if (annot.getCustomData("type") !== "") {
+                            // create a form field based on the type of annotation
+                            if (
+                                annot.getCustomData("type") === "TEXT" ||
+
+                                annot.getCustomData("type") === "INITIAL" ||
+                                annot.getCustomData("type") === "COMPANY" ||
+                                annot.getCustomData("type") === "FULL_NAME" ||
+                                annot.getCustomData("type") === "JOB_TITLE" ||
+                                annot.getCustomData("type") === "ADDRESS" ||
+                                annot.getCustomData("type") === "PHONE"
+                            ) {
+                                field = new Annotations.Forms.Field(
+                                    annot.getCustomData("name") + Date.now() + index,
+                                    {
+                                        type: "Tx",
+                                        value: annot.getCustomData("value"),
+                                    }
+                                );
+                                inputAnnot = new Annotations.TextWidgetAnnotation(field);
+                            } else if (annot.getCustomData("type") === "EMAIL") {
+                                field = new Annotations.Forms.Field(
+                                    annot.getCustomData("name") + Date.now() + index,
+                                    {
+                                        type: "Tx",
+                                        value: annot.getCustomData("value"),
+                                    }
+                                );
+                                inputAnnot = new Annotations.TextWidgetAnnotation(field);
+                            }
+                            else if (annot.getCustomData("type") === "SIGNATURE" ) {
+                                let recpemail = annot.getCustomData("recepient");
+                                let anname = annot.getCustomData("name") + Date.now() + index;
+                                signCordinates[recpemail] = {
+                                    fieldName: anname,
+                                    posX: annot.getX(),
+                                    posY: annot.getY(),
+                                    PageNumber: annot.getPageNumber(),
+                                    width: annot.getWidth(),
+                                    height: annot.getHeight(),
+                                };
+
+
+                                field = new Annotations.Forms.Field(
+                                    annot.getCustomData("name") + Date.now() + index,
+                                    {
+                                        type: "Sig",
+                                    }
+                                );
+                                inputAnnot = new Annotations.SignatureWidgetAnnotation(field, {
+                                    appearance: "_DEFAULT",
+                                    appearances: {
+                                        _DEFAULT: {
+                                            Normal: {
+                                                data: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjEuMWMqnEsAAAANSURBVBhXY/j//z8DAAj8Av6IXwbgAAAAAElFTkSuQmCC",
+                                                offset: {
+                                                    x: 100,
+                                                    y: 100,
+                                                },
+                                            },
+                                        },
+                                    },
+                                });
+                            }
+                            else if (annot.getCustomData("type") === "ESEAL") {
+                                let recpemail = annot.getCustomData("recepient");
+                                let orgIDofUser = "12b0020f-f3ba-48dc-8015-5a63700797da";
+                                let anname = annot.getCustomData("name") + Date.now() + index;
+                                esealCordinates[recpemail] = {
+                                    fieldName: anname,
+                                    posX: annot.getX(),
+                                    posY: annot.getY(),
+                                    PageNumber: annot.getPageNumber(),
+                                    width: annot.getWidth(),
+                                    height: annot.getHeight(),
+                                    organizationID: orgIDofUser,
+                                };
+
+                                field = new Annotations.Forms.Field(
+                                    annot.getCustomData("name") + Date.now() + index,
+                                    {
+                                        type: "Sig",
+                                    }
+                                );
+                                inputAnnot = new Annotations.SignatureWidgetAnnotation(field, {
+                                    appearance: "_DEFAULT",
+                                    appearances: {
+                                        _DEFAULT: {
+                                            Normal: {
+                                                data: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGMAAAAgCAIAAACJlVEAAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAEiSURBVGhD7ZTbFYMgEESty4Ksx2psxmIM4AIL8phEPxIy9yMRZpew9+Q4HQSDplBoCoWmUGgKhaZQ+qb2dZ4y5nUvhOVdIYYnUrJssha25Vr6JYCm8okcLglzmZV/rrd4rJFlsR9p1aCmqmN1TTlRm/9SDGyqmPRMBUMXMTVT7sQYvLV8iDumzsiQ36rRYgmirmZ+35QmvUOMs6tqdIsLg8ZMTc3UF3DrPxURN1LWasmz1M34pgx2SKlrtIjSHF/8F6ZUXb2llCjFg5oyU8WhXJUva7UUArVbM+VOzH4NXT7EB2/0eIskUlertZRF6X33pJFT2y7ay4fomyInNIVCUyg0hUJTKDSFQlMoNIVCUyg0hUJTKDSFQlMoNIVCUxjH8QKm2g2cIoXf3gAAAABJRU5ErkJggg==",
+                                                offset: {
+                                                    x: 100,
+                                                    y: 100,
+                                                },
+                                            },
+                                        },
+                                    },
+                                });
+                            }
+                            else if (annot.getCustomData("type") === "QRCODE") {
+                                let recpemail = annot.getCustomData("recepient");
+                                let orgIDofUser = "12b0020f-f3ba-48dc-8015-5a63700797da";
+                                let anname = annot.getCustomData("name") + Date.now() + index;
+                                qrCordinates[recpemail] = {
+                                    fieldName: anname,
+                                    posX: annot.getX(),
+                                    posY: annot.getY(),
+                                    PageNumber: annot.getPageNumber(),
+                                    width: annot.getWidth(),
+                                    height: annot.getHeight(),
+                                    organizationID: orgIDofUser,
+                                };
+
+
+                                field = new Annotations.Forms.Field(
+                                    annot.getCustomData("name") + Date.now() + index,
+                                    {
+                                        type: "Sig",
+                                    }
+                                );
+                                inputAnnot = new Annotations.SignatureWidgetAnnotation(field, {
+                                    appearance: "_DEFAULT",
+                                    appearances: {
+                                        _DEFAULT: {
+                                            Normal: {
+                                                data: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjEuMWMqnEsAAAANSURBVBhXY/j//z8DAAj8Av6IXwbgAAAAAElFTkSuQmCC",
+                                                offset: {
+                                                    x: 100,
+                                                    y: 100,
+                                                },
+                                            },
+                                        },
+                                    },
+                                });
+                            }
+                        else if (annot.getCustomData("type") === "TRUECOPY") {
+                            let recpemail = annot.getCustomData("recepient");
+                            let orgIDofUser = "12b0020f-f3ba-48dc-8015-5a63700797da";
+                            let anname = annot.getCustomData("name") + Date.now() + index;
+                            truecopyCordinates[recpemail] = {
+                                fieldName: anname,
+                                posX: annot.getX(),
+                                posY: annot.getY(),
+                                PageNumber: annot.getPageNumber(),
+                                width: annot.getWidth(),
+                                height: annot.getHeight(),
+                                organizationID: orgIDofUser,
+                            };
+
+
+                            field = new Annotations.Forms.Field(
+                                annot.getCustomData("name") + Date.now() + index,
+                                {
+                                    type: "Sig",
+                                }
+                            );
+                            inputAnnot = new Annotations.SignatureWidgetAnnotation(field, {
+                                appearance: "_DEFAULT",
+                                appearances: {
+                                    _DEFAULT: {
+                                        Normal: {
+                                            data: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjEuMWMqnEsAAAANSURBVBhXY/j//z8DAAj8Av6IXwbgAAAAAElFTkSuQmCC",
+                                            offset: {
+                                                x: 100,
+                                                y: 100,
+                                            },
+                                        },
+                                    },
+                                },
+                            });
+                        }
+                            else if (annot.getCustomData("type") === "DATE") {
+                                field = new Annotations.Forms.Field(
+                                    annot.getCustomData("name") + Date.now() + index,
+                                    {
+                                        type: "Tx",
+                                        value: "m-d-yyyy",
+                                        // Actions need to be added for DatePickerWidgetAnnotation to recognize this field.
+                                        actions: {
+                                            F: [
+                                                {
+                                                    name: "JavaScript",
+                                                    // You can customize the date format here between the two double-quotation marks
+                                                    // or leave this blank to use the default format
+                                                    javascript: 'AFDate_FormatEx("mmm d, yyyy");',
+                                                },
+                                            ],
+                                            K: [
+                                                {
+                                                    name: "JavaScript",
+                                                    // You can customize the date format here between the two double-quotation marks
+                                                    // or leave this blank to use the default format
+                                                    javascript: 'AFDate_FormatEx("mmm d, yyyy");',
+                                                },
+                                            ],
+                                        },
+                                    }
+                                );
+
+                                inputAnnot = new Annotations.DatePickerWidgetAnnotation(field);
+                            } else {
+                                // exit early for other annotations
+                                annotManager.deleteAnnotation(annot, false, true); // prevent duplicates when importing xfdf
+                                return;
+                            }
+                        } else {
+                            // exit early for other annotations
+                            return;
+                        }
+
+                        // set position
+                        inputAnnot.PageNumber = annot.getPageNumber();
+
+                        inputAnnot.X = annot.getY();
+                        inputAnnot.Y = annot.getX();
+
+                        inputAnnot.rotation = annot.Rotation;
+                        if (annot.Rotation === 0 || annot.Rotation === 180) {
+                            inputAnnot.Width = annot.getWidth();
+                            inputAnnot.Height = annot.getHeight();
+                        } else {
+                            inputAnnot.Width = annot.getHeight();
+                            inputAnnot.Height = annot.getWidth();
+                        }
+
+
+                        annotsToDelete.push(annot);
+
+
+                        // customize styles of the form field
+                        Annotations.WidgetAnnotation.getCustomStyles = function (widget) {
+                            if (widget instanceof Annotations.SignatureWidgetAnnotation) {
+                                return {
+                                    border: "1px solid #a5c7ff",
+                                    "background-color": "transparent",
+                                    color: "white",
+                                    "font-size": "12px",
+                                    "font-family": "Comic Sans MS Bold Italic",
+                                };
+                            } else {
+                                return {
+                                    border: "1px solid #000000",
+                                    "font-size": "" + 12.0 / zoom + "px",
+                                };
+                            }
+                        };
+                        Annotations.WidgetAnnotation.getCustomStyles(inputAnnot);
+
+                        //setSignCords(signCordinates);
+                        //setesealCords(esealCordinates);
+                        //setQrCords(qrCordinates);
+
+                        //inputAnnot.setCustomData(
+                        //  "recepient",
+                        //  annot.getCustomData("recepient")
+                        //);
+                        //inputAnnot.setCustomData("field_type", annot.getCustomData("type"));
+                        //if (annot.getCustomData("type") === "SIGNATURE") {
+                        //  inputAnnot.setCustomData("issigfield", true);
+                        //} else {
+                        //  inputAnnot.setCustomData("issigfield", false);
+                        //}
+
+                        //if (annot.getCustomData("type") === "ESEAL") {
+                        //  inputAnnot.setCustomData("isesealField", true);
+                        //} else {
+                        //  inputAnnot.setCustomData("isesealField", false);
+                        //}
+
+                        //if (
+                        //  annot.getCustomData("type") !== "SIGNATURE" &&
+                        //  annot.getCustomData("type") !== "ESEAL"
+                        //) {
+                        //  annotManager.addAnnotation(inputAnnot);
+                        //  fieldManager.addField(field);
+                        //  annotsToDraw.push(inputAnnot);
+                        //}
+                    })
+                );
+                /////////////////////////////////////////////////////////
+                //delete Annot
+                annotManager.deleteAnnotations(annotsToDelete, null, true);
+
+
+                const xfdfString = await annotManager.exportAnnotations();
+                const data = await docViewer.getDocument().getFileData({
+                    xfdfString,
+                    flags: CoreControls.SaveOptions.INCREMENTAL,
+                    downloadType: "pdf",
+                });
+
+                //certify pdf/a
+                await PDFNet.initialize();
+                const doc = await PDFNet.PDFDoc.createFromBuffer(new Uint8Array(data));
+
+                await PDFNet.runWithCleanup(async () => {
+                    doc.lock();
+                    const buf = await doc.saveMemoryBuffer(
+                        PDFNet.SDFDoc.SaveOptions.e_incremental
+                    );
+                    const blob = new Blob([buf], { type: "application/pdf" });
+
+                    let DocumentName = document.getElementById("FileName").value;
+
+                    if (Object.keys(esealCordinates).length === 0) {
+                        esealCordinates = null
+                    }
+                    if (Object.keys(qrCordinates).length === 0) {
+                        qrCordinates = null
+                    }
+                    if (Object.keys(signCordinates).length === 0) {
+                         signCordinates = null
+                    }
+                    if (Object.keys(truecopyCordinates).length === 0) {
+                         truecopyCordinates = null
+                    }
+
+                    var config = {
+
+                        Eseal: esealCordinates,
+                        Signature: signCordinates,
+                        QrCode: qrCordinates,
+                        Truecopy: truecopyCordinates
+                    }
+
+                    console.log(JSON.stringify(config));
+
+                    var list = Signatory.map(x => { return x.email })
+
+                    var fileFormData = new FormData();
+
+                    fileFormData.append("FileName", DocumentName);
+                    fileFormData.append("RequestId", requestId);
+                    fileFormData.append("Config", JSON.stringify(config));
+                    fileFormData.append("Signatory", list.join(","));
+                    fileFormData.append("Rotation", rotationData);
+
+                    // Checking for Eseal Permission
+                    if (PerpareDocumentContext.receipientEmails.length > 0) {
+
+                         var firstEmail = PerpareDocumentContext.receipientEmails[0].email;
+                         // checkEsealPermission(firstEmail);
+                          if(esealCordinates != null){
+
+                             checkEsealPermission(firstEmail);
+                          }
+                         else
+                          {
+                             SaveDocument("@Url.Action("SignVerificationRequestDocument", "VerificationRequests")", fileFormData, esealCordinates, signCordinates, truecopyCordinates)
+                           .then((response) => {
+                              if (response.status == "Success") {
+
+                                Swal.fire({
+                                    title: "Success",
+                                    text: response.message,
+                                    icon: "success",
+                                    showCancelButton: true,
+                                    showConfirmButton: true,
+                                    confirmButtonText: 'Download Report',
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+
+                                        // $.ajax({
+                                        //     url: '@Url.Action("DownloadCertificatesForTrueCopy", "VerificationRequests")',
+                                        //     type: 'GET',
+                                        //     data: {
+                                        //         fileId: "@ViewBag.FileId"
+                                        //     },
+                                        //     xhrFields: {
+                                        //         responseType: 'blob'
+                                        //     },
+                                        //     success: function (blob) {
+                                        //         console.log("File download initiated");
+
+                                        //         var link = document.createElement('a');
+                                        //         link.href = window.URL.createObjectURL(blob);
+                                        //         link.download = "VerificationReportAndTrueCopy.zip";
+                                        //         link.click();
+                                        //         if (blob != null) {
+                                        //             window.location.href = '@Url.Action("List", "VerificationRequests")';
+                                        //         }
+                                        //     },
+                                        //     error: function (error) {
+                                        //         console.log("Error during file download");
+                                        //     }
+                                        // });
+
+                                        downloadTrueCopyZip();
+
+                                    } else {
+                                        window.location.href = '@Url.Action("List", "VerificationRequests")';
+                                    }
+                                });
+
+                            }
+
+                            else {
+                                Swal.fire({
+                                    title: "Error",
+                                    text: response.message,
+                                    icon: "error",
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.href = '@Url.Action("List", "VerificationRequests")';
+                                    }
+                                });
+                            }
+                            })
+                            .catch((e) => {
+                                console.log(e);
+                                Swal.fire({
+                                    title: "Error",
+                                    text: "Something went wrong!",
+                                    icon: "error",
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.href = '@Url.Action("List", "VerificationRequests")';
+                                    }
+                                });
+                            });
+
+                      }
+
+                    }
+                  function checkEsealPermission(email) {
+
+                    // Add your AJAX call here to check e-seal permission
+                    $.ajax({
+                        url: '@Url.Action("isEsealAffix", "Documents")', // Replace with your actual URL
+                        method: 'GET',
+                        data: { Email: email },
+                        success: function (response) {
+                            if (response.success) {
+                                //continuePreparingDocument();
+                                SaveDocument("@Url.Action("SignVerificationRequestDocument", "VerificationRequests")", fileFormData, esealCordinates, signCordinates, truecopyCordinates)
+                                    .then((response) => {
+                                        if (response.status === "Success") {
+                                            Swal.fire({
+                                                title: "Success",
+                                                text: response.message,
+                                                icon: "success",
+                                                showCancelButton: true,
+                                                showConfirmButton: true,
+                                                confirmButtonText: 'Download Report',
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+
+                                                    // $.ajax({
+                                                    //     url: '@Url.Action("DownloadCertificatesForTrueCopy", "VerificationRequests")',
+                                                    //     type: 'GET',
+                                                    //     data: {
+                                                    //         fileId: "@ViewBag.FileId"
+                                                    //     },
+                                                    //     xhrFields: {
+                                                    //         responseType: 'blob'
+                                                    //     },
+                                                    //     success: function (blob) {
+                                                    //         console.log("File download initiated");
+
+                                                    //         var link = document.createElement('a');
+                                                    //         link.href = window.URL.createObjectURL(blob);
+                                                    //         link.download = "VerificationReportAndTrueCopy.zip";
+                                                    //         link.click();
+                                                    //         if (blob != null) {
+                                                    //             window.location.href = '@Url.Action("List", "VerificationRequests")';
+                                                    //         }
+                                                    //     },
+                                                    //     error: function (error) {
+                                                    //         console.log("Error during file download");
+                                                    //     }
+                                                    // });
+
+                                                    downloadTrueCopyZip();
+
+                                                } else {
+                                                    // Redirect to the list page if cancel button is clicked
+                                                    window.location.href = '@Url.Action("List", "VerificationRequests")';
+                                                }
+                                            });
+
+                                        } else {
+                                            Swal.fire({
+                                                title: "Error",
+                                                text: response.message,
+                                                icon: "error",
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+                                                    window.location.href = '@Url.Action("List", "VerificationRequests")';
+                                                }
+                                            });
+                                        }
+
+                                    })
+                                    .catch((e) => {
+                                        console.log(e);
+                                        Swal.fire({
+                                            title: "Error",
+                                            text: "Something went wrong!",
+                                            icon: "error",
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                window.location.href = '@Url.Action("List", "VerificationRequests")';
+                                            }
+                                        });
+                                    });
+
+                            } else {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Info',
+                                    text: 'E-seal permission not granted for the selected email',
+                                });
+                            }
+                        },
+                        error: function () {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Error checking e-seal permission. Please try again.',
+                            });
+                        }
+                    });
+
+
+                   //SaveDocument("@Url.Action("SignVerificationRequestDocument","VerificationRequests")", fileFormData)
+                   //     .then((response) => {
+                   //     if (response.status == "Success") {
+                   //         swal({
+                   //             title: "Success",
+                   //             text: response.message,
+                   //             type: "success",
+                   //             showCancelButton: true,
+                   //             showConfirmButton: true,
+                   //             confirmButtonText: 'Download Report',
+                   //         }, function (isConfirm) {
+                   //             if (isConfirm) {
+                   //                 $.ajax({
+                   //                     url: '@Url.Action("DownloadCertificatesForTrueCopy", "VerificationRequests")',
+                   //                     type: 'GET',
+                   //                     data: {
+                   //                         fileId: "@ViewBag.FileId"
+                   //                     },
+                   //                     xhrFields: {
+                   //                         responseType: 'blob'
+                   //                     },
+                   //                     success: function (blob) {
+                   //                         console.log("File download initiated");
+
+                   //                         var link = document.createElement('a');
+                   //                         link.href = window.URL.createObjectURL(blob);
+                   //                         link.download = "VerificationReportAndTrueCopy.zip";
+                   //                         link.click();
+                   //                         if (blob != null) {
+                   //                             window.location.href = '@Url.Action("List", "VerificationRequests")';
+                   //                         }
+                   //                     },
+                   //                     error: function (error) {
+                   //                         console.log("Error during file download");
+                   //                     }
+                   //                 });
+
+                   //             }
+                   //         });
+                   //     }//Edited part
+
+                   //         else {
+                   //             swal({
+                   //                 title: "Error",
+                   //                 text: response.message,
+                   //                 type: "error",
+                   //             }, function (isConfirm) {
+                   //                 if (isConfirm) {
+                   //                 window.location.href = '@Url.Action("List", "VerificationRequests")';
+                   //                 }
+                   //             });
+                   //         }
+                   //     })
+                   //     .catch((e) => {
+
+                   //         console.log(e);
+                   //         swal({
+                   //             title: "Error",
+                   //             text: "Something went wrong!",
+                   //             type: "error",
+                   //         }, function (isConfirm) {
+                   //             if (isConfirm) {
+                   //             window.location.href = '@Url.Action("List", "VerificationRequests")';
+                   //             }
+                   //         });
+                   //     });
+                });
+            }
+
+            function downloadTrueCopyZip(){
+                    $.ajax({
+                        url: '@Url.Action("DownloadCertificatesForTrueCopy", "VerificationRequests")',
+                        type: 'GET',
+                        data: {
+                            fileId: "@ViewBag.FileId"
+                        },
+                        xhrFields: {
+                            responseType: 'blob'
+                        },
+                        success: function (blob) {
+                            console.log("File download initiated");
+
+                            var link = document.createElement('a');
+                            link.href = window.URL.createObjectURL(blob);
+                            link.download = "VerificationReportAndTrueCopy.zip";
+                            link.click();
+                            if (blob != null) {
+                                window.location.href = '@Url.Action("List", "VerificationRequests")';
+                            }
+                        },
+                        error: function (error) {
+                            console.log("Error during file download");
+                        }
+                    });
+
+            }
+
+            function validateEmail(email) {
+                var emailReg = /^([\w\.\-]+)@@([\w\-]+)((\.(\w){1,15})+)$/;
+                if (!emailReg.test(email.value)) {
+                    $(email).next("span").removeClass("classshide")
+                    return false
+                } else {
+                    $(email).next("span").addClass("classshide")
+                    return true;
+                }
+            }
+
+            function open_file() {
+                document.getElementById('File').click();
+            }
+
+            function ShowError(msg) {
+                $("#ErrMsg").html(msg)
+                $("#myModal").removeClass('classshide');
+            }
+            function FileError(msg) {
+                ShowError(msg);
+                $("#FileName").val("");
+                $("#File").val(null);
+            }
+
+        function fileSelect(e)
+        {
+            let acceptableSize = false;
+            let acceptableExt = false;
+
+            if (isFileUploaded === true) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "File already uploaded."
+
+                });
+
+                return false;
+            }
+
+            // Added validation for maximum file size (15MB)
+            if (e.target.files[0].size > 15 * 1024 * 1024) {
+
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "File size should be 15 MB or below."
+
+                });
+                return false;
+            }
+
+            acceptableSize = true;
+
+            if (
+                e.target.files[0].type !=
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document" &&
+                e.target.files[0].type !=
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" &&
+                e.target.files[0].type != "application/pdf"
+            ) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "Only pdf are supported"
+
+                });
+                return false;
+            }
+
+            acceptableExt = true;
+
+            var len = e.target.files[0].name.length;
+            if (len > 50) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "File name length should be less than 40 characters"
+
+                });
+
+                return false;
+            }
+
+            if (!acceptableSize || !acceptableExt) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "Something went wrong. Try after sometime or Contact Administrator"
+
+                });
+
+                return false;
+            }
+
+            $("#FileName").val(e.target.files[0].name);
+            PerpareDocumentContext.fileName = e.target.files[0].name.split(".").slice(0, -1).join(".");
+            PerpareDocumentContext.docName = e.target.files[0].name;
+            $("#thumbnail").removeClass('classshide');
+            isFileUploaded = true;
+            $("#myModal").addClass('classshide');
+            let file = e.target.files[0];
+            var blob = getblob(file, e.target.files[0].name).then(data => {
+                webviwerInstance.loadDocument(data, { filename: e.target.files[0].name });
+            });
+            globalFile = e.target.files[0];
+        }
+
+
+
+            function PrepareDocument() {
+
+                 var imgdata = '';
+                 var imgdata1_others = '';
+
+
+
+                 var sigimgdataval_others = 'data:image/png;base64,' + signature_img_others;
+                 imgdata = sigimgdataval_others;
+                 var img_others = new Image();
+                 img_others.src = imgdata;
+                 img_others.onload = function () {
+                     const width = img_others.width;
+                     const height = img_others.height;
+                     signature_dimensions_others = {
+                         width: width,
+                         height: height,
+                     }
+
+                 };
+
+                 var esealimgdataval_others = 'data:image/png;base64,' + eseal_img_others;
+                 imgdata1_others = esealimgdataval_others;
+                 var img1_others = new Image();
+                 img1_others.src = imgdata1_others;
+                 img1_others.onload = function () {
+                     const width = img1_others.width;
+                     const height = img1_others.height;
+                     eseal_dimensions_others = {
+                         width: width,
+                         height: height,
+                     }
+
+                 };
+
+
+                let docusers = PerpareDocumentContext.receipientEmails;
+                PerpareDocumentContext.receipientEmailsList = [];
+
+                let recpfieldcount = Object.values(docusers).map((user) => {
+                    return { email: user.email, count: 0 };
+                });
+
+                if (recpfieldcount.length > 0) {
+                    PerpareDocumentContext.receipientEmailsList = recpfieldcount;
+                }
+
+                $('#emailList').empty();
+                PerpareDocumentContext.receipientEmailsList.map((item, index) => {
+                    var selected = (index == 0) ? "selected" : "";
+                    $("#emailList").append(`<li class="list ${selected}" onclick="toggleRecepientSelection('${item.email}')"></span>${item.email}</li>`);
+                })
+
+                var annDat = "";
+
+                //===========
+
+                // webviwerInstance.loadDocument(files);
+
+                const { Annotations, docViewer, CoreControls } = webviwerInstance;
+                const { iframeWindow } = webviwerInstance;
+                const { WidgetFlags } = Annotations;
+                 webviwerInstance.setZoomLevel("100%");
+                const zoom = docViewer.getZoom();
+                // var watermarkdata = JSON.parse(localStorage.getItem("documentdata"));
+                const getWatermarkOptions = () => ({
+                    diagonal: {
+                        text: "",
+                        fontSize: 60,
+                        color: "#cccccc",
+                        opacity: 50,
+                    },
+                });
+                docViewer.setWatermark(getWatermarkOptions());
+
+                Annotations.WidgetAnnotation.getCustomStyles = (widget) => {
+                    return {
+                        color: "black",
+                        "font-size": "" + 12.0 / zoom + "px",
+                        border: "1px solid black",
+                    };
+                };
+                const annotManager = docViewer.getAnnotationManager();
+
+
+                docViewer.on("annotationsLoaded", () => {
+                    // all annotations are available
+
+                    if (annDat) {
+                        let signCordss = JSON.parse(annDat);
+
+                        for (const [key, value] of Object.entries(signCordss)) {
+                            let signfieldvals = value;
+                            // create a form field
+                            const field = new Annotations.Forms.Field(
+                                signfieldvals.fieldName,
+                                {
+                                    type: "Sig",
+                                }
+                            );
+                            // create a widget annotation
+                            const widgetAnnot = new Annotations.SignatureWidgetAnnotation(
+                                field,
+                                {
+                                    appearance: "_DEFAULT",
+                                    appearances: {
+                                        _DEFAULT: {
+                                            Normal: {
+                                                data: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjEuMWMqnEsAAAANSURBVBhXY/j//z8DAAj8Av6IXwbgAAAAAElFTkSuQmCC",
+                                                offset: {
+                                                    x: 100,
+                                                    y: 100,
+                                                },
+                                            },
+                                        },
+                                    },
+                                }
+                            );
+
+                            // set position and size
+                            widgetAnnot.PageNumber = signfieldvals.PageNumber;
+                            widgetAnnot.X = signfieldvals.posX;
+                            widgetAnnot.Y = signfieldvals.posY;
+                            widgetAnnot.Width = signfieldvals.width;
+                            widgetAnnot.Height = signfieldvals.height;
+                            widgetAnnot.setCustomData("issigfield", true);
+                            widgetAnnot.setCustomData("recepient", key);
+
+                            //add the form field and widget annotation
+                            annotManager.addAnnotation(widgetAnnot);
+
+                            annotManager.drawAnnotationsFromList([widgetAnnot]);
+
+                            const fieldManager = annotManager.getFieldManager();
+
+                            fieldManager.addField(field);
+                        }
+                    }
+
+                });
+
+                docViewer.on("documentLoaded", async () => {
+
+                // currentuser = JSON.parse(localStorage.getItem("user"));
+                 webviwerInstance.setLayoutMode(webviwerInstance.LayoutMode.Continuous);
+                 const layoutMode = webviwerInstance.getLayoutMode();
+                  webviwerInstance.setZoomLevel("100%");
+
+                    docViewer.getAnnotationsLoadedPromise().then(() => {
+                        // iterate over fields
+                        const fieldManager = docViewer
+                            .getAnnotationManager()
+                            .getFieldManager();
+                        fieldManager.forEachField((field) => {
+                            if (
+                                field.widgets[0].getCustomData("recepient") ==
+                                currentuser.email &&
+                                !field.widgets[0].getCustomData("issigfield") &&
+                                field.value == ""
+                            ) {
+                                if (field.widgets[0].getCustomData("field_type") == "EMAIL") {
+                                    field.setValue(currentuser.email);
+                                } else if (
+                                    field.widgets[0].getCustomData("field_type") == "FULL_NAME"
+                                ) {
+                                    field.setValue(currentuser.name);
+                                }
+                            }
+                        });
+                    });
+                    webviwerInstance.disableElements([
+                        "inkSignaturePanelButton",
+                        "textSignaturePanelButton",
+                    ]);
+
+                    const signatureTool = docViewer.getTool("AnnotationCreateSignature");
+                    signatureTool.on("locationSelected", () => {
+                        webviwerInstance.closeElements(["signatureModal"]);
+
+                        const fieldManager = docViewer
+                            .getAnnotationManager()
+                            .getFieldManager();
+                        fieldManager.forEachField((field) => {
+                            if (
+                                field.widgets[0].getCustomData("recepient") ==
+                                currentuser.email &&
+                                !field.widgets[0].getCustomData("issigfield") &&
+                                field.value == ""
+                            ) {
+                                if (field.widgets[0].getCustomData("field_type")) {
+                                    alert(
+                                        "Please fill out the " +
+                                        field.widgets[0].getCustomData("field_type") +
+                                        " field"
+                                    );
+                                } else {
+                                    alert("Please fill out all the fields");
+                                }
+
+                                throw "";
+                            }
+                        });
+                        const annotManager = docViewer.getAnnotationManager();
+                        const annotationsList = annotManager.getAnnotationsList();
+                        annotationsList.map(async (annot, index) => {
+                            if (
+                                annot.getCustomData("recepient") == currentuser.email &&
+                                annot.getCustomData("issigfield")
+                            ) {
+                                setDialogData3({ open: true, data: {} });
+                            }
+                        });
+                    });
+                });
+                annotManager.on("fieldChanged", (field, value) => { });
+                // select only the view group
+                webviwerInstance.setToolbarGroup("toolbarGroup-View");
+                const iframeDoc = iframeWindow.document.body;
+                iframeDoc.addEventListener("dragover", dragOver);
+                iframeDoc.addEventListener("drop", (e) => {
+                    drop(e);
+                });
+
+                if (PerpareDocumentContext.MultiSign) {
+                    $('#Send').removeClass("classshide");
+                } else {
+                    $('#Save').removeClass("classshide");
+                }
+
+                $('#create').addClass("classshide");
+                $('#viwer').removeClass("classshide");
+                //=============
+            }
+    </script>
+
+        <script>
+            //script for prepare document page
+
+            // before code
+
+            // const addField = (type, point = {}, name = "", value = "", flag = {}) => {
+            //     const { docViewer, Annotations, toolManager } = webviwerInstance;
+            //     const annotManager = docViewer.getAnnotationManager();
+            //     const doc = docViewer.getDocument();
+            //     const displayMode = docViewer.getDisplayModeManager().getDisplayMode();
+            //     const page = displayMode.getSelectedPages(point, point);
+            //     if (!!point.x && page.first == null) {
+            //         return; //don't add field to an invalid page location
+            //     }
+            //     const page_idx =
+            //         page.first !== null ? page.first : docViewer.getCurrentPage();
+            //     const page_info = doc.getPageInfo(page_idx);
+            //     const page_point = displayMode.windowToPage(point, page_idx);
+            //     const zoom = docViewer.getZoomLevel();
+
+            //     var textAnnot = new Annotations.FreeTextAnnotation();
+            //     textAnnot.PageNumber = page_idx;
+            //     const rotation = docViewer.getCompleteRotation(page_idx) * 90;
+            //     textAnnot.Rotation = rotation;
+            //     if (rotation === 270 || rotation === 90) {
+            //         textAnnot.Width = 20.0 / zoom;
+            //         textAnnot.Height = 150.0 / zoom;
+            //     } else {
+            //         textAnnot.Width = 150.0 / zoom;
+            //         textAnnot.Height = 20.0 / zoom;
+            //     }
+            //     textAnnot.X = (page_point.x || page_info.width / 2) - textAnnot.Width / 2;
+            //     textAnnot.Y = (page_point.y || page_info.height / 2) - textAnnot.Height / 2;
+
+            //     textAnnot.setPadding(new Annotations.Rect(0, 0, 0, 0));
+            //     textAnnot.custom = {
+            //         type,
+            //         value,
+            //         flag,
+            //         name: `${type}_${PerpareDocumentContext.selectuser}_`,
+            //     };
+            //     textAnnot.setCustomData("type", type);
+            //     textAnnot.setCustomData("value", value);
+            //     textAnnot.setCustomData("flag", flag);
+            //     textAnnot.setCustomData("name", name);
+
+            //     textAnnot.setCustomData("recepient", PerpareDocumentContext.selectuser);
+            //     // set the type of annot
+            //     textAnnot.setContents(textAnnot.custom.name);
+            //     textAnnot.FontSize = "" + 12.0 / zoom + "px";
+            //     textAnnot.FillColor = new Annotations.Color(211, 211, 211, 0.5);
+            //     textAnnot.TextColor = new Annotations.Color(0, 165, 228);
+            //     textAnnot.StrokeThickness = 1;
+            //     textAnnot.StrokeColor = new Annotations.Color(0, 165, 228);
+            //     textAnnot.TextAlign = "center";
+            //     textAnnot.Author = annotManager.getCurrentUser();
+
+            //     annotManager.deselectAllAnnotations();
+            //     annotManager.addAnnotation(textAnnot, true);
+            //     annotManager.redrawAnnotation(textAnnot);
+            //     annotManager.selectAnnotation(textAnnot);
+            //     const elementsIndex = PerpareDocumentContext.receipientEmailsList.findIndex(
+            //         (element) => element.email == PerpareDocumentContext.selectuser
+            //     );
+            //     let newArray = PerpareDocumentContext.receipientEmailsList;
+            //     newArray[elementsIndex] = {
+            //         ...newArray[elementsIndex],
+            //         count: newArray[elementsIndex].count + 1,
+            //     };
+
+            //     PerpareDocumentContext.receipientEmailsList = newArray;
+            // };
+
+            const addField = (type, point = {}, name = "", value = "", flag = {}) => {
+            if (type === "SIGNATURE"){
+                    const { docViewer, Annotations, toolManager } = webviwerInstance;
+                    const annotManager = docViewer.getAnnotationManager();
+                    const doc = docViewer.getDocument();
+                    const displayMode = docViewer.getDisplayModeManager().getDisplayMode();
+                    pageHeight = docViewer.getPageHeight(1);
+                    pageWidth = docViewer.getPageWidth(1);
+                    const page = displayMode.getSelectedPages(point, point);
+                    // if (!!point.x && page.first == null) {
+                    //     return; //don't add field to an invalid page location
+                    // }
+                     if (!!point.x && page.first == null) {
+                        return Swal.fire({ icon: 'info', title: "Message", text: "The annotation is exceeding the PDF boundaries. Please adjust its size or position to fit within the document limits." });
+
+                        //don't add field to an invalid page location
+                    }
+                    const page_idx =
+                        page.first !== null ? page.first : docViewer.getCurrentPage();
+                    const page_info = doc.getPageInfo(page_idx);
+                    const page_point = displayMode.windowToPage(point, page_idx);
+                    const zoom = docViewer.getZoomLevel();
+
+                    var textAnnot = new Annotations.FreeTextAnnotation();
+                    textAnnot.PageNumber = page_idx;
+                    const rotation = docViewer.getCompleteRotation(page_idx) * 90;
+                    rotationData = rotation;
+                    textAnnot.Rotation = rotation;
+                    if (signature_dimensions_others.height <= 120) {
+                        if (rotation === 270 || rotation === 90) {
+                            textAnnot.Width = (signature_dimensions_others.height * 29.5) / 100;
+                            textAnnot.Height = 126;
+                        } else {
+                            textAnnot.Width = 126;
+                            textAnnot.Height = (signature_dimensions_others.height * 29.5) / 100;
+                        }
+                    } else if (signature_dimensions_others.height < 160 && signature_dimensions_others.height > 120) {
+                        if (rotation === 270 || rotation === 90) {
+                            textAnnot.Width = (signature_dimensions_others.height * 24) / 100;
+                            textAnnot.Height = 126.6;
+                        } else {
+                            textAnnot.Width = 126.6;
+                            textAnnot.Height = (signature_dimensions_others.height * 24) / 100;
+                        }
+                    } else if (signature_dimensions_others.height > 160) {
+                        if (rotation === 270 || rotation === 90) {
+                            textAnnot.Width = (signature_dimensions_others.height * 24) / 100;
+                            textAnnot.Height = 127;
+                        } else {
+                            textAnnot.Width = 127;
+                            textAnnot.Height = (signature_dimensions_others.height * 24) / 100;
+                        }
+                    }
+                    // if (rotation === 270 || rotation === 90) {
+                    //     textAnnot.Width = 32.745 / zoom;
+                    //     textAnnot.Height = 126.0 / zoom;
+                    // } else {
+                    //     textAnnot.Width = 126.0 / zoom;
+                    //     textAnnot.Height = 32.745 / zoom;
+                    // }
+                    if (isNaN(page_point.x) || isNaN(page_point.y)) {
+
+                        textAnnot.X = (page_point.x || page_info.width / 2) - textAnnot.Width / 2;
+                        textAnnot.Y = (page_point.y || page_info.height / 2) - textAnnot.Height / 2;
+
+                    } else {
+                        textAnnot.X = page_point.x;
+                        textAnnot.Y = page_point.y;
+                    }
+                    // textAnnot.X = (page_point.x || page_info.width / 2) - textAnnot.Width / 2;
+                    // textAnnot.Y = (page_point.y || page_info.height / 2) - textAnnot.Height / 2;
+                    if ((textAnnot.X < 0) || (textAnnot.Y < 0)) {
+                        return Swal.fire({ icon: 'info', title: "Message", text: "The annotation is exceeding the PDF boundaries. Please adjust its size or position to fit within the document limits." });
+
+                    }
+                    else if (((textAnnot.X + textAnnot.Width) > page_info.width) || ((textAnnot.Y + textAnnot.Height) > page_info.height)) {
+                        return Swal.fire({ icon: 'info', title: "Message", text: "The annotation is exceeding the PDF boundaries. Please adjust its size or position to fit within the document limits." });
+
+                    }
+
+                    textAnnot.setPadding(new Annotations.Rect(0, 0, 0, 0));
+                    textAnnot.custom = {
+                        type,
+                        value,
+                        flag,
+                        name: `${type}_${PerpareDocumentContext.selectuser}_`,
+                    };
+                    textAnnot.setCustomData("type", type);
+                    textAnnot.setCustomData("value", value);
+                    textAnnot.setCustomData("flag", flag);
+                    textAnnot.setCustomData("name", name);
+
+                    textAnnot.setCustomData("recepient", PerpareDocumentContext.selectuser);
+                    // set the type of annot
+                    textAnnot.setContents(textAnnot.custom.name);
+                    textAnnot.FontSize = "" + 12.0 / zoom + "px";
+                    textAnnot.FillColor = new Annotations.Color(211, 211, 211, 0.5);
+                    textAnnot.TextColor = new Annotations.Color(0, 165, 228);
+                    textAnnot.StrokeThickness = 1;
+                    textAnnot.StrokeColor = new Annotations.Color(0, 165, 228);
+                    textAnnot.TextAlign = "center";
+                    textAnnot.Author = annotManager.getCurrentUser();
+
+                    annotManager.deselectAllAnnotations();
+                    annotManager.addAnnotation(textAnnot, true);
+                    annotManager.redrawAnnotation(textAnnot);
+                    annotManager.selectAnnotation(textAnnot);
+                    const elementsIndex = PerpareDocumentContext.receipientEmailsList.findIndex(
+                        (element) => element.email == PerpareDocumentContext.selectuser
+                    );
+                    let newArray = PerpareDocumentContext.receipientEmailsList;
+                    newArray[elementsIndex] = {
+                        ...newArray[elementsIndex],
+                        count: newArray[elementsIndex].count + 1,
+                    };
+
+                    PerpareDocumentContext.receipientEmailsList = newArray;
+                
+            }
+            else if(type == "ESEAL"){
+
+                     const { docViewer, Annotations, toolManager } = webviwerInstance;
+                     const annotManager = docViewer.getAnnotationManager();
+                     const doc = docViewer.getDocument();
+                    const displayMode = docViewer.getDisplayModeManager().getDisplayMode();
+                    pageHeight = docViewer.getPageHeight(1);
+                    pageWidth = docViewer.getPageWidth(1);
+                    const page = displayMode.getSelectedPages(point, point);
+                    if (!!point.x && page.first == null) {
+                        return Swal.fire({ icon: 'info', title: "Message", text: "The annotation is exceeding the PDF boundaries. Please adjust its size or position to fit within the document limits." });
+
+                        //don't add field to an invalid page location
+                    }
+                    const page_idx =
+                        page.first !== null ? page.first : docViewer.getCurrentPage();
+                    const page_info = doc.getPageInfo(page_idx);
+                    const page_point = displayMode.windowToPage(point, page_idx);
+                    const zoom = docViewer.getZoomLevel();
+                    var textAnnot = new Annotations.FreeTextAnnotation();
+                    textAnnot.PageNumber = page_idx;
+                    const rotation = docViewer.getCompleteRotation(page_idx) * 90;
+                    rotationData = rotation;
+                    textAnnot.Rotation = rotation;
+
+                    if (rotation === 270 || rotation === 90) {
+                        textAnnot.Width = (eseal_dimensions_others.height * 24) / 100;
+                        textAnnot.Height = (eseal_dimensions_others.width * 24.12) / 100;
+                    } else {
+                        textAnnot.Width = (eseal_dimensions_others.width * 24.12) / 100;
+                        textAnnot.Height = (eseal_dimensions_others.height * 24) / 100; //Original
+                    }
+
+                    // if (rotation === 270 || rotation === 90) {
+                    //     textAnnot.Width = (eseal_dimensions_others.height * 29.07) / 100;
+                    //     textAnnot.Height = (eseal_dimensions_others.width * 19.59) / 100;
+                    // } else {
+                    //     textAnnot.Width = (eseal_dimensions_others.width * 19.59) / 100;
+                    //     textAnnot.Height = (eseal_dimensions_others.height * 29.07) / 100;
+                    // }
+
+                    // if (rotation === 270 || rotation === 90) {
+                    //     textAnnot.Width = (eseal_dimensions_others.height * 25.38) / 100;
+                    //     textAnnot.Height = (eseal_dimensions_others.width * 23.89) / 100;
+                    // } else {
+                    //     textAnnot.Width = (eseal_dimensions_others.width * 23.89) / 100;
+                    //     textAnnot.Height = (eseal_dimensions_others.height * 25.38) / 100;
+                    // }
+
+
+                    if (isNaN(page_point.x) || isNaN(page_point.y)) {
+
+                        textAnnot.X = (page_point.x || page_info.width / 2) - textAnnot.Width / 2;
+                        textAnnot.Y = (page_point.y || page_info.height / 2) - textAnnot.Height / 2;
+
+                    } else {
+                        textAnnot.X = page_point.x;
+                        textAnnot.Y = page_point.y;
+                    }
+
+                    // textAnnot.X = (page_point.x || page_info.width / 2) - textAnnot.Width / 2;
+                    // textAnnot.Y = (page_point.y || page_info.height / 2) - textAnnot.Height / 2;
+                    if ((textAnnot.X < 0) || (textAnnot.Y < 0)) {
+                        return Swal.fire({ icon: 'info', title: "Message", text: "The annotation is exceeding the PDF boundaries. Please adjust its size or position to fit within the document limits." });
+
+                    }
+                    else if (((textAnnot.X + textAnnot.Width) > page_info.width) || ((textAnnot.Y + textAnnot.Height) > page_info.height)) {
+                        return Swal.fire({ icon: 'info', title: "Message", text: "The annotation is exceeding the PDF boundaries. Please adjust its size or position to fit within the document limits." });
+
+                    }
+                        textAnnot.setPadding(new Annotations.Rect(0, 0, 0, 0));
+                        textAnnot.custom = {
+                            type,
+                            value,
+                            flag,
+                            name: `${type}_${PerpareDocumentContext.selectuser}_`,
+                        };
+                        textAnnot.setCustomData("type", type);
+                        textAnnot.setCustomData("value", value);
+                        textAnnot.setCustomData("flag", flag);
+                        textAnnot.setCustomData("name", name);
+
+                        textAnnot.setCustomData("recepient", PerpareDocumentContext.selectuser);
+                        // set the type of annot
+                        textAnnot.setContents(textAnnot.custom.name);
+                        textAnnot.FontSize = "" + 12.0 / zoom + "px";
+                        textAnnot.FillColor = new Annotations.Color(211, 211, 211, 0.5);
+                        textAnnot.TextColor = new Annotations.Color(0, 165, 228);
+                        textAnnot.StrokeThickness = 1;
+                        textAnnot.StrokeColor = new Annotations.Color(0, 165, 228);
+                        textAnnot.TextAlign = "center";
+                        textAnnot.Author = annotManager.getCurrentUser();
+
+                        annotManager.deselectAllAnnotations();
+                        annotManager.addAnnotation(textAnnot, true);
+                        annotManager.redrawAnnotation(textAnnot);
+                        annotManager.selectAnnotation(textAnnot);
+                        const elementsIndex = PerpareDocumentContext.receipientEmailsList.findIndex(
+                            (element) => element.email == PerpareDocumentContext.selectuser
+                        );
+                        let newArray = PerpareDocumentContext.receipientEmailsList;
+                        newArray[elementsIndex] = {
+                            ...newArray[elementsIndex],
+                            count: newArray[elementsIndex].count + 1,
+                        };
+
+                        PerpareDocumentContext.receipientEmailsList = newArray;
+                    
+
+            }
+            else { // For TRUECOPY
+
+                   
+                    const { docViewer, Annotations, toolManager } = webviwerInstance;
+                    const annotManager = docViewer.getAnnotationManager();
+                    const doc = docViewer.getDocument();
+                    const displayMode = docViewer.getDisplayModeManager().getDisplayMode();
+                    pageHeight = docViewer.getPageHeight(1);
+                    pageWidth = docViewer.getPageWidth(1);
+                    const page = displayMode.getSelectedPages(point, point);
+                     if (!!point.x && page.first == null) {
+                        return Swal.fire({ icon: 'info', title: "Message", text: "The annotation is exceeding the PDF boundaries. Please adjust its size or position to fit within the document limits." });
+
+                        //don't add field to an invalid page location
+                    }
+                    const page_idx =
+                        page.first !== null ? page.first : docViewer.getCurrentPage();
+                    const page_info = doc.getPageInfo(page_idx);
+                    const page_point = displayMode.windowToPage(point, page_idx);
+                    const zoom = docViewer.getZoomLevel();
+
+                    var textAnnot = new Annotations.FreeTextAnnotation();
+                    textAnnot.PageNumber = page_idx;
+                    const rotation = docViewer.getCompleteRotation(page_idx) * 90;
+                    textAnnot.Rotation = rotation;
+                    if (rotation === 270 || rotation === 90) {
+                        textAnnot.Width = 20.0 / zoom;
+                        textAnnot.Height = 150.0 / zoom;
+                    } else {
+                        textAnnot.Width = 150.0 / zoom;
+                        textAnnot.Height = 20.0 / zoom;
+                    }
+
+                    if (isNaN(page_point.x) || isNaN(page_point.y)) {
+
+                        textAnnot.X = (page_point.x || page_info.width / 2) - textAnnot.Width / 2;
+                        textAnnot.Y = (page_point.y || page_info.height / 2) - textAnnot.Height / 2;
+
+                    } else {
+                        textAnnot.X = page_point.x;
+                        textAnnot.Y = page_point.y;
+                    }
+                    // textAnnot.X = (page_point.x || page_info.width / 2) - textAnnot.Width / 2;
+                    // textAnnot.Y = (page_point.y || page_info.height / 2) - textAnnot.Height / 2;
+
+                     if ((textAnnot.X < 0) || (textAnnot.Y < 0)) {
+                        return Swal.fire({ icon: 'info', title: "Message", text: "The annotation is exceeding the PDF boundaries. Please adjust its size or position to fit within the document limits." });
+
+                    }
+                    else if (((textAnnot.X + textAnnot.Width) > page_info.width) || ((textAnnot.Y + textAnnot.Height) > page_info.height)) {
+                        return Swal.fire({ icon: 'info', title: "Message", text: "The annotation is exceeding the PDF boundaries. Please adjust its size or position to fit within the document limits." });
+
+                    }
+
+                    textAnnot.setPadding(new Annotations.Rect(0, 0, 0, 0));
+                    textAnnot.custom = {
+                        type,
+                        value,
+                        flag,
+                        name: `${type}_${PerpareDocumentContext.selectuser}_`,
+                    };
+                    textAnnot.setCustomData("type", type);
+                    textAnnot.setCustomData("value", value);
+                    textAnnot.setCustomData("flag", flag);
+                    textAnnot.setCustomData("name", name);
+
+                    textAnnot.setCustomData("recepient", PerpareDocumentContext.selectuser);
+                    // set the type of annot
+                    textAnnot.setContents(textAnnot.custom.name);
+                    textAnnot.FontSize = "" + 12.0 / zoom + "px";
+                    textAnnot.FillColor = new Annotations.Color(211, 211, 211, 0.5);
+                    textAnnot.TextColor = new Annotations.Color(0, 165, 228);
+                    textAnnot.StrokeThickness = 1;
+                    textAnnot.StrokeColor = new Annotations.Color(0, 165, 228);
+                    textAnnot.TextAlign = "center";
+                    textAnnot.Author = annotManager.getCurrentUser();
+
+                    annotManager.deselectAllAnnotations();
+                    annotManager.addAnnotation(textAnnot, true);
+                    annotManager.redrawAnnotation(textAnnot);
+                    annotManager.selectAnnotation(textAnnot);
+                    const elementsIndex = PerpareDocumentContext.receipientEmailsList.findIndex(
+                        (element) => element.email == PerpareDocumentContext.selectuser
+                    );
+                    let newArray = PerpareDocumentContext.receipientEmailsList;
+                    newArray[elementsIndex] = {
+                        ...newArray[elementsIndex],
+                        count: newArray[elementsIndex].count + 1,
+                    };
+
+                    PerpareDocumentContext.receipientEmailsList = newArray;
+               
+
+            }
+
+            };
+            const dragOver = (e) => {
+                e.preventDefault();
+                return false;
+            };
+
+            const drop = (e) => {
+                const { docViewer } = webviwerInstance;
+                const scrollElement = docViewer.getScrollViewElement();
+                const scrollLeft = scrollElement.scrollLeft || 0;
+                const scrollTop = scrollElement.scrollTop || 0;
+                PerpareDocumentContext.dropPoint = { x: e.pageX + scrollLeft, y: e.pageY + scrollTop };
+                e.preventDefault();
+                return false;
+            };
+
+            const dragStart = (e) => {
+               
+                e.target.style.opacity = 0.5;
+                const copy = e.target.cloneNode(true);
+                copy.id = "form-build-drag-image-copy";
+                copy.style.width = "250px";
+                document.body.appendChild(copy);
+                e.dataTransfer.setDragImage(copy, 125, 25);
+                e.dataTransfer.setData("text", "");
+            };
+
+            const dragEnd = (e, type) => {
+                addField(type, PerpareDocumentContext.dropPoint);
+                e.target.style.opacity = 1;
+                document.body.removeChild(
+                    document.getElementById("form-build-drag-image-copy")
+                );
+                e.preventDefault();
+            };
+
+            const handlecomment = (event) => {
+                setcomment(event.target.value);
+            };
+
+            const commentsubmit = () => {
+                let detaisl = { commentoption: commentoption, comment: comment };
+
+                if (reject == true) {
+                    if (comment === "" || comment == undefined) {
+                        alert("Please Enter the Comment");
+                        return false;
+                    } else {
+                        
+                        const currentuser = JSON.parse(localStorage.getItem("user"));
+                        
+                        DocumentService.decline(tempid, {
+                            useremail: currentuser.email,
+                            comment: comment,
+                        })
+                            .then((response) => {
+                                if (!response.data.success) {
+                                    showMessage(response.data.message);
+                                    return false;
+                                }
+                                window.location.href = "/dashboard";
+                                // process.env.REACT_APP_ROUTER_BASE + "/dashboard";
+                            })
+                            .catch((e) => {
+                                console.log("response ===" + e.response);
+                                console.log("Message ===" + e.message);
+                                error(e, 1002013).then((value) => {
+                                    if (value == 401) {
+                                        history.push("/")
+                                    }
+
+                                })
+                            });
+                    }
+                }
+            };
+
+
+            const setWatermark = async () => {
+                const { docViewer, PDFNet } = webviwerInstance;
+
+                let password = document.getElementById("watermark-field").value;
+
+                const getWatermarkOptions = () => ({
+                    diagonal: {
+                        text: password,
+                        fontSize: 60,
+                        color: "#cccccc",
+                        opacity: 50,
+                    },
+                });
+
+                docViewer.setWatermark(getWatermarkOptions());
+                webviwerInstance.docViewer.refreshAll();
+                webviwerInstance.docViewer.updateView();
+            };
+
+            const removeWatermark = async () => {
+                const { docViewer, PDFNet } = webviwerInstance;
+                const getWatermarkOptions = () => ({
+                    diagonal: {
+                        text: "",
+                        fontSize: 60,
+                        color: "#cccccc",
+                        opacity: 50,
+                    },
+                });
+                docViewer.setWatermark(getWatermarkOptions());
+                webviwerInstance.docViewer.refreshAll();
+                webviwerInstance.docViewer.updateView();
+            };
+
+            const nextField = () => {
+                const { Annotations, docViewer } = webviwerInstance;
+                const annotManager = docViewer.getAnnotationManager();
+                let annots = annotManager.getAnnotationsList();
+                if (annots[annotPosition]) {
+                    annotManager.jumpToAnnotation(annots[annotPosition]);
+                    if (annots[annotPosition + 1]) {
+                        setAnnotPosition(annotPosition + 1);
+                    }
+                }
+            };
+
+            const prevField = () => {
+                const { Annotations, docViewer } = webviwerInstance;
+                const annotManager = docViewer.getAnnotationManager();
+                let annots = annotManager.getAnnotationsList();
+                if (annots[annotPosition]) {
+                    annotManager.jumpToAnnotation(annots[annotPosition]);
+                    if (annots[annotPosition - 1]) {
+                        setAnnotPosition(annotPosition - 1);
+                    }
+                }
+            };
+
+            $("#emailList").on('click', 'li', function () {
+                $(".list").removeClass("selected");
+                $(this).addClass("selected");  // adding active class
+
+                 $("#fields").removeClass("classshide");
+            });
+
+            //const toggleRecepientSelection = (email) => {
+            //    PerpareDocumentContext.selectuser = email;
+
+            //    var userObj = PerpareDocumentContext.receipientEmails.find(x => x.email == email)
+            //   if (userObj.eseal) {
+            //        $("#Eseal").removeClass("classshide");
+            //        $("#QRCODE").removeClass("classshide");
+            //    } else {
+            //        $("#Eseal").addClass("classshide");
+            //        $("#QRCODE").addClass("classshide");
+            //    }
+
+            //    //here manage field div
+            //    $("#fields").removeClass("classshide");
+            //};
+            const toggleRecepientSelection = (email) => {
+                PerpareDocumentContext.selectuser = email;
+
+                var userObj = PerpareDocumentContext.receipientEmails.find(x => x.email == email);
+                if (userObj.eseal) {
+                    $("#Eseal").removeClass("classshide");
+                    toggleQRCODEVisibility();
+                } else {
+                    $("#Eseal").addClass("classshide");
+                    $("#QRCODE").addClass("classshide");
+                }
+
+                // Manage the field div visibility
+                $("#fields").removeClass("classshide");
+            };
+
+            const toggleQRCODEVisibility = () => {
+                var isQrCodeRequired = $("#QrCodeRequired").prop("checked");
+
+                if (isQrCodeRequired) {
+                    $("#QRCODE").removeClass("classshide");
+                } else {
+                    $("#QRCODE").addClass("classshide");
+                }
+            };
+
+
+          async function handlePreviewimages() {                
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("GetPreviewimages", "VerificationRequests")",
+                    beforeSend: function () {
+                        $('#overlay').show(); // Show loading overlay
+                    },
+                    complete: function () {
+                        $('#overlay').hide(); // Hide loading overlay
+                    },
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            console.log("Preview images retrieved successfully:", response.data);
+                            resolve(response.data); // Resolve with the preview data
+                        } else {
+                            console.error("Failed to retrieve preview images:", response.message);
+                            resolve(false); // Resolve with `false` for failure
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Error during AJAX call:", error);
+                        ajaxErrorHandler(error); // Handle error (function to be implemented)
+                        reject(error); // Reject the promise
+                    }
+                });
+            });
+          }
+
+
+        </script>
+}

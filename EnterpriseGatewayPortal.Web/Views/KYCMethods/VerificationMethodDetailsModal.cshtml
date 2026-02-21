@@ -1,0 +1,458 @@
+﻿<!-- View Method Modal -->
+<div class="modal fade" id="viewMethodModal" tabindex="-1" role="dialog" aria-labelledby="viewMethodLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content overflow-hidden rounded-lg border-0 shadow-lg">
+            <!-- Header -->
+            <div class="modal-header bg-gradient-primary py-2 text-white">
+                <div class="d-flex align-items-center">
+                    <div>
+                        <h5 class="modal-title fw-bold modal-heading mb-0" id="viewMethodLabel">
+                            Verification Method Details
+                        </h5>
+                    </div>
+                </div>
+                <button type="button" class="close-btn" data-dismiss="modal" aria-label="Close">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body px-4 py-2">
+                <div class="d-flex flex-column">
+                    <div class="d-flex flex-row gap-3">
+                        <div class="flex-1">
+                            <div class="info-item">
+                                <label class="info-label">Method UID</label>
+                                @*<div id="method-uid" class="info-value font-monospace text-truncate"></div>*@
+                                <input id="method-uid" readonly class="method-input" />
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="info-item">
+                                <label class="info-label">Method Name</label>
+                                @*<div id="method-name" class="info-value fw-semibold"></div>*@
+                                <input id="method-name" class="method-input" readonly />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-row gap-3">
+                        <div class="flex-1">
+                            <div class="info-item">
+                                <label class="info-label">Method Type</label>
+                                @*<div id="method-type" class="info-value"></div>*@
+                                <input id="method-type" class="method-input" readonly />
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="info-item">
+                                <label class="info-label">Status</label>
+                                <span id="method-status" class="status-badge badge bg-success"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration Section -->
+                <div class="d-flex justify-content-between mt-2 flex-row gap-2">
+                    <div class="flex">
+                        <div class="info-item">
+                            <label class="info-label">Pricing Per Verification (AED)</label>
+                            @*<div id="method-pricing" class="info-value text-success fw-bold"></div>*@
+                            <input id="method-pricing" readonly class="method-input" />
+                        </div>
+                    </div>
+                    <div class="flex">
+                        <div class="info-item">
+                            <label class="info-label">Processing Time (SLA)</label>
+                            @*<div id="method-processingtime" class="info-value"></div>*@
+                            <input id="method-processingtime" readonly class="method-input" />
+                        </div>
+                    </div>
+                    <div class="flex">
+                        <div class="info-item">
+                            <label class="info-label">Confidence Threshold</label>
+                            @*<div id="method-confidence" class="info-value">
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <small class="text-muted" id="confidence-value"></small>
+                                </div>*@
+                            <input id="method-confidence" readonly class="method-input" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Segments & Attributes Section -->
+                <div class="row" style="gap:15px;">
+                    <div class="w-100">
+                        <div class="info-item">
+                            <label class="info-label">Target Segments</label>
+                            <div id="method-targetsegments" class="tags-container"></div>
+                        </div>
+                    </div>
+                    <div class="w-100">
+                        <div class="info-item">
+                            <label class="info-label">Mandatory Attributes</label>
+                            <div id="method-mandatory" class="tags-container"></div>
+                        </div>
+                    </div>
+                    <div class="w-100">
+                        <div class="info-item">
+                            <label class="info-label">Optional Attributes</label>
+                            <div id="method-optional" class="tags-container"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="w-100">
+                    <label class="info-label">Description</label>
+                    @*<div id="method-description" class="info-value text-muted bg-light rounded p-3"></div>*@
+                    <textarea id="method-description" readonly class="method-input" style="max-height:50px;"></textarea>
+                </div>
+
+                <!-- Request Status -->
+                @*<div class="section-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <label class="info-label mb-1">Request Status</label>
+                                <span id="method-requeststatus" class="status-badge status-active badge bg-primary"></span>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="bi bi-clock me-1"></i> Last updated: <span id="last-updated">Just now</span>
+                            </div>
+                        </div>
+                    </div>*@
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer border-top bg-light px-4 py-3">
+                <button id="method-status-btn">
+                    View Status
+                </button>
+                <button id="method-send-request-btn">
+                    Send Request
+                </button>
+                <button type="button" class="button-close" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Modal Styling */
+
+    button:active, button:focus {
+        outline: none;
+        box-shadow: none !important;
+    }
+
+    .button-close {
+        border-radius: 4px !important;
+        padding: 0.5rem 1.25rem;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        border: 1px solid #dee2e6;
+        box-shadow: none !important;
+    }
+
+        .button-close:hover {
+            box-shadow: 0 0 0 2px #ccc;
+        }
+
+    #method-status-btn {
+        border-radius: 4px !important;
+        padding: 0.5rem 1.25rem;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        border: 1px solid #dee2e6;
+        color: #333;
+        box-shadow: none !important;
+        cursor: pointer;
+    }
+
+    #method-send-request-btn {
+        border-radius: 4px !important;
+        padding: 0.5rem 1.25rem;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        border: none;
+        background: linear-gradient(90deg, #CBA344 0%, #92722A 100%, #92722A 100%);
+        color: white;
+        box-shadow: none !important;
+        cursor: pointer;
+    }
+
+    .gap-3 {
+        gap: 30px !important;
+    }
+
+    .gap-2 {
+        gap: 20px !important;
+    }
+
+    .flex-1 {
+        flex: auto !important;
+        width: 50%;
+    }
+
+    .flex {
+        flex: auto !important;
+    }
+
+    .modal-dialog {
+        max-width: 900px;
+    }
+
+    .modal-content {
+        border: none;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        border-radius: 8px !important;
+    }
+
+    .modal-heading {
+        font-family: "Inter", sans-serif;
+        color: black;
+        font-size: 1.25rem !important;
+        font-weight: 600 !important;
+    }
+
+    .modal-footer {
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+
+    #method-status {
+        width: fit-content;
+        text-transform: none !important;
+    }
+
+    .close-btn {
+        --btn-size: 36px;
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        color: #111;
+        font-size: 1.2rem;
+        border-radius: 50%;
+        height: var(--btn-size);
+        width: var(--btn-size);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        transition: all 0.25s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+        .close-btn:hover {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            color: #000;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+        }
+
+        .close-btn:active {
+            transform: scale(0.95);
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        .close-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35);
+        }
+
+
+
+    .modal-body {
+        height: 75vh;
+        overflow-y: auto;
+    }
+
+    .modal-icon-wrapper {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Section Styling */
+    .section-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: 1px solid #e9ecef;
+    }
+
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .method-input {
+        width: 100%;
+        padding: 0.575rem 0.75rem;
+        border-radius: 5px;
+        outline: none;
+        font-size: 1.2rem;
+        border: 1px solid #ced4da;
+        background-color: #f8f9fa;
+    }
+
+    #method-uid {
+        font-family: monospace;
+    }
+
+    .method-input[readonly] {
+        color: #5d5d5df7;
+        border-color: #dee2e6;
+        cursor: not-allowed;
+        box-shadow: none;
+        pointer-events: none;
+    }
+
+    /* Info Item Styling */
+    .info-item {
+        margin-bottom: 0.75rem;
+    }
+
+    .info-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: black;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .info-value {
+        font-size: 0.95rem;
+        color: #212529;
+        font-weight: 500;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    /* Tags Container */
+    .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .tag {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.8rem;
+        color: #495057;
+        font-weight: 500;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+        .tag.mandatory {
+            border-left: 3px solid #dc3545;
+        }
+
+        .tag.optional {
+            border-left: 3px solid #fd7e14;
+        }
+
+        .tag.segment {
+            border-left: 3px solid #20c997;
+        }
+
+    /* Progress Bar */
+    .progress {
+        border-radius: 10px;
+        background-color: #e9ecef;
+    }
+
+    .progress-bar {
+        border-radius: 10px;
+        transition: width 0.6s ease;
+    }
+
+    /* Footer Buttons */
+    .modal-footer {
+        border-top: 1px solid #e9ecef !important;
+    }
+
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .btn-outline-secondary {
+        border: 1px solid #6c757d;
+        color: #6c757d;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: white;
+        }
+
+    /* Responsive Adjustments */
+    @@media (max-width: 768px) {
+        .modal-body {
+            padding: 1rem;
+        }
+
+        .section-card {
+            padding: 1rem;
+        }
+
+        .tags-container {
+            gap: 0.35rem;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+        }
+    }
+
+    .kyc-modal-tag {
+        border: 1px solid #92722a17;
+        background-color: #F9F7ED;
+        color: #92722A;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 2px 10px;
+        border-radius: 8px;
+        list-style: none;
+    }
+</style>
+
+<script>
+    $('#method-status-btn').on('click', function () {
+        const methodUid = $('#method-uid').val();
+        const targetUrl = '@Url.Action("VerificationMethodStatus", "KYCMethods")' + '?methodUid=' + encodeURIComponent(methodUid);
+        window.location.href = targetUrl;
+    });
+
+    $('#method-send-request-btn').on('click', function () {
+        const methodUid = $('#method-uid').val();
+
+        sendRequest(methodUid);
+
+        $('#viewMethodModal').modal('hide');
+
+    });
+
+</script>

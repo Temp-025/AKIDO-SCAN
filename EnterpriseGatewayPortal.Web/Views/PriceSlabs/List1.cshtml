@@ -1,0 +1,358 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.Priceslabs.PriceSlabDefinitionListViewModel
+@using Newtonsoft.Json;
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+{
+        new BreadCrumbModel { Title = "Payments - General Price Slabs",Url = "", IconKey = "payments-priceSlabs"},
+    };
+}
+@{
+    var layoutType = Context.Request.Cookies["HeaderNavigationLayout"];
+}
+
+@{
+    var hasData = Model.PriceSlabs.Any();
+}
+
+<style>
+    .classshide {
+        display: none !important;
+    }
+
+    .table.dataTable.table {
+        margin-top: 0 !important;
+    }
+
+    .col-sm-12 {
+        padding-right: 0px !important;
+        padding-left: 0px !important;
+    }
+
+
+    /* ----------- Select dropdown css -------------*/
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+        .select2-container .select2-selection--single {
+            border-radius: 8px;
+            align-items: center;
+            box-sizing: border-box;
+            justify-content: center;
+            height: 40px !important;
+            border: 1px solid #E2E8F0 !IMPORTANT;
+            color: #3E4046 !important;
+        }
+
+    .selection {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #3E4046 !important;
+        font-size: 14px;
+        font-family: inherit;
+        padding: 5px 10px;
+    }
+
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border: none !important; /* removes default triangle */
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        background: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M27.0613 13.0612L17.0613 23.0612C16.9219 23.2011 16.7563 23.312 16.574 23.3877C16.3917 23.4634 16.1962 23.5024 15.9988 23.5024C15.8013 23.5024 15.6059 23.4634 15.4235 23.3877C15.2412 23.312 15.0756 23.2011 14.9363 23.0612L4.93626 13.0612C4.65446 12.7794 4.49615 12.3972 4.49615 11.9987C4.49615 11.6002 4.65446 11.218 4.93626 10.9362C5.21805 10.6544 5.60024 10.4961 5.99876 10.4961C6.39727 10.4961 6.77946 10.6544 7.06126 10.9362L16 19.875L24.9388 10.935C25.2205 10.6532 25.6027 10.4949 26.0013 10.4949C26.3998 10.4949 26.782 10.6532 27.0638 10.935C27.3455 11.2168 27.5039 11.599 27.5039 11.9975C27.5039 12.396 27.3455 12.7782 27.0638 13.06L27.0613 13.0612Z' fill='%2392722A'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-size: 16px 16px;
+        width: 19px;
+        top: 11px;
+        vertical-align: middle;
+        height: 100%;
+    }
+
+    .select2-search__field {
+        display: none !important;
+    }
+
+
+    .select2-container .select2-dropdown.select2-dropdown--below {
+        top: -5px !important;
+    }
+
+    .select2-container .select2-search.select2-search--dropdown {
+        padding: 0 !important;
+    }
+
+</style>
+
+
+@if (!Model.PriceSlabs.Any())
+{
+    <style>
+        table {
+            height: 50% !important;
+            margin-top: 0 !important;
+        }
+
+            table.dataTable.table {
+                margin-top: 0 !important;
+            }
+
+        .table-hover > tbody > tr:hover > td {
+            background: none !important;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        /* Apply 100% height to all DataTables wrappers */
+        .dataTables_wrapper {
+            height: 100% !important;
+        }
+
+            /* Apply 100% height only to the second .row inside any DataTables wrapper */
+            .dataTables_wrapper > .row:nth-of-type(2) {
+                height: 100% !important;
+            }
+
+        td:not([style*="display: none"]) {
+            border-bottom-right-radius: 12px !important;
+            border-bottom-left-radius: 12px !important;
+        }
+
+        /*  th:not([style*="display: none"]) {
+                            border-top-left-radius: 12px !important;
+                        }*/
+
+
+        .dataTables_filter .form-control.form-control-sm {
+            pointer-events: none !important;
+        }
+
+        .col-sm-12 {
+            padding-right: 0px !important;
+            padding-left: 0px !important;
+        }
+    </style>
+}
+
+
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 plr">
+
+        <div class="card-body">
+            <div class="row" style="margin-top: -15px; padding: 0px 20px;">
+
+                <div class="col-md-4 col-sm-4 col-4 plr">
+
+
+                    <div class="form-group" style="margin-left: -3px;">
+                        <label class="col-form-label">Price Slab Type</label>
+
+                        <select class="form-control select2" name="priceType" id="priceTypeSelect" style="padding: 5px;">
+                            @* <option value="Choose Option">Choose Option</option>*@
+                            <option value="Organization Price slab">Organization Specific Price slab</option>
+                            <option value="Generic Price Slab">General Price Slab</option>
+
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-6 col-6">
+
+                    <div class="btn-group" style="margin-top: 33px;">
+
+
+                        <a class="btn btn-other" asp-controller="PriceSlabs" asp-action="List1">
+                            <img src="~/assets/images/refresh.png"
+                                 alt="refresh Icon"
+                                 width="17" height="17"
+                                 style=" margin-right: 7px; opacity: 1; position: relative; bottom: -2px;">Refresh
+                        </a>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+</div>
+<div id="tablesDiv" style="height: 100%; margin-top: -2rem; padding: 0px 20px;">
+    <div class="row" style="height:100%;">
+        <div class="col-md-12 plr">
+
+            <div class="card-body">
+                <div class="row align-items-center justify-content-between plr" style="padding-left: 12px; padding-bottom:15px;">
+                    <!-- Left: Search bar (will be injected by DataTables) -->
+                    <div class="col-md-6 col-sm-12 d-flex align-items-center" id="custom-search-container"></div>
+
+                </div>
+                <table id="genericPriceTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table @(Model == null || !Model.PriceSlabs.Any() ? "empty-table" : "")">
+                    <thead>
+                        <tr>
+                            <th>Service Name</th>
+
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.PriceSlabs.Any())
+                        {
+                            <tr>
+                                <td style="text-align:center" valign="top" colspan="6" class="dataTables_empty">
+                                    <img class="NoRecordsCls" src="~/assets/images/No-Records-icon.svg" alt="No records" style=" display:block; margin:0 auto 8px;">
+                                    <p class="NoRecordFound-paragarph">No records found</p>
+
+                                </td>
+                                <td style="display: none;"></td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.PriceSlabs)
+                            {
+                                <tr class="odd gradeX">
+
+                                    <td>@(string.IsNullOrWhiteSpace(item.ServiceName) ? "N/A" : item.ServiceName)</td>
+
+                                    <td class="valigntop">
+                                        <div class="">
+                                            <button class="btn btn-xs deepPink-bgcolor no-margin Actions_btn" type="button" data-toggle="dropdown" style="font-size:0.8rem;"
+                                                    aria-expanded="false">
+                                                Actions
+                                                <i class="fa fa-angle-down"></i>
+                                            </button>
+                                            <ul class="dropdown-menu pull-left" role="menu">
+                                                <li>
+                                                    <a asp-action="ViewGenericDetails" asp-route-serviceId="@item.ServiceId" asp-route-stakeholder="@item.Stakeholder" asp-route-viewData="genericData" onclick="document.getElementById('navigationNetworkOverlay').style.display='block'">
+
+                                                        <img src="~/assets/images/Eye_View_Icon.svg" />
+                                                        View
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+
+
+                                </tr>
+                            }
+                        }
+                    </tbody>
+
+                </table>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+@section scripts{
+
+    <script>
+
+       var table1;
+       var table2;
+       $(document).ready(function () {
+
+
+           $('#networkOverlay').hide();
+
+             document.getElementById("navigationNetworkOverlay").style.display = "none";
+                  var layoutType = '@(layoutType ?? "")';
+            if(layoutType == "Vertical"){
+
+                $('#navigationNetworkOverlay').hide();
+
+                $("#Payments > a")
+                    .attr("aria-expanded", "true")
+                    .addClass("active");
+
+                $("#Payments")
+                    .addClass("submenu-active show");
+
+                $("#Payments .submenu")
+                    .addClass("show");
+
+                $('#Price-Slabs').addClass('active');
+
+               $('#homeMenu').addClass('breadcrumb-item').append('Payments > General Price Slabs');
+               $('#mainMenu').removeClass('breadcrumb-item');
+               $('#subMenu').removeClass('breadcrumb-item');
+            }
+           $('#priceTypeSelect').val('Generic Price Slab');
+           $('.select2').select2();
+
+            const parentNavItem = document.querySelector(`[data-section="Payments"] .nav-link`);
+            if (parentNavItem) {
+                parentNavItem.classList.add("active");
+            }
+           table1 = $("#genericPriceTable").DataTable({
+                       "bLengthChange": false,
+                        "searching": true,
+                        "paging": @hasData.ToString().ToLower(),
+                        "info": @hasData.ToString().ToLower(),
+                        "ordering": @hasData.ToString().ToLower(),
+                           "initComplete": function () {
+                          // Move the search bar into our custom container
+                          $(".dataTables_filter").appendTo("#custom-search-container");
+                          $('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+                          $('.dataTables_filter label').contents().filter(function () {
+                              return this.nodeType === 3;
+                          }).remove();
+
+                   },
+
+                       //"order": [[0, 'desc']]
+                       //"sorting": true
+           });
+            $('#priceTypeSelect').change(function () {
+
+                console.log($(this).val());
+
+                document.getElementById("navigationNetworkOverlay").style.display = "block";
+                var selectedValue = $(this).val();
+
+                if (selectedValue == "Generic Price Slab")
+                {
+                    if ($.fn.DataTable.isDataTable('#genericPriceTable')) {
+
+                        table1.destroy();
+                    }
+
+                    var url = '@Url.Action("List1", "PriceSlabs")';
+                     window.location.href = url;
+
+                }
+
+                if (selectedValue == "Organization Price slab") {
+
+                    var url = '@Url.Action("List2", "PriceSlabs")';
+                    window.location.href = url;
+
+                }
+
+                if (selectedValue == "Choose Option") {
+
+                    var url = '@Url.Action("PriceList", "PriceSlabs")';
+                    window.location.href = url;
+
+                }
+
+            });
+
+       });
+
+    </script>
+}

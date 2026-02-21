@@ -1,0 +1,194 @@
+﻿@using Newtonsoft.Json
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="~/assets/appcss/LoginPage.css">
+    <meta charset="utf-8" />
+    @*<base href="#" target="_blank">*@
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <noscript>Please enable java script in your browser.</noscript>
+    <link rel="icon" type="image/x-icon" href="~/assets/logo-single.svg">
+    <title>@ViewData["Title"] - MYTRUST IDP</title>
+    <!--<link href="~/assets/css/font-awesome-4.7.0/css/font-awesome.min.css"
+          rel="stylesheet"/>-->
+    <!-- stylesheets -->
+    <!--<link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700,900" rel="stylesheet"
+          type="text/css" />-->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.css" integrity="sha512-fRVSQp1g2M/EqDBL+UFSams+aw2qk12Pl/REApotuUVK1qEXERk3nrCFChouag/PdDsPk387HJuetJ1HBx8qAg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="~/assets/css/font-awesome-4.7.0/css/font-awesome.min.css">
+    @*<link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />*@
+    @*<link rel="stylesheet" href="lib/sweetalert/dist/sweetalert.css">*@
+    <!--  stylesheets -->
+    <style>
+        #browserErrordiv {
+            position: fixed;
+            top: 0;
+            z-index: 100;
+            width: 100%;
+            height: 100%;
+            display: none;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .is-hide {
+            display: none;
+        }
+
+        .error1 {
+            display: inline-block;
+            width: 600px;
+            background-color: white;
+            padding: 15px;
+            height: fit-content;
+            margin: 10% auto;
+            border-radius: 5px;
+            border-width: medium;
+            box-shadow: 0 0 #28fac959;
+        }
+
+        #browserError {
+            white-space: pre-wrap;
+            text-align: left;
+            margin-left: 20px;
+            font-family: sans-serif;
+            font-size: 16px;
+        }
+
+        #retry {
+            border: 1px solid #80cfed;
+            padding: 5px 10px 5px 10px;
+            display: flex;
+            border-radius: 5px;
+            font-size: 15px;
+            outline: none !important;
+            background-color: rgba(36, 96, 200, 1);
+            width: auto;
+            float: right;
+            height: 32px;
+        }
+
+        .myform-btn {
+            padding: 5px 10px !important; /* Adjust padding to make the buttons smaller */
+            background-color: #ACC43D !important; /* Add shading by changing background color */
+            border: none !important;
+            border-radius: 200px !important;
+            font-size: 13px !important;
+            cursor: pointer !important;
+            height: 36px !important;
+            
+        }
+
+            .myform-btn:hover {
+                background-color: #ACC43D !important; /* Change background color on hover for a slight effect */
+            }
+
+        .myform-button {
+            display: inline-block !important;
+        }
+    </style>
+</head>
+<body>
+<div id="overlay">
+    <div class="cv-spinner">
+        <span class="spinner">
+
+        </span>
+    </div>
+</div>
+<div id="overlay2">
+    <div class="cv-spinner">
+        <span class="spinner">
+
+        </span>
+    </div>
+</div>
+  
+<div id="overlay1">
+</div>
+    <section class="myform-area" style=" background-image: url('/assets/images/background_Login.png');">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                    <div class="form-area login-form" style="background-image: linear-gradient(to left bottom, rgba(255,255,255,1) 50%, rgba(255,255,255,0.4) 30%),url('/assets/images/Group 11.svg'); height: 580px; width: 115%;">
+                        <div class="form-content">
+                            <img class="icon-img" src="~/assets/images/TitleAndLogo.jpg" style="padding-top: 30px; padding-bottom: 20px;" />
+                        </div>
+                        <div class="form-input" id="USER">
+
+                            <div id="mainDiv" class="d-flex flex-row justify-content-between align-items-center card cookie p-3" style="height:69px; background-color: #ACC43D;">
+                                <div id="mainDiv" class="d-flex flex-row align-items-center" style="font-size:71%">
+                                    <img src="~/assets/NewLogo/icons/Group 96615.png" width="40">
+                                    <div id="mainMsg" class="ml-2 mr-2" style="font-weight: bold; color: black;">
+                                        <span>
+                                            You have successfully authenticated with MyTrust
+                                        <br></span>
+                                         <span>
+                                         NOTE: This is only one time setup<br></span>
+                                         </div>
+                                </div>
+                               
+
+                            </div>
+                            <div>
+                                <h6 style="font-size: 80%; padding-bottom: 10px;padding-top: 10px;">
+                                    NOTE: Please authenticate using your EGP Credentials to link your account</h6>
+                            </div>
+                            <form action="/Login/Index1" method="POST" id="Loginform">
+                                <div class="form-group">
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                                </div>
+                               
+                               
+                                    <div class="myform-button">
+                                    <button class="myform-btn" type="button" id="checkUser" style="width: 139px;">Link Account</button>
+                                       
+                                    </div>
+                              
+                                <h6 style="font-size: 102%;padding-bottom: -4px; padding-top: 11px;">
+                                    If you don't have existing UAEID account, Please click on Create Account
+                                </h6>
+                                <div class="row">
+                                    <div class="myform-button">
+                                       
+                                        <button class="myform-btn" type="button" id="checkUser" style="margin-left: 12px;width: 143px;">Create Account</button>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="row footer">
+                    <img src="~/assets/NewLogo/SVG/NitaLogo.svg" />
+                </div>
+            </div>
+
+                <script>
+                    if (!navigator.cookieEnabled) {
+                        document.querySelector(".backdrop").style.display = "none";
+                        document.getElementById("browserErrordiv").style.display = "flex"
+                        document.getElementById("browserError").innerHTML = "Your browser cookies option is disabled.\ Please enable cookies option \n Go browser setting -> Cookies and other site data -> Enable 'Allow all cookies'!";
+                        //  return false;
+                    }
+                    function load() {
+                        window.location.reload();
+                    }
+                </script>
+                <!-- Core JS files -->
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+                <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js" integrity="sha512-7VTiy9AhpazBeKQAlhaLRUk+kAMAb8oczljuyJHPsVPWox/QIXDFOnT9DUk1UC8EbnHKRdQowT7sOBe7LAjajQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>

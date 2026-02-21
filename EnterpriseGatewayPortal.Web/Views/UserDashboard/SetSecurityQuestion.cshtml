@@ -1,0 +1,174 @@
+﻿@model EnterpriseGatewayPortal.Web.Models.SecurityQuestions.SecurityQuestionViewModel
+
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <noscript>Please enable java script in your browser.</noscript>
+    <title>Set Security Question - UAEID</title>
+    <link rel="icon" type="image/x-icon" href="~/assets/UAEIDfavicon.png" />
+
+    <link href="~/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <script src="~/global_assets/js/main/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/global_assets/js/main/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    <link rel="stylesheet" href="~/assets/appcss/RegistrationPage.css" asp-append-version="true">
+    <link href="~/lib/sweetalert/dist/sweetalert.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <script src="~/assets/js/sweetalert2@11.js"></script>
+
+</head>
+<body>
+    @{
+        await Html.RenderPartialAsync("_AlertBox");
+    }
+    <section class="myform-area">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="form-area" id="AuthenticationProvision">
+                        <div class="header">Set Security Question</div>
+                        <div class="activationDiv" style="padding: 20px 55px !important; width: 100% !important;">
+                            <form id="securityQue" asp-action="SetSecurityQuestion">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-12">
+                                        <div class="form-group" hidden>
+                                            <input asp-for="UserId" class="form-control" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label asp-for="Question1" class="col-form-label"></label>
+                                            <select asp-for="Question1" class="form-control"
+                                                    asp-items="@Model.SecurityQueList1"></select>
+                                            <span asp-validation-for="Question1" class="text-danger"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input asp-for="Answer1" required />
+                                            <label asp-for="Answer1" class="s3"></label>
+                                            <span asp-validation-for="Answer1" class="text-danger"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label asp-for="Question2" class="col-form-label"></label>
+                                            <select asp-for="Question2" class="form-control"
+                                                    asp-items="@Model.SecurityQueList2"></select>
+                                            <span asp-validation-for="Question2" class="text-danger"></span>
+                                        </div>
+                                        <div class="form-group">
+
+                                            <input asp-for="Answer2" required />
+                                            <label asp-for="Answer2" class="s3"></label>
+                                            <span id='message'></span>
+                                            <span asp-validation-for="Answer2" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="myform-button" style="margin-top: 0px">
+                                    <div class="d-flex justify-content-end">
+
+                                        <button id="secQueBtn" class="btn btn-primary uaeid-primary" type="submit" style="opacity: 0.5;" disabled>
+                                            Save
+                                        </button>
+
+                                    </div>
+                                </div>
+
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+
+        Swal = Swal.mixin({
+    customClass: {
+        popup: 'custom-swal-popup',
+        title: 'custom-swal-title',
+        htmlContainer: 'custom-swal-content',
+        confirmButton: 'custom-swal-confirm-btn',
+        cancelButton: 'custom-swal-cancel-btn'
+    },
+    buttonsStyling: false
+});
+
+const originalSwalFire = Swal.fire;
+
+Swal.fire = function (options) {
+    if (typeof options === "string") {
+        options = { title: options };
+    }
+
+    const type = options.icon || options.type || "info";
+    let iconHtml = "";
+
+    switch (type) {
+        case "info":
+            iconHtml = '<img src="@Url.Content("~/assets/images/Info.svg")" class="custom-swal-icon">';
+            break;
+        case "warning":
+            iconHtml = '<img src="@Url.Content("~/assets/images/Warning.svg")" class="custom-swal-icon">';
+            break;
+        case "error":
+            iconHtml = '<img src="@Url.Content("~/assets/images/Error.svg")" class="custom-swal-icon">';
+            break;
+        case "success":
+            iconHtml = '<img src="@Url.Content("~/assets/images/Success.svg")" class="custom-swal-icon">';
+            break;
+        default:
+            iconHtml = "";
+    }
+
+    options.iconHtml = iconHtml;
+    options.icon = undefined;
+
+    return originalSwalFire.call(this, options);
+};
+
+        $(document).ready(function () {
+
+            /*For Beadcrum Start*/
+            $('#homeMenu').addClass('breadcrumb-item').append('Dashboard');
+            $('#mainMenu').addClass('breadcrumb-item active').append('Set Security Question');
+            $('#subMenu').removeClass('breadcrumb-item');
+
+            $('#Question1, #Question2').on('change', function () {
+                var q1 = $('#Question1 option:selected').val();
+                var q2 = $('#Question2 option:selected').val();
+                if (q1 == q2) {
+                    $('#message').html('Both question can not be same').css('color', 'red');
+                    $('#secQueBtn').attr("disabled", true);
+                    $('#secQueBtn').css('opacity', '0.5');
+                } else {
+                    $('#message').html('').css('color', 'green');
+                    $('#secQueBtn').css('opacity', '1');
+                    $('#secQueBtn').attr("disabled", false);
+                }
+            });
+
+            $('#Answer1, #Answer2').on('change', function () {
+                var q1 = $('#Question1 option:selected').val();
+                var q2 = $('#Question2 option:selected').val();
+                if (q1 == q2) {
+                    $('#message').html('Both question can not be same').css('color', 'red');
+                    $('#secQueBtn').attr("disabled", true);
+                    $('#secQueBtn').css('opacity', '0.5');
+                } else {
+                    $('#message').html('').css('color', 'green');
+                    $('#secQueBtn').css('opacity', '1');
+                    $('#secQueBtn').attr("disabled", false);
+                }
+            });
+        });
+
+
+    </script>
+
+</body>
+
+</html>

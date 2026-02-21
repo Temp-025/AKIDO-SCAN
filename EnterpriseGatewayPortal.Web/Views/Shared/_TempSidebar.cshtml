@@ -1,0 +1,1444 @@
+﻿@using System.Security.Claims;
+
+@inject IConfiguration Configuration
+@inject IHttpContextAccessor httpContextAccessor
+
+@{
+    var id = int.Parse(User.FindFirst(ClaimTypes.UserData).Value);
+    var IDPLogin = User.FindFirst("IDPLogin").Value;
+    var adminUserExist = User.FindFirst("AdminUserExist").Value;
+    var RoleId = User.FindFirst("UserRoleID").Value;
+    var businessUserExist = User.FindFirst("UserExist").Value;
+    var spoc_email = User.FindFirst("SpocEmail").Value;
+    var user_email = User.FindFirst("userEmail").Value;
+    var prePaidOrPostPaid = User.FindFirst("PrePaidOrPostPiad").Value;
+    var userRoleName = User.FindFirst("userRoleName")?.Value;
+    var suid = "";
+    var template = "false";
+    var bulkSign = "false";
+    if (IDPLogin == "true")
+    {
+        suid = User.FindFirst("Suid").Value;
+    }
+    if (IDPLogin == "true" && businessUserExist == "true")
+    {
+        template = User.FindFirst("Template").Value;
+        bulkSign = User.FindFirst("BulkSign").Value;
+    }
+    var PresentlayoutType = Context.Request.Cookies["NavigationLayout"];
+    var theme = httpContextAccessor.HttpContext.Request.Cookies["theme"];
+    var uaeidTheme = httpContextAccessor.HttpContext.Request.Cookies["theme"];
+    var Presentlayout = Context.Request.Cookies["NavigationLayout"];
+    var layoutType = Context.Request.Cookies["NavigationLayout"];
+    var userExist = User.FindFirst("UserExist").Value;
+}
+
+@{
+    var roles = new HashSet<string>(User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value));
+
+    bool isOrgDetails = roles.Contains("OrganizationDetails");
+    bool isOrg = roles.Contains("Organization");
+    bool isSignatureTemplates = roles.Contains("Signature Templates");
+    bool isEseal = roles.Contains("ESeal");
+    bool isBusinessUsers = roles.Contains("Business Users");
+    bool isBeneficiaries = roles.Contains("Beneficiaries");
+    bool isApplications = roles.Contains("Applications");
+
+    bool isQRCredentials = roles.Contains("QR Credentials");
+    bool isQRCreate = roles.Contains("QR Credentials Create");
+    bool isQRSubReq = roles.Contains("QR Subscribed Requests");
+
+    bool isQRVerification = roles.Contains("QR Credentials Verification");
+    bool isSubscribedQR = roles.Contains("Subscribed QR Credentials");
+
+    bool isWallet = roles.Contains("Wallet");
+    bool isWalletCredentials = roles.Contains("Credentials");
+    bool isRevokeCredentials = roles.Contains("Revoke User Credentials");
+    bool isCredentialIssuer = roles.Contains("credential_issuer");
+    bool isCredentialSubscriptionVerification = roles.Contains("Credential Subscription Verification");
+    bool isCredentialVerifier = roles.Contains("credential_verifier");
+
+    bool isPayments = roles.Contains("Payments");
+    bool isRateCards = roles.Contains("Rate Cards");
+    bool isPriceSlabs = roles.Contains("Price Slabs");
+    bool isPaymentHistory = roles.Contains("Payment History");
+    bool isBalanceSheets = roles.Contains("Balance Sheets");
+    bool isUsageReports = roles.Contains("Usage Reports");
+    bool isIdValidation = roles.Contains("Id Validation Service");
+    bool isKycApplication = roles.Contains("Kyc Applications");
+    bool isKycDevices = roles.Contains("Kyc Devices");
+    bool isKycMethods = roles.Contains("Kyc Methods");
+
+    bool isUsers = roles.Contains("Users");
+    bool isRoles = roles.Contains("Roles");
+    bool isAdminLogReports = roles.Contains("Admin Log Reports");
+
+}
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
+        display: flex;
+    }
+
+    .nsidebar {
+        background: #fff;
+        height: 100vh;
+        box-shadow: 2px 0 6px rgba(0,0,0,0.08);
+        position: fixed;
+        top: 0;
+        left: 0;
+        overflow-y: auto;
+        border-right: 1px solid #E8E9F8;
+        overflow: visible !important;
+        transition: width 0.3s ease;
+        visibility: visible;
+    }
+
+        .nsidebar .sidebar-scroll {
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-bottom: 50px;
+            scrollbar-width: none;
+        }
+
+    .sidebar-scroll::-webkit-scrollbar {
+        display: none;
+        width: 0;
+    }
+
+    .sactive {
+        width: 70px !important;
+        overflow: hidden;
+    }
+
+    .hide {
+        display: none !important;
+    }
+
+    .main-head {
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    /*    .nsidebar::before {
+        content: "\e138";
+        font-family: "Phosphor" !important;
+        position: absolute;
+        top: 25%;
+        right: -10px;
+        transform: translateY(-50%);
+        background: #222;
+        color: #fff;
+        font-size: 14px;
+        height: 20px;
+        width: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        background: linear-gradient(90deg, #CBA344 0%, #92722A 100%);
+        z-index: 10;
+    }*/
+
+    .nsidebar.sactive::before {
+        transform: translateY(-50%) rotate(180deg);
+    }
+
+    .nsidebar.sactive {
+        width: 78px !important;
+        overflow: visible;
+    }
+
+        .nsidebar.sactive .main-head,
+        .nsidebar.sactive .toggle-icon {
+            display: none !important;
+        }
+
+        .nsidebar.sactive .sidebar-menu .menu-item {
+            width: 55px !important;
+        }
+
+            .nsidebar.sactive .sidebar-menu .menu-item > a {
+                justify-content: center !important;
+                flex-direction: row;
+            }
+
+        .nsidebar.sactive .submenu {
+            display: none !important;
+        }
+
+
+    /*    .sidebar-before-btn {
+        position: absolute;
+        top: 25%;
+        right: -10px;
+        transform: translateY(-50%);
+        height: 20px;
+        width: 20px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        z-index: 20;
+        outline: none !important;
+        padding: 0;
+    }*/
+
+
+    .sidebar-header {
+        width: 250px;
+        padding: 4px 10px;
+    }
+
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .sidebar-menu .menu-item {
+            margin: 10px 0;
+        }
+
+            .sidebar-menu .menu-item > a {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 16px;
+                font-size: 15px;
+                font-weight: 400;
+                color: #444;
+                border-radius: 8px;
+                text-decoration: none;
+            }
+
+                .sidebar-menu .menu-item > a:hover {
+                    background-color: #F9F7ED;
+                    color: #92722A;
+                }
+
+            .sidebar-menu .menu-item.active > a {
+                background: linear-gradient(90deg, #CBA344 0%, #92722A 100%);
+                color: #fff;
+                font-weight: 600;
+            }
+
+    .menu-item.has-submenu > a[aria-expanded="true"] .toggle-icon {
+        transform: rotate(90deg);
+        transition: transform 0.3s ease;
+    }
+
+    .menu-item.has-submenu > a .toggle-icon {
+        transition: transform 0.3s ease;
+    }
+
+
+    .sidebar-menu .submenu {
+        list-style: none;
+        padding: 0 0 0 10px;
+        border-left: 1px solid rgba(226, 232, 240, 1);
+        margin-left: 25px;
+        position: static;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    /*    .nsidebar.sactive .submenu {
+        position: absolute;
+        top: 0;
+        left: calc(100% + 5px);
+        min-width: 220px;
+        margin-left: 0;
+        padding: 8px 0;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+        display: none;
+        z-index: 9999;
+    }
+        .nsidebar.sactive .menu-item.has-submenu:hover > .submenu {
+            display: block !important;
+        }*/
+
+
+
+    .nsidebar.sactive .submenu li a {
+        padding: 10px 16px;
+        white-space: nowrap;
+    }
+
+    .sidebar-menu li {
+        margin: 4px 0;
+    }
+
+    .sidebar-menu .submenu li a {
+        display: block;
+        padding: 8px 8px 8px 20px !important;
+        font-size: 15px !important;
+        color: black;
+        border-radius: 8px;
+        text-decoration: none;
+        position: relative;
+    }
+
+        .sidebar-menu .submenu li a::before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: -12px;
+            width: 3px;
+            height: 80%;
+            background: transparent;
+            transition: background 0.3s ease;
+        }
+
+        .sidebar-menu .submenu li a:hover {
+            background: linear-gradient(90deg, #CBA344 0%, #92722A 100%);
+            color: #fff;
+        }
+
+            .sidebar-menu .submenu li a:hover::before {
+                background: rgba(146, 114, 42, 1); /* gold bar */
+            }
+
+        .sidebar-menu .submenu li a.active {
+            background: linear-gradient(90deg, #CBA344 0%, #92722A 100%);
+            color: #fff;
+            font-weight: 600;
+        }
+
+            .sidebar-menu .submenu li a.active::before {
+                background: rgba(146, 114, 42, 1);
+            }
+
+    .page-header {
+        margin-bottom: 30px;
+    }
+
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+    }
+
+    .sidebar-menu .menu-item.has-submenu > a[aria-expanded="true"] {
+        background-color: #F9F7ED;
+        color: white;
+        font-weight: #92722A;
+    }
+
+    .sidebar-menu .menu-item.has-submenu.submenu-active > a {
+        background: none !important;
+        color: rgba(146, 114, 42, 1) !important;
+        font-weight: 600;
+    }
+
+    .sidebar-menu .menu-item.has-submenu .submenu a.active {
+        background: linear-gradient(90deg, #CBA344 0%, #92722A 100%);
+        color: #fff !important;
+        font-weight: 600;
+    }
+
+        .sidebar-menu .menu-item.has-submenu .submenu a.active::before {
+            background: rgba(146, 114, 42, 1);
+        }
+
+    .sidebar-menu .menu-item.has-submenu.submenu-active > a:hover {
+        background: linear-gradient(90deg, #CBA344 0%, #92722A 100%) !important;
+        color: #fff !important;
+    }
+
+
+    @@media (max-width: 992px) {
+        .sidebar {
+            transform: translateX(-100%);
+            position: fixed;
+            z-index: 1000;
+        }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+        .menu-toggle {
+            display: block;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 999;
+            background: linear-gradient(90deg, #CBA344 0%, #92722A 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content {
+            margin-left: 0;
+        }
+    }
+
+    @@media (min-width: 993px) {
+        .menu-toggle {
+            display: none;
+        }
+    }
+
+    .si {
+        font-size: 24px !important;
+    }
+
+    .gap {
+        gap: 12px;
+    }
+
+    /* Floating submenu only visible in collapsed mode */
+    .nsidebar .submenu-flyout {
+        display: none;
+    }
+
+    .nsidebar.sactive .submenu-flyout {
+        position: absolute;
+        top: 0;
+        left: calc(100% + 5px);
+        min-width: 175px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        padding: 4px 0;
+        list-style: none;
+    }
+
+        .nsidebar.sactive .submenu-flyout li a {
+            padding: 8px 16px !important;
+            display: block;
+            white-space: nowrap;
+            color: black;
+            font-size: 14px !important;
+            font-weight: 400 !important;
+            padding-left: 16px !important;
+        }
+
+            .nsidebar.sactive .submenu-flyout li a:hover {
+                background: rgba(249, 247, 237, 1);
+                color: black;
+            }
+
+    .nsidebar .menu-item.open > a {
+        background: linear-gradient(90deg, #CBA344 0%, #92722A 100%);
+        color: #fff;
+    }
+
+    .nsidebar-header {
+        width: 100%;
+        border-bottom: 1px solid #E8E9F8;
+        height: 60px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .main-wrapper {
+        margin-left: 1px;
+    }
+
+    .main-content-area {
+        padding: 10px !important;
+    }
+
+    .plr {
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+
+    .pr {
+        padding-right: 0px !important;
+    }
+
+    .pl {
+        padding-left: 0px !important;
+    }
+
+    .pt {
+        padding-top: 0px !important;
+    }
+
+    .mlr {
+        margin-right: 0px !important;
+        margin-left: 0px !important;
+    }
+
+    .mr {
+        margin-right: 0px !important;
+    }
+
+    .ml {
+        margin-left: 0px !important;
+    }
+
+    .toggle-icon.rotated {
+        transform: rotate(90deg);
+        transition: transform 0.3s ease;
+    }
+
+    .between {
+        justify-content: space-between !important;
+    }
+
+    #businessUserTable_wrapper.container-fluid {
+        padding: 0px !important;
+    }
+
+    #beneficiariesUserTable_wrapper.container-fluid {
+        padding: 0px !important;
+    }
+
+    #scopesTable_wrapper.container-fluid {
+        padding: 0px !important;
+    }
+
+    #WalletTable_wrapper.container-fluid {
+        padding: 0px !important;
+    }
+
+    #CredentialVerifyTable_wrapper.container-fluid {
+        padding: 0px !important;
+    }
+
+    #rateCardsTable_wrapper.container-fluid {
+        padding: 0px !important;
+    }
+
+    #orgPriceTable_wrapper.container-fluid {
+        padding: 0px !important;
+    }
+
+    #DataTables_Table_0_wrapper.container-fluid {
+        padding: 0px !important;
+    }
+
+    #roleTable_wrapper.container-fluid {
+        padding: 0px !important;
+    }
+
+    #templatesTable_wrapper.container-fluid {
+        padding: 0px !important;
+    }
+
+    #genericPriceTable_wrapper.container-fluid {
+        padding: 0px !important;
+    }
+
+    #DevicesTable_wrapper.container-fluid {
+        padding: 0px !important;
+    }
+
+    .sub-label {
+        padding-left: 20px !important;
+    }
+
+    #spacingCss {
+        margin-left: 0px !important;
+    }
+</style>
+
+<div class="nsidebar">
+    @{
+        var targetUrl = userRoleName == "KYCADMIN"
+            ? Url.Action("Index", "KYCDashboard")
+            : Url.Action("Index", "Dashboard");
+    }
+    <div class="nsidebar-header">
+        <a class="navbar-brand" href="#" style="margin-right:0px !important;">
+            <!-- Primary logo -->
+            <img id="primary-image"
+                 alt="Logo"
+                 width="200" height="50"
+                 style="padding: 6px; cursor: pointer; margin-left: -10px; display: block;"
+                 src="@Url.Content("~/assets/images/NewUAEIDprimaryImg.svg")"
+                 onclick="window.location.href='@targetUrl'" />
+
+            <!-- Secondary logo (hidden by default, same style as primary) -->
+            <img id="secondaryImage"
+                 alt="Secondary Logo"
+                 height="50"
+                 style="padding: 6px; cursor: pointer; display: none;"
+                 src="@Url.Content("~/assets/images/Seconday-Image-Logo.svg")"
+                 onclick="window.location.href='@targetUrl'" />
+        </a>
+    </div>
+    <div class="sidebar-scroll">
+        <div class="sidebar-header">
+            @*<button class="sidebar-before-btn"></button>*@
+            <ul class="sidebar-menu">
+                <!-- Example: Dashboard (no submenu) -->
+                <li class="menu-item" id="dashboardMenu">
+                    @if (userRoleName == "KYCADMIN")
+                    {
+                        @if (layoutType != "BusinessUserLayout")
+                        {
+                            <a asp-controller="KYCDashboard" asp-action="Index" onclick="showLoader()">
+                                <i class="ph ph-layout si"></i>
+                                <span class="main-head">Dashboard</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Dashboard" asp-action="Index" onclick="showLoader()">
+                                <i class="ph ph-layout si"></i>
+                                <span class="main-head">Dashboard</span>
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <a asp-controller="Dashboard" asp-action="Index" onclick="showLoader()">
+                            <i class="ph ph-layout si"></i>
+                            <span class="main-head">Dashboard</span>
+                        </a>
+                    }
+                </li>
+                @if (PresentlayoutType == "BusinessUserLayout" || userRoleName == "BUSINESSUSER")
+                {
+                    @if (User.IsInRole("Document Signing") && (userExist == "true"))
+                    {
+                        <li class="menu-item" id="DocumentSigningModule">
+                            <a asp-controller="Documents" asp-action="Index" onclick="showLoader(); Document(event)">
+                                <i class="ph ph-signature si"></i>
+                                <span class="main-head">Document Signing</span>
+                            </a>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("Bulk signing") && (userExist == "true") && template == "true" && bulkSign == "true")
+                    {
+
+
+                                var bulkItems = new[]
+                                {
+                                    new { Condition = User.IsInRole("Templates"), Id = "Templates", Text = "Templates", Controller = "DocumentTemplates", Action = "Index", OnClick = "showLoader(); Template(event)", DataParent = "bulk", Style = "", FlyoutId = "TemplateMenuFlyout" },
+                                    new { Condition = User.IsInRole("Transactions"), Id = "BulkSignTransactions", Text = "Transactions", Controller = "BulkSign", Action = "GetBulkSigDataList", OnClick = "showLoader(); Transaction(event)", DataParent = "bulk", Style = "", FlyoutId = "TransactionMenuItemFlyout" }
+                                };
+                                var visibleBulkItems = bulkItems.Where(x => x.Condition).ToList();
+                            
+                            @if (visibleBulkItems.Count == 1)
+                            {
+                                var item = visibleBulkItems.First();
+                                <li class="menu-item" id="builksignModule">
+                                    <a asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick">
+                                        <i class="ph ph-folder-open si"></i>
+                                        <span class="main-head">Bulk Signing</span>
+                                    </a>
+                                </li>
+                            }
+                            else if (visibleBulkItems.Count > 1)
+                            {
+                                <li class="menu-item has-submenu" id="builksignModule">
+                                    <a href="#orgSubmenu" data-bs-toggle="collapse" aria-expanded="false" aria-controls="bulkSubmneu">
+                                        <div class="d-flex justify-content-between align-items-center w-100 flex-row">
+                                            <div class="d-flex align-items-center gap flex-row">
+                                                <i class="ph ph-folder-open si"></i>
+                                                <span class="main-head">Bulk Signing</span>
+                                            </div>
+                                            <i class="ph ph-caret-right toggle-icon ms-auto" style="font-size:16px !important;"></i>
+                                        </div>
+                                    </a>
+                                    <ul class="submenu collapse" id="orgSubmenu">
+                                        @foreach(var item in visibleBulkItems)
+                                        {
+                                            <li><a id="@item.Id" asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick" data-parent="@item.DataParent">@item.Text</a></li>
+                                        }
+                                    </ul>
+
+                                    <ul class="submenu-flyout">
+                                        @foreach(var item in visibleBulkItems)
+                                        {
+                                            <li>
+                                                <a id="@item.FlyoutId" asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick" data-parent="@item.DataParent">
+                                                    @item.Text
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+
+                    }
+                    else if (User.IsInRole("Bulk signing") && (userExist == "true") && bulkSign == "true" && template == "false")
+                    {
+                        <li class="dropdown" id="builksignModle">
+                            <a class="nav-link drop-logo" href="#selfServicePortal" data-toggle="collapse" aria-expanded="false">
+                                <i class="bulkSigning-icon" style="padding:0px 12px"></i>
+                                Bulk signing
+                            </a>
+                            <ul class="list-unstyledData dashColSubmenu collapse" id="selfServicePortal">
+
+
+
+
+                                @if (User.IsInRole("Transactions"))
+                                {
+                                    <li class="nav-data" id="TransactionMenuItem">
+                                        <a class="nav-data" asp-controller="BulkSign" asp-action="GetBulkSigDataList" onclick="showLoader(); Transaction(event)">Transactions</a>
+                                    </li>
+                                }
+
+
+
+
+                            </ul>
+                        </li>
+                    }
+                    else if (User.IsInRole("Bulk signing") && (userExist == "true") && template == "true" && bulkSign == "false")
+                    {
+
+                        <li class="dropdown" id="builksignModle">
+                            <a class="nav-link drop-logo" href="#selfServicePortal" data-toggle="collapse" aria-expanded="false">
+                                <i class="bulkSigning-icon" style="padding:0px 12px"></i>
+                                Bulk signing
+                            </a>
+                            <ul class="list-unstyledData dashColSubmenu collapse" id="selfServicePortal">
+
+
+                                @if (User.IsInRole("Templates"))
+                                {
+                                    <li class="nav-data" id="TemplateMenu">
+                                        <a class="nav-data" asp-controller="DocumentTemplates" asp-action="Index" onclick="showLoader(); Template(event)">Templates</a>
+                                    </li>
+                                }
+
+                                @if (User.IsInRole("Transactions"))
+                                {
+                                    <li class="nav-data" id="TransactionMenuItem">
+                                        <a class="nav-data" asp-controller="BulkSign" asp-action="GetBulkSigDataList" onclick="showLoader(); Transaction(event)">Transactions</a>
+                                    </li>
+                                }
+
+
+
+
+                            </ul>
+                        </li>
+                    }
+                }
+                else if (PresentlayoutType == "AdminLayout" || userRoleName == "ADMIN" || userRoleName == "KYCADMIN")
+                {
+                    <!-- Example: Organization -->
+                    @if (isOrgDetails || isOrg || isSignatureTemplates)
+                    {
+
+                        var orgItems = new[]
+                        {
+                                    new { Condition = isOrg, Id = "OrganizationProfile", Text = "Profile", Controller = "ESealRegistration", Action = (userRoleName == "KYCADMIN" ? "GetKYCOrganizationById" : "GetOrganizationById"), OnClick = "showLoader()", DataParent = "organization", Style = "" },
+                                    //new { Condition = isSignatureTemplates, Id = "SignatureTemplates", Text = "Signature Templates", Controller = "Template", Action = "Index", OnClick = "showLoader()", DataParent = "organization", Style = "" },
+                                    //new { Condition = isEseal, Id = "OrganizationEseal", Text = "ESeal", Controller = "ESealDetail", Action = "Index", OnClick = "showLoader()", DataParent = "organization", Style = "" }
+                                };
+                        var visibleOrgItems = orgItems.Where(x => x.Condition).ToList();
+
+                            @if (visibleOrgItems.Count == 1)
+                            {
+                                var item = visibleOrgItems.First();
+                                <li class="menu-item" id="OrgDetailsModle">
+                                    <a asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick">
+                                        <i class="ph ph-buildings si"></i>
+                                        <span class="main-head">Organization</span>
+                                    </a>
+                                </li>
+                            }
+                            else if (visibleOrgItems.Count > 1)
+                            {
+                                <li class="menu-item has-submenu" id="OrgDetailsModle">
+                                    <a href="#orgSubmenu" data-bs-toggle="collapse" aria-expanded="false" aria-controls="orgSubmenu">
+                                        <div class="d-flex justify-content-between align-items-center w-100 flex-row">
+                                            <div class="d-flex align-items-center gap flex-row">
+                                                <i class="ph ph-buildings si"></i>
+                                                <span class="main-head">Organization</span>
+                                            </div>
+                                            <i class="ph ph-caret-right toggle-icon ms-auto" style="font-size:16px !important;"></i>
+                                        </div>
+                                    </a>
+                                    <ul class="submenu collapse" id="orgSubmenu">
+                                        @foreach(var item in visibleOrgItems)
+                                        {
+                                            <li><a id="@item.Id" asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick" data-parent="@item.DataParent" style="@item.Style">@item.Text</a></li>
+                                        }
+                                    </ul>
+
+                                    <ul class="submenu-flyout">
+                                        @foreach(var item in visibleOrgItems)
+                                        {
+                                            <li><a id="@item.Id" asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick" data-parent="@item.DataParent" style="@item.Style">@item.Text</a></li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                    }
+
+
+                    <!-- Keep rest of menu items same... -->
+                    @if (isBusinessUsers || isBeneficiaries || isApplications)
+                    {
+                        var businessItems = new[]
+                        {
+                            new { Condition = isBusinessUsers, Id = "Business-Users", Text = "Business Users", Controller = "BussinessUser", Action = "List", OnClick = "showLoader()", DataParent = "Business", Style = "padding-right:10px !important;" },
+                            new { Condition = isApplications, Id = "Business-Applications", Text = "Business Applications", Controller = "Clients", Action = "List", OnClick = "showLoader()", DataParent = "Business", Style = "padding-right:10px !important;" },
+                            //new { Condition = isBeneficiaries, Id = "Beneficiaries", Text = "Beneficiaries", Controller = "Beneficiaries", Action = "List", OnClick = "showLoader()", DataParent = "Business", Style = "padding-right:10px !important;" }
+                        };
+                        var visibleBusinessItems = businessItems.Where(x => x.Condition).ToList();
+
+                            @if (visibleBusinessItems.Count == 1)
+                            {
+                                var item = visibleBusinessItems.First();
+                                <li class="menu-item" id="BusinessModule">
+                                    <a asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick">
+                                        <i class="ph ph-briefcase si"></i>
+                                        <span class="main-head">Business</span>
+                                    </a>
+                                </li>
+                            }
+                            else if (visibleBusinessItems.Count > 1)
+                            {
+                                <li class="menu-item has-submenu" id="BusinessModule">
+                                    <a href="#bizUsersSubmenu" data-bs-toggle="collapse" aria-expanded="false" aria-controls="bizUsersSubmenu">
+                                        <div class="d-flex justify-content-between align-items-center w-100 flex-row">
+                                            <div class="d-flex align-items-center gap flex-row">
+                                                <i class="ph ph-briefcase si"></i>
+                                                <span class="main-head">Business</span>
+                                            </div>
+                                            <i class="ph ph-caret-right toggle-icon ms-auto" style="font-size:16px !important;"></i>
+                                        </div>
+                                    </a>
+                                    <ul class="submenu collapse" id="bizUsersSubmenu">
+                                        @foreach(var item in visibleBusinessItems)
+                                        {
+                                            <li><a id="@item.Id" asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick" data-parent="@item.DataParent" style="@item.Style">@item.Text</a></li>
+                                        }
+                                    </ul>
+
+                                    <ul class="submenu-flyout">
+                                        @foreach(var item in visibleBusinessItems)
+                                        {
+                                            <li><a id="@item.Id" asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick" data-parent="@item.DataParent" style="@item.Style">@item.Text</a></li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                    }
+                    <!-- QR Manager -->
+                    @*@if (isQRCredentials || isQRVerification)
+                    {
+
+                                var qrItems = new[]
+                                {
+                                    new { Condition = isQRCredentials && isQRCreate, Id = "QR-Create", Text = "Credentials", Controller = "QrCredential", Action = "List", OnClick = "showLoader()", DataParent = "QRM" },
+                                    new { Condition = isQRCredentials && isQRSubReq, Id = "QR-Requests", Text = "Subscription Requests", Controller = "QRVerificationSubscriptionRequest", Action = "List", OnClick = "showLoader()", DataParent = "QRM" },
+                                    new { Condition = isQRVerification && isSubscribedQR, Id = "QR-Subscriptions", Text = "Subscribed Credentials", Controller = "QrSubscribeCredential", Action = "List", OnClick = "showLoader()", DataParent = "QRM" }
+                                };
+                                var visibleQrItems = qrItems.Where(x => x.Condition).ToList();
+                            
+                            @if (visibleQrItems.Count == 1)
+                            {
+                                var item = visibleQrItems.First();
+                                <li class="menu-item" id="QR-Manager">
+                                    <a asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick">
+                                        <i class="ph ph-qr-code si"></i>
+                                        <span class="main-head">QR Manager</span>
+                                    </a>
+                                </li>
+                            }
+                            else if (visibleQrItems.Count > 1)
+                            {
+                                <li class="menu-item has-submenu" id="QR-Manager">
+                                    <a href="#qrSubmenu" data-bs-toggle="collapse" aria-expanded="false" aria-controls="qrSubmenu">
+                                        <div class="d-flex justify-content-between align-items-center w-100 flex-row">
+                                            <div class="d-flex align-items-center gap flex-row">
+                                                <i class="ph ph-qr-code si"></i>
+                                                <span class="main-head">QR Manager</span>
+                                            </div>
+                                            <i class="ph ph-caret-right toggle-icon ms-auto" style="font-size:16px !important;"></i>
+                                        </div>
+                                    </a>
+                                    <ul class="submenu collapse" id="qrSubmenu">
+                                        @foreach(var item in visibleQrItems)
+                                        {
+                                            <li><a id="@item.Id" asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick" data-parent="@item.DataParent">@item.Text</a></li>
+                                        }
+                                    </ul>
+
+                                    <ul class="submenu-flyout">
+                                        @foreach(var item in visibleQrItems)
+                                        {
+                                            <li><a id="@item.Id" asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick" data-parent="@item.DataParent">@item.Text</a></li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                    }*@
+                    <!-- Wallet -->
+                    @if ((isWallet && isCredentialIssuer) || (isCredentialSubscriptionVerification && isCredentialVerifier))
+                    {
+
+                                var walletItems = new[]
+                                {
+                                    new { Condition = isWallet && isCredentialIssuer && isWalletCredentials, Id = "Wallet-Credentials", Text = "Credentials", Controller = "Wallet", Action = "Index", OnClick = "showLoader()", DataParent = "Wallet" },
+                                    new { Condition = isWallet && isCredentialIssuer && isRevokeCredentials, Id = "Revoke-Credentials", Text = "Revoke User Credentials", Controller = "Wallet", Action = "Revoke", OnClick = "showLoader()", DataParent = "Wallet" },
+                                    new { Condition = isWallet && isCredentialIssuer, Id = "Wallet-Subscriptions", Text = "Subscription Requests", Controller = "WalletVerificationSubscriptionRequest", Action = "List", OnClick = "showLoader()", DataParent = "Wallet" },
+                                    new { Condition = isCredentialSubscriptionVerification && isCredentialVerifier && isSubscribedQR, Id = "Wallet-Subs", Text = "Subscribed Credentials", Controller = "WalletCredentialVerification", Action = "List", OnClick = "showLoader()", DataParent = "Wallet" }
+                                };
+                                var visibleWalletItems = walletItems.Where(x => x.Condition).ToList();
+                            
+                            @if (visibleWalletItems.Count == 1)
+                            {
+                                var item = visibleWalletItems.First();
+                                <li class="menu-item" id="Wallet-Manager">
+                                    <a asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick">
+                                        <i class="ph ph-wallet si"></i>
+                                        <span class="main-head">Wallet</span>
+                                    </a>
+                                </li>
+                            }
+                            else if (visibleWalletItems.Count > 1)
+                            {
+                                <li class="menu-item has-submenu" id="Wallet-Manager">
+                                    <a href="#walletSubmenu" data-bs-toggle="collapse" aria-expanded="false" aria-controls="walletSubmenu">
+                                        <div class="d-flex justify-content-between align-items-center w-100 flex-row">
+                                            <div class="d-flex align-items-center gap flex-row">
+                                                <i class="ph ph-wallet si"></i>
+                                                <span class="main-head">Wallet</span>
+                                            </div>
+                                            <i class="ph ph-caret-right toggle-icon ms-auto" style="font-size:16px !important;"></i>
+                                        </div>
+                                    </a>
+                                    <ul class="submenu collapse" id="walletSubmenu">
+                                        @foreach(var item in visibleWalletItems)
+                                        {
+                                            <li><a id="@item.Id" asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick" data-parent="@item.DataParent">@item.Text</a></li>
+                                        }
+                                    </ul>
+
+                                    <ul class="submenu-flyout">
+                                        @foreach(var item in visibleWalletItems)
+                                        {
+                                            <li><a id="@item.Id" asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick" data-parent="@item.DataParent">@item.Text</a></li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                    }
+                    <!-- Payments -->
+                    @*@if (isPayments)
+                    {
+                        <li class="menu-item has-submenu" id="Payments">
+                            <a href="#paySubmenu" data-bs-toggle="collapse" aria-expanded="false" aria-controls="paySubmenu">
+                                <div class="d-flex justify-content-between align-items-center w-100 flex-row">
+                                    <div class="d-flex align-items-center gap flex-row">
+                                        <i class="ph ph-receipt si"></i>
+                                        <span class="main-head">Payments</span>
+                                    </div>
+                                    <i class="ph ph-caret-right toggle-icon ms-auto" style="font-size:16px !important;"></i>
+                                </div>
+                            </a>
+                            <ul class="submenu collapse" id="paySubmenu">
+                                @if (isRateCards)
+                                {
+                                    <li><a id="Rate-Cards" asp-controller="RateCards" asp-action="Index" onclick="showLoader()" data-parent="Payments">Rate Cards</a></li>
+                                }
+                                @if (isPriceSlabs)
+                                {
+                                    <li><a id="Price-Slabs" asp-controller="PriceSlabs" asp-action="List2" onclick="showLoader()" data-parent="Payments">Price Slabs</a></li>
+                                }
+                                @if (isPaymentHistory)
+                                {
+                                    <li><a id="Payment-History" asp-controller="PaymentHistory" asp-action="OrgPaymentList" onclick="showLoader()" data-parent="Payments">Payment History</a></li>
+                                }
+                                @if (isBalanceSheets)
+                                {
+                                    <li><a id="Balance-Sheets" asp-controller="BalanceSheets" asp-action="BalanceList" onclick="CheckSpocBalanceA(event)" data-parent="Payments">Balance Sheets</a></li>
+                                }
+                                @if (isUsageReports)
+                                {
+                                    <li><a id="Usage-Reports" asp-controller="UsageReports" asp-action="Index" onclick="showLoader()" data-parent="Payments">Usage Reports</a></li>
+                                }
+                            </ul>
+
+                            <ul class="submenu-flyout">
+                                @if (isRateCards)
+                                {
+                                    <li><a id="Rate-Cards" asp-controller="RateCards" asp-action="Index" onclick="showLoader()" data-parent="Payments">Rate Cards</a></li>
+                                }
+                                @if (isPriceSlabs)
+                                {
+                                    <li><a id="Price-Slabs" asp-controller="PriceSlabs" asp-action="List2" onclick="showLoader()" data-parent="Payments">Price Slabs</a></li>
+                                }
+                                @if (isPaymentHistory)
+                                {
+                                    <li><a id="Payment-History" asp-controller="PaymentHistory" asp-action="OrgPaymentList" onclick="showLoader()" data-parent="Payments">Payment History</a></li>
+                                }
+                                @if (isBalanceSheets)
+                                {
+                                    <li><a id="Balance-Sheets" asp-controller="BalanceSheets" asp-action="BalanceList" onclick="CheckSpocBalanceA(event)" data-parent="Payments">Balance Sheets</a></li>
+                                }
+                                @if (isUsageReports)
+                                {
+                                    <li><a id="Usage-Reports" asp-controller="UsageReports" asp-action="Index" onclick="showLoader()" data-parent="Payments">Usage Reports</a></li>
+                                }
+                            </ul>
+                        </li>
+
+                    }*@
+
+                     @if (isIdValidation && isKycApplication)
+                    {
+                        <li class="menu-item" id="Kyc-Applications">
+                            <a asp-controller="KYCApplications" asp-action="Index" onclick="showLoader();">
+                                <i class="ph ph-key si"></i>
+                                <span class="main-head">API Keys</span>
+                            </a>
+                        </li>
+                    }
+
+                    @if (isIdValidation && isKycMethods)
+                    {
+                        <li class="menu-item" id="Kyc-Methods">
+                            <a asp-controller="KYCMethods" asp-action="RequestVErificationMethod" onclick="showLoader();">
+                                <i class="ph ph-shield-check si"></i>
+                                <span class="main-head">Verification Methods</span>
+                            </a>
+                        </li>
+                    }
+                    @if (isIdValidation && isKycDevices)
+                    {
+                        <li class="menu-item" id="Kyc-Devices">
+                            <a asp-controller="KYCDevice" asp-action="Index" onclick="showLoader();">
+                                <i class="ph ph-device-tablet si"></i>
+                                <span class="main-head">Verification Devices</span>
+                            </a>
+                        </li>
+                    } 
+
+                    @if (isIdValidation)
+                    {
+                        <!--<li class="menu-item has-submenu" id="IdValidation">
+                            <a href="#idValidationSubmenu" data-bs-toggle="collapse" aria-expanded="false" aria-controls="idValidationSubmenu">
+                                <div class="d-flex justify-content-between align-items-center w-100 flex-row">
+                                    <div class="d-flex align-items-center gap flex-row">
+                                        <i class="ph ph-identification-badge si"></i>
+                                        <span class="main-head">ID Validation Service</span>
+                                    </div>
+                                    <i class="ph ph-caret-right toggle-icon ms-auto" style="font-size:16px !important;"></i>
+                                </div>
+                            </a>-->
+
+                            <!-- Collapsible Submenu -->
+                            <!--<ul class="submenu collapse" id="idValidationSubmenu">
+                                @if (isKycApplication)
+                                {
+                                    <li>
+                                        <a id="Kyc-Applications" asp-controller="KycApplications" asp-action="Index" onclick="showLoader()" data-parent="IdValidation">
+                                            Api Keys
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (isKycMethods)
+                                {
+                                    <li>
+                                        <a id="Kyc-Methods" asp-controller="KycMethods" asp-action="Index" onclick="showLoader()" data-parent="IdValidation">
+                                            KYC Methods
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (isKycDevices)
+                                {
+
+                                    <li>
+                                        <a id="Kyc-Devices" asp-controller="KYCDevice" asp-action="Index" onclick="showLoader()" data-parent="IdValidation">
+                                            KYC Devices
+                                        </a>
+                                    </li>
+                                }
+                            </ul>-->
+
+                            <!-- Flyout Submenu -->
+                            <!--<ul class="submenu-flyout">
+                                @if (isKycApplication)
+
+                                {
+                                    <li>
+                                        <a id="Kyc-Applications" asp-controller="KycApplications" asp-action="Index" onclick="showLoader()" data-parent="IdValidation">
+                                            Api Keys
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (isKycMethods)
+                                {
+                                    <li>
+                                        <a id="Kyc-Methods" asp-controller="KycMethods" asp-action="Index" onclick="showLoader()" data-parent="IdValidation">
+                                            KYC Methods
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (isKycDevices)
+                                {
+                                    <li>
+                                        <a id="Kyc-Devices" asp-controller="KYCDevice" asp-action="Index" onclick="showLoader()" data-parent="IdValidation">
+                                            KYC Devices
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </li>-->
+                    }
+
+                    <!-- Administration -->
+                    @if (isUsers || isRoles || isAdminLogReports)
+                    {
+
+                                var adminItems = new[]
+                                {
+                                    new { Condition = isUsers, Id = "Users", Text = "Users", Controller = "Users", Action = "List", OnClick = "showLoader()", DataParent = "Admin" },
+                                    new { Condition = isRoles, Id = "Roles", Text = "Roles", Controller = "RoleManagement", Action = "List", OnClick = "showLoader()", DataParent = "Admin" },
+                                    new { Condition = isAdminLogReports, Id = "Reports", Text = "Activity Reports", Controller = "AdminLogReports", Action = "Reports", OnClick = "showLoader()", DataParent = "Admin" }
+                                };
+                                var visibleAdminItems = adminItems.Where(x => x.Condition).ToList();
+                            
+                            @if (visibleAdminItems.Count == 1)
+                            {
+                                var item = visibleAdminItems.First();
+                                <li class="menu-item" id="Administration">
+                                    <a asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick">
+                                        <i class="ph ph-user-circle-gear si"></i>
+                                        <span class="main-head">Administration</span>
+                                    </a>
+                                </li>
+                            }
+                            else if (visibleAdminItems.Count > 1)
+                            {
+                                <li class="menu-item has-submenu" id="Administration">
+                                    <a href="#adminSubmenu" data-bs-toggle="collapse" aria-expanded="false" aria-controls="adminSubmenu">
+                                        <div class="d-flex justify-content-between align-items-center w-100 flex-row">
+                                            <div class="d-flex align-items-center gap flex-row">
+                                                <i class="ph ph-user-circle-gear si"></i>
+                                                <span class="main-head">Administration</span>
+                                            </div>
+                                            <i class="ph ph-caret-right toggle-icon ms-auto" style="font-size:16px !important;"></i>
+                                        </div>
+                                    </a>
+                                    <ul class="submenu collapse" id="adminSubmenu">
+                                        @foreach(var item in visibleAdminItems)
+                                        {
+                                            <li><a id="@item.Id" asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick" data-parent="@item.DataParent">@item.Text</a></li>
+                                        }
+                                    </ul>
+
+                                    <ul class="submenu-flyout">
+                                        @foreach(var item in visibleAdminItems)
+                                        {
+                                            <li><a id="@item.Id" asp-controller="@item.Controller" asp-action="@item.Action" onclick="@item.OnClick" data-parent="@item.DataParent">@item.Text</a></li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="~/global_assets/js/main/jquery.min.js" asp-append-version="true"></script>
+
+<script>
+
+    $(document).ready(function () {
+        const path = window.location.pathname.toLowerCase().split('/').filter(Boolean);
+        if (path.length === 0 || path.includes("dashboard") || path.includes("kycdashboard")){
+            document.querySelector('#dashboardMenu')?.classList.add('active');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const currentPath = window.location.pathname.toLowerCase();
+        const links = document.querySelectorAll('.nsidebar a');
+        let bestMatch = null;
+        let maxMatchLen = 0;
+
+        links.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && href !== '#' && href !== '/') {
+                const linkPath = href.toLowerCase();
+                // Check if current path matches or starts with link path
+                if (currentPath === linkPath || (linkPath !== '/' && currentPath.startsWith(linkPath))) {
+                    // If multiple matches, keep the longest one (most specific)
+                    if (linkPath.length > maxMatchLen) {
+                        maxMatchLen = linkPath.length;
+                        bestMatch = link;
+                    }
+                }
+            }
+        });
+
+        if (bestMatch) {
+            bestMatch.classList.add('active');
+            const parentLi = bestMatch.closest('.menu-item');
+            if (parentLi) parentLi.classList.add('active');
+        }
+
+
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.nsidebar');
+
+        const dashboard = document.getElementById("#dashboardMenu");
+
+        const collapseButton = document.querySelector('.sidebar-before-btn');
+
+        const mainSection = document.querySelector('.main-section');
+        const sidebar2 = document.querySelector('.sidebar');
+
+        if (collapseButton) {
+            collapseButton.addEventListener('click', () => {
+                sidebar.classList.toggle('sactive');
+
+                if (sidebar.classList.contains('sactive')) {
+                    mainSection.style.marginLeft = "70px";
+                    sidebar2.style.width = "70px";
+                } else {
+                    mainSection.style.marginLeft = "260px";
+                }
+                const heading = document.querySelector('.sidebar-header .main-head');
+                if (heading) heading.classList.toggle('hide');
+            });
+        }
+
+        // Main menu (no submenu)
+        document.querySelectorAll('.menu-item > a:not([data-bs-toggle])').forEach(link => {
+            link.addEventListener('click', () => {
+                document.querySelectorAll('.menu-item').forEach(it => it.classList.remove('active'));
+                document.querySelectorAll('.submenu a.active').forEach(a => a.classList.remove('active'));
+                const parent = link.closest('.menu-item');
+                if (parent) parent.classList.add('active');
+            });
+        });
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
+        }
+
+        const items = document.querySelectorAll('.menu-item.has-submenu');
+
+        items.forEach(item => {
+            const toggle = item.querySelector('a[data-bs-toggle="collapse"]');
+            const submenu = item.querySelector('.submenu');
+            const icon = item.querySelector('.toggle-icon');
+            if (!toggle || !submenu) return;
+
+            // Create Collapse instance
+            const collapseInstance = new bootstrap.Collapse(submenu, { toggle: false });
+
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                const isExpanded = submenu.classList.contains('show');
+
+                // --- Instantly close all other submenus ---
+                items.forEach(otherItem => {
+                    if (otherItem === item) return;
+                    const otherSubmenu = otherItem.querySelector('.submenu');
+                    const otherIcon = otherItem.querySelector('.toggle-icon');
+                    const otherToggle = otherItem.querySelector('a[data-bs-toggle="collapse"]');
+
+                    if (otherSubmenu && otherSubmenu.classList.contains('show')) {
+                        otherSubmenu.classList.remove('show'); // instantly hide without waiting
+                        otherSubmenu.style.height = null;
+                    }
+
+                    if (otherIcon) otherIcon.classList.remove('rotated');
+                    otherItem.classList.remove('active');
+                    if (otherToggle) otherToggle.setAttribute('aria-expanded', 'false');
+                });
+
+                // --- Toggle the current submenu ---
+                if (isExpanded) {
+                    collapseInstance.hide();
+                    item.classList.remove('active');
+                    if (icon) icon.classList.remove('rotated');
+                    toggle.setAttribute('aria-expanded', 'false');
+                } else {
+                    collapseInstance.show();
+                    item.classList.add('active');
+                    if (icon) icon.classList.add('rotated');
+                    toggle.setAttribute('aria-expanded', 'true');
+                }
+
+                // Remove dashboard active if submenu is toggled
+                if (dashboard) dashboard.classList.remove('active');
+            });
+
+            // Keep icon sync with collapse events
+            submenu.addEventListener('shown.bs.collapse', () => {
+                item.classList.add('active');
+                toggle.setAttribute('aria-expanded', 'true');
+                if (icon) icon.classList.add('rotated');
+            });
+
+            submenu.addEventListener('hidden.bs.collapse', () => {
+                item.classList.remove('active');
+                toggle.setAttribute('aria-expanded', 'false');
+                if (icon) icon.classList.remove('rotated');
+            });
+        });
+
+        // --- Auto-open submenu if child already active on load ---
+        const activeChild = document.querySelector('.submenu a.active');
+        if (activeChild) {
+            const parent = activeChild.closest('.menu-item.has-submenu');
+            if (parent) {
+                const submenu = parent.querySelector('.submenu');
+                const toggle = parent.querySelector('a[data-bs-toggle="collapse"]');
+                const icon = parent.querySelector('.toggle-icon');
+                const collapseInstance = new bootstrap.Collapse(submenu, { toggle: false });
+                collapseInstance.show();
+                parent.classList.add('active');
+                toggle.setAttribute('aria-expanded', 'true');
+                if (icon) icon.classList.add('rotated');
+            }
+        }
+
+        document.querySelectorAll('.nsidebar .menu-item.has-submenu').forEach(item => {
+            const flyout = item.querySelector('.submenu-flyout');
+            if (!flyout) return;
+
+            let timer;
+
+            item.addEventListener('mouseenter', () => {
+                if (item.closest('.nsidebar').classList.contains('sactive')) {
+                    clearTimeout(timer);
+
+                    // Close all other flyouts + remove "open" class
+                    document.querySelectorAll('.nsidebar .menu-item.has-submenu.open').forEach(openItem => {
+                        if (openItem !== item) {
+                            openItem.classList.remove('open');
+                            const otherFlyout = openItem.querySelector('.submenu-flyout');
+                            if (otherFlyout) otherFlyout.style.display = 'none';
+                        }
+                    });
+
+                    // Show this one
+                    item.classList.add('open');
+                    flyout.style.display = 'block';
+                    const rect = item.getBoundingClientRect();
+                    flyout.style.top = rect.top + "px";
+                }
+            });
+
+            item.addEventListener('mouseleave', () => {
+                if (item.closest('.nsidebar').classList.contains('sactive')) {
+                    timer = setTimeout(() => {
+                        item.classList.remove('open');
+                        flyout.style.display = 'none';
+                    }, 300);
+                }
+            });
+
+            flyout.addEventListener('mouseenter', () => {
+                clearTimeout(timer);
+                item.classList.add('open'); // keep parent highlighted
+            });
+
+            flyout.addEventListener('mouseleave', () => {
+                timer = setTimeout(() => {
+                    item.classList.remove('open');
+                    flyout.style.display = 'none';
+                }, 300);
+            });
+        });
+
+
+
+
+        // Submenu links
+        document.querySelectorAll('.submenu a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.querySelectorAll('.submenu a.active').forEach(a => a.classList.remove('active'));
+                link.classList.add('active');
+
+                items.forEach(it => it.classList.remove('active'));
+                const parent = link.closest('.menu-item.has-submenu');
+                if (parent) {
+                    parent.classList.add('active');
+                    const parentToggle = parent.querySelector('a[data-bs-toggle="collapse"]');
+                    if (parentToggle) parentToggle.setAttribute('aria-expanded', 'true');
+                    if (parent._collapse) parent._collapse.show();
+                }
+
+                // Remove Dashboard active when submenu item clicked
+                if (dashboard) dashboard.classList.remove('active');
+            });
+        });
+
+        // Auto-open if child already active
+        //const activeChild = document.querySelector('.submenu a.active');
+        //if (activeChild) {
+        //    const parent = activeChild.closest('.menu-item.has-submenu');
+        //    if (parent) {
+        //        if (parent._collapse) parent._collapse.show();
+        //        parent.classList.add('active');
+        //        const parentToggle = parent.querySelector('a[data-bs-toggle="collapse"]');
+        //        if (parentToggle) parentToggle.setAttribute('aria-expanded', 'true');
+        //    }
+
+        //    if (dashboard) dashboard.classList.remove('active');
+        //}
+
+        // Inside submenu link click
+        document.querySelectorAll('.submenu a').forEach(link => {
+            link.addEventListener('click', () => {
+                // Remove previous active states
+                document.querySelectorAll('.submenu a.active').forEach(a => a.classList.remove('active'));
+                document.querySelectorAll('.menu-item.has-submenu').forEach(it => it.classList.remove('submenu-active'));
+
+                link.classList.add('active');
+                const parent = link.closest('.menu-item.has-submenu');
+                if (parent) {
+                    parent.classList.add('submenu-active');
+                }
+            });
+        });
+
+        function showLoader() {
+            document.getElementById("navigationNetworkOverlay").style.display = "block";
+        }
+
+
+    });
+    function CheckSpocBalance(event) {
+        event.preventDefault();
+        const prePaidOrPostPaid = '@prePaidOrPostPaid';
+
+        if (prePaidOrPostPaid == "True") {
+            Swal.fire({ icon: 'info', title: "Information", text: "Only PrePaid Organization can access this module" });
+        }
+        else {
+	        window.location.href = '@Url.Action("BalanceList", "BalanceSheets")'
+        }
+
+    }
+
+
+</script>

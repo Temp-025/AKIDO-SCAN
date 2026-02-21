@@ -1,0 +1,162 @@
+﻿using EnterpriseGatewayPortal.Core.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json;
+using System.Data;
+using System.Security.Claims;
+using System.Text;
+using EnterpriseGatewayPortal.Core.Utilities;
+using ClosedXML.Excel;
+using EnterpriseGatewayPortal.Core.Domain.Services;
+using EnterpriseGatewayPortal.Core.DTOs;
+
+namespace EnterpriseGatewayPortal.Web.Controllers
+{
+    public class BaseController : Controller
+    {
+        //private readonly ILogClient _logClient;
+        private readonly IAdminLogService _adminLogService;
+
+        protected BaseController(IAdminLogService adminLogService)
+        {
+            //_logClient = logClient;
+            _adminLogService = adminLogService;
+        }
+
+		//[NonAction]
+		//protected virtual void SendAdminLog(string moduleName, string serviceName, string activityName,
+		//    string logMessageType, string logMessage, string dataTransformation = null, string userName = null)
+		//{
+		//    userName = (!string.IsNullOrEmpty(userName) ? userName : FullName);
+		//    AdminLogMessage adminLogMessage
+		//        = new AdminLogMessage(moduleName, serviceName, activityName, logMessage, logMessageType, userName, dataTransformation);
+
+		//    string logWithChecksum = PKIMethods.Instance.AddChecksum(JsonConvert.SerializeObject(adminLogMessage,
+		//       new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }));
+		//    _logClient.SendAdminLogMessage(logWithChecksum);
+		//}
+
+		[NonAction]
+		protected virtual void SendAdminLog(string moduleName, string serviceName, string activityName,
+	    string logMessageType, string logMessage, string identifier, string identifierName, string dataTransformation = null, string userName = null)
+		{
+			userName = !string.IsNullOrEmpty(userName) ? userName : FullName;
+
+			
+
+            var adminLogDTO = new AdminLogDTO
+            {
+              ActivityName = activityName,
+              ModuleName = moduleName,
+              ServiceName = serviceName,
+              LogMessage = logMessage,
+              LogMessageType = logMessageType,
+              UserName = userName,
+              Identifier = identifier,
+              IdentifierName = identifierName,
+              DataTransformation = dataTransformation,
+             
+            };
+			
+			_adminLogService.SaveAdminLogDetails(adminLogDTO);
+		}
+
+
+		[NonAction]
+        public byte[] ExportToPDF(DataTable dataTable)
+        {
+            byte[] result = new byte[] { };
+            return result;
+        }
+
+        [NonAction]
+        public byte[] ExportToExcel(DataTable dataTable)
+        {
+            MemoryStream stream;
+            using (XLWorkbook wb = new XLWorkbook())
+            {
+                var ws = wb.Worksheets.Add(dataTable);
+                ws.Columns().AdjustToContents();
+                using (stream = new MemoryStream())
+                {
+                    wb.SaveAs(stream);
+                    //return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Report.xlsx");
+                }
+            }
+            return stream.ToArray();
+        }
+
+        [NonAction]
+        public byte[] ExportToCSV(DataTable dataTable)
+        {
+            StringBuilder data = new StringBuilder();
+
+            //Taking the column names.
+            for (int column = 0; column < dataTable.Columns.Count; column++)
+            {
+                //Making sure that end of the line, shoould not have comma delimiter.
+                if (column == dataTable.Columns.Count - 1)
+                    data.Append(dataTable.Columns[column].ColumnName.ToString().Replace(",", ";"));
+                else
+                    data.Append(dataTable.Columns[column].ColumnName.ToString().Replace(",", ";") + ',');
+            }
+
+            data.Append(Environment.NewLine);//New line after appending columns.
+
+            for (int row = 0; row < dataTable.Rows.Count; row++)
+            {
+                for (int column = 0; column < dataTable.Columns.Count; column++)
+                {
+                    ////Making sure that end of the line, shoould not have comma delimiter.
+                    if (column == dataTable.Columns.Count - 1)
+                        data.Append(dataTable.Rows[row][column].ToString().Replace(",", ";"));
+                    else
+                        data.Append(dataTable.Rows[row][column].ToString().Replace(",", ";") + ',');
+                }
+
+                //Making sure that end of the file, should not have a new line.
+                if (row != dataTable.Rows.Count - 1)
+                    data.Append(Environment.NewLine);
+            }
+
+            return ASCIIEncoding.ASCII.GetBytes(data.ToString());
+        }
+
+        public string FullName
+        {
+            get { return User.Identity.Name; }
+        }
+
+        public string UUID
+        {
+            get { return HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value; }
+        }
+
+        public string Email
+        {
+            get { return HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value; }
+        }
+        public string Suid
+        {
+            get { return HttpContext.User.Claims.FirstOrDefault(c => c.Type == "Suid").Value; }
+        }
+
+        public string OrganizationName
+        {
+            get { return HttpContext.User.Claims.FirstOrDefault(c => c.Type == "OrganizationName").Value; }
+        }
+        public string EmployeeEmail
+        {
+            get { return HttpContext.User.Claims.FirstOrDefault(c => c.Type == "employeEmail").Value; }
+        }
+        public string AccessToken
+        {
+            get { return HttpContext.User.Claims.FirstOrDefault(c => c.Type == "AccessToken").Value; } //Ipd_Token
+        }
+        public string OrganizationId
+        {
+            get { return HttpContext.User.Claims.FirstOrDefault(c => c.Type == "OrganizationUid").Value; }
+        }
+    }
+
+}

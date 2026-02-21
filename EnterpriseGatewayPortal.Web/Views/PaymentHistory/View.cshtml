@@ -1,0 +1,298 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.PaymentHistory.PaymentHistoryInfoViewModel
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+    {
+        new BreadCrumbModel { Title = "Payment History" , Url = Url.Action("OrgPaymentList","PaymentHistory"), IconKey="payments-paymentHistory"},
+        new BreadCrumbModel { Title = "View" , Url = "", IconKey="view"}
+    };
+}
+
+@{
+    var layoutType = Context.Request.Cookies["HeaderNavigationLayout"];
+}
+@{
+    ViewData["Title"] = "View";
+}
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+
+<style>
+    /* Icon progress bar */
+    #progressbar {
+        margin-bottom: 30px;
+        overflow: hidden;
+        color: #455A64;
+        padding-left: 24px;
+        padding-right: 77px;
+        margin-top: 0px;
+        display: flex;
+        justify-content: space-between;
+        list-style-type: none;
+    }
+
+        #progressbar li {
+            font-size: 13px;
+            position: relative;
+            text-align: center;
+            flex: 1;
+        }
+
+        #progressbar .step0:before {
+            font-family: FontAwesome;
+            content: "\f10c";
+            color: #fff;
+        }
+
+        #progressbar li:before {
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            display: block;
+            font-size: 20px;
+            background: #C5CAE9;
+            border-radius: 50%;
+            margin: auto;
+            padding: 0px;
+            z-index: 1;
+            position: relative;
+        }
+
+        #progressbar li:after {
+            content: '';
+            width: 92%;
+            height: 12px;
+            background: #C5CAE9;
+            position: absolute;
+            left: 58%;
+            top: 14px;
+            z-index: 0;
+        }
+
+        #progressbar li:first-child:after {
+            left: 50%;
+            /* width: 50%;*/
+        }
+
+        #progressbar li:last-child:after {
+            width: 100%;
+            left: -50%;
+        }
+
+        #progressbar li.active:before, #progressbar li.active:after {
+            background: #faae2a;
+        }
+
+        #progressbar li.active:before {
+            font-family: FontAwesome;
+            content: "\f00c";
+        }
+
+        #progressbar.success li.active:before, #progressbar.success li.active:after {
+            background: mediumseagreen;
+        }
+
+        #progressbar.failure li:before, #progressbar.failure li:after {
+            background: #dc3545;
+        }
+
+    #loadingGif {
+        display: flex;
+        align-items: center;
+    }
+
+        #loadingGif img {
+            height: 43px;
+            margin-right: 55px;
+        }
+
+        #loadingGif span {
+            flex: 1; /* Take remaining space */
+            display: block;
+            margin-right: 44px;
+        }
+
+    .classshide {
+        display: none !important;
+    }
+
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row">
+    <div class="col-md-12 plr">
+        <div class="card-custom">
+            <div class="card-body">
+
+                <form>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <div class="form-group col-md-6" style="float:left;">
+                                <div class="form-group">
+                                    <label asp-for="PaymentChannel" class="col-form-label"></label>
+                                    <input asp-for="PaymentChannel" class="form-control" tabindex="1" readonly />
+                                    <span asp-validation-for="PaymentChannel" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="TotalAmount" class="col-form-label"></label>
+                                    <input asp-for="TotalAmount" class="form-control" tabindex="1" readonly />
+                                    <span asp-validation-for="TotalAmount" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="TransactionReferenceId" class="col-form-label"></label>
+                                    <input asp-for="TransactionReferenceId" class="form-control" tabindex="1" readonly />
+                                    <span asp-validation-for="TransactionReferenceId" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="CreatedOn" class="col-form-label"></label>
+                                    <input asp-for="CreatedOn" class="form-control" tabindex="1" readonly />
+                                    <span asp-validation-for="CreatedOn" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-6" style="float:left;">
+
+                                <div class="form-group">
+                                    <label asp-for="PaymentStatus" class="col-form-label"></label>
+                                    <input asp-for="PaymentStatus" class="form-control" tabindex="1" readonly />
+                                    <span asp-validation-for="PaymentStatus" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="px-md-4 container mx-auto px-1 py-5" style="margin-top: -22px;">
+                                        <div class="card d-flex flex-row">
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex">
+                                                    <h5 id="statusMessage">Status Bar <span class="text-primary font-weight-bold"></span></h5>
+                                                </div>
+                                                <div class="row d-flex justify-content-start">
+                                                    <div class="col-12" style="margin-bottom: -10px;">
+                                                        <ul id="progressbar" class="text-left">
+                                                            <li class="step0 active" id="step1" style="display:none;">Processing</li>
+                                                            @*<li class="step0" id="step2">In Progress</li>*@
+
+                                                            <li id="loadingGif" style="display:none;">
+                                                                <img src="~/assets/images/loading-loading-forever.gif" style="height: 43px;" />  <span>Processing</span>
+                                                            </li>
+
+                                                            <li class="step0" id="step3">Success</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end" style="padding-top: 31px;">
+                        <a class="btn btn-primary" asp-controller="PaymentHistory" asp-action="View" asp-route-ackId="@Model.AggregatorAcknowledgementId" id="refreshId" style="display:none;">
+                            <i class="fa fa-refresh"></i>Refresh
+                        </a>&nbsp;&nbsp;
+                        <a type="button" asp-action="OrgPaymentList" asp-controller="PaymentHistory" class="btn btn-other">
+                            Cancel
+                        </a>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+<script>
+    var status = '@Model.PaymentStatus';
+    var id = '@Model.AggregatorAcknowledgementId';
+
+    $(document).ready(function () {
+        document.getElementById("navigationNetworkOverlay").style.display = "none";
+        $('#District').addClass('active');
+            var layoutType = '@(layoutType ?? "")';
+        if(layoutType == "Vertical"){
+
+            $("#Payments > a")
+                .attr("aria-expanded", "true")
+                .addClass("active");
+
+            $("#Payments")
+                .addClass("submenu-active show");
+
+            $("#Payments .submenu")
+                .addClass("show");
+
+            $('#Payment-History').addClass('active');
+
+            $('#homeMenu').addClass('breadcrumb-item').append('Payments > Payment History > View');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#PaymentHistoryMenu').addClass('active');
+        }
+        $('#networkOverlay').hide();
+        updateProgressBar(status);
+        if (status == "Pending" || status == "Initiated") {
+            $("#refreshId").css('display', 'block');
+            RefreshPage();
+        }
+        const parentNavItem = document.querySelector(`[data-section="Payments"] .nav-link`);
+        if (parentNavItem) {
+            parentNavItem.classList.add("active");
+        }
+    });
+
+    function updateProgressBar(status) {
+        var step1 = document.getElementById('step1');
+       // var step2 = document.getElementById('step2');
+        var step3 = document.getElementById('step3');
+        var progressBar = document.getElementById('progressbar');
+        var loadingGif = document.getElementById('loadingGif');
+        var statusMessage = document.getElementById('statusMessage');
+
+        if (status == "Initiated" ) {
+            // step2.classList.add('active');
+            //step1.classList.add('loaderSpin');
+            step3.innerText = 'Success';
+            statusMessage.innerHTML = 'Processing <span class="text-primary font-weight-bold"></span>';
+
+           // step1.style.display = 'none';
+            loadingGif.style.display = 'block';
+
+        }  else if (status == "Success") {
+            step1.style.display = 'block';
+            step1.classList.add('active');
+          //  step2.classList.add('active');
+          //  step1.classList.remove('loaderSpin');
+            step3.classList.add('active');
+            step3.innerText = 'Success';
+            progressBar.classList.add('success'); // Add class for additional styling
+            statusMessage.innerHTML = 'Success <span class="text-primary font-weight-bold"></span>';
+
+        } else if (status == "Failed") {
+            step1.style.display = 'block';
+            step1.classList.add('active');
+          //  step2.classList.add('active');
+           // step1.classList.remove('loaderSpin');
+            step3.classList.add('active');
+            step3.innerText = 'Failed';
+            progressBar.classList.add('failure'); // Add class for additional styling
+            statusMessage.innerHTML = 'Failed <span class="text-primary font-weight-bold"></span>';
+        }
+    }
+
+    function RefreshPage() {
+        setTimeout(() => {
+            window.location.href = '@Url.Action("View", "PaymentHistory")?ackId=' + id;
+
+        }, 10000);
+    }
+
+</script>
+

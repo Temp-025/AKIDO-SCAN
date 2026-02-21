@@ -1,0 +1,497 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.Wallet.PdfViewModel
+
+<style>
+
+    canvas{
+        display: block;
+        margin-bottom: 10px; /* Add space between pages */
+        border: 1px solid #ccc;
+    }
+
+    #pdfContainer{
+        position: relative;
+        width: 100%;
+        height: 600px; 
+        overflow-y: auto;
+        /* border: 1px solid #ddd; */
+        overflow-x: hidden;
+    }
+
+        /* Thin scrollbar for WebKit browsers (Chrome, Edge, Safari) */
+        #pdfContainer::-webkit-scrollbar {
+            height: 6px; /* Reduce the height of the scrollbar */
+            opacity: 0; /* Hide initially */
+            transition: opacity 0.2s;
+        }
+
+        #pdfContainer::-webkit-scrollbar-track {
+            background: #f1f1f1; /* Light background for the track */
+            border-radius: 5px;
+        }
+
+    #pdfContainerr::-webkit-scrollbar-thumb {
+        background: #888; /* Darker color for the scrollbar thumb */
+        border-radius: 5px;
+    }
+
+    #pdfContainer::-webkit-scrollbar-thumb:hover {
+        background: #555; /* Darker shade when hovered */
+    }
+
+    /* Thin scrollbar for Firefox */
+    #pdfContainer {
+        scrollbar-width: thin; /* Makes the scrollbar thin */
+        scrollbar-color: #888 #f1f1f1; /* thumb and track color */
+    }
+
+        #pdfContainer:hover::-webkit-scrollbar,
+        #pdfContainer:active::-webkit-scrollbar {
+            opacity: 1;
+        }
+
+</style>
+
+<div style="display: flex; justify-content: flex-end;">
+    <button class="btn btn-primary" id="signPdfButton" onclick="signDocument()" style="margin-bottom: 12px;">
+        Sign the pdf<i class="fa fa-caret-right"></i>
+    </button>
+</div>
+@if (Model == null || Model.CredentialPdfReport == null || Model.CredentialPdfReport.Length == 0)
+{
+                <p>Downloaded document is empty or null.</p>
+}
+else
+{
+  
+
+    @* <div style="position: relative; width: 100%; height: 600px; border: 1px solid #ddd;">
+        <iframe id="pdfViewer"
+                src="data:application/pdf;base64,@(Convert.ToBase64String(Model.CredentialPdfReport))#toolbar=0&navpanes=0&scrollbar=0&disablekb=1"
+                height="600"
+                width="100%"
+                frameborder="0">
+            Your browser does not support PDF embedding. You can
+            <a href="data:application/pdf;base64,@(Convert.ToBase64String(Model.CredentialPdfReport))"
+               download="verification_certificate.pdf">download the PDF file here</a>.
+        </iframe>
+
+        <div id="annotationText"
+             style="
+                position: absolute;
+                display: none;
+                background-color: #007bff;
+                padding: 5px;
+                font-size: 14px;
+                font-weight: bold;
+                border: 1px solid #000;
+                z-index: 10;
+                cursor: pointer;
+                
+                ">
+            Sign Here →
+        </div> 
+    </div>*@
+    <form id="createDoc" enctype="multipart/form-data">
+        <div class="card-custom">
+            <div class="card-body" style="display: flex; justify-content: center;">
+                <div>
+
+                    <div id="pdfContainer">
+                        <canvas id="pdfCanvas" style="width: 100%;"></canvas>
+
+                        <div id="annotationText"
+                             style="
+                               position: absolute;
+                                display: none;
+                                background-color: #007bff;
+                                padding: 5px;
+                                font-size: 14px;
+                                font-weight: bold;
+                                border: 1px solid #000;
+                                z-index: 10;
+                                cursor: pointer;
+                                     ">
+                            Sign Here →
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="display:none">
+            <input id="fileInput" asp-for="File" onchange="fileSelect(event)" type="file" accept=".docx,.pdf" autocomplete="off" tabindex="-1">
+        </div>
+    </form>
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.10.111/pdf.min.js"></script>
+
+<script>
+
+    var recpemail = "@Model.Email";
+    let canvasHeight = "";
+    let canvasWidth = "";
+
+    $(document).ready(function () {
+            var WalletLink = document.getElementById('WalletServiceModle').querySelector('.nav-link');
+            WalletLink.click();
+            $('#homeMenu').addClass('breadcrumb-item').append('Wallet > Wallet Credential');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#CredentialsMenu').addClass('active');
+
+        $('#networkOverlay').hide();s
+
+
+         //var pdfData = '@(Convert.ToBase64String(Model.CredentialPdfReport))';
+         //var pdf = '@Model.CredentialPdfReport';
+        var pdfData = @Html.Raw(Json.Serialize(ViewBag.PdfBytes));
+         uploadPdfFromBytes(pdfData);
+
+        // Convert Base64 to Uint8Array
+        //var byteArray = window.atob(pdfData);
+        var byteArray = atob(pdfData);
+        var arrayBuffer = new Uint8Array(byteArray.length);
+        for (var i = 0; i < byteArray.length; i++) {
+            arrayBuffer[i] = byteArray.charCodeAt(i);
+        }
+
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+
+      // Load the PDF file
+      pdfjsLib.getDocument(arrayBuffer).promise.then(function(pdf) {
+        const container = document.getElementById('pdfContainer');
+        container.innerHTML = ''; // Clear previous content
+
+        const scale = 1.8;
+        const lastPageNumber = pdf.numPages;
+
+        // Render all pages
+        for (let pageNumber = 1; pageNumber <= lastPageNumber; pageNumber++) {
+            pdf.getPage(pageNumber).then(page => {
+                const scale = 1.5;
+                const viewport = page.getViewport({ scale });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                canvas.style.width = '100%';
+
+                const pageContainer = document.createElement('div');
+                pageContainer.className = 'pdf-page';
+                pageContainer.style.position = 'relative';
+                pageContainer.appendChild(canvas);
+
+                pdfContainer.appendChild(pageContainer);
+
+                const firstCanvas = document.querySelector('canvas');
+                canvasWidth = firstCanvas.getBoundingClientRect().width;
+                canvasHeight = firstCanvas.getBoundingClientRect().height;
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                page.render(renderContext).promise.then(() => {
+                    const annotationLayer = document.createElement('div');
+                    annotationLayer.className = 'annotation-layer';
+                    annotationLayer.style.position = 'absolute';
+                    annotationLayer.style.top = '0';
+                    annotationLayer.style.left = '0';
+                    annotationLayer.style.width = '100%'
+                    annotationLayer.style.height = '100%'
+                    annotationLayer.style.pointerEvents = 'none';
+                    pageContainer.appendChild(annotationLayer);
+                    originalWidth = viewport.viewBox[2];
+                    originalHeight = viewport.viewBox[3];
+
+                    const pageAnnotations = annotations.filter(annotation => annotation.page === pageNumber);
+                    if (pageAnnotations.length > 0) {
+                        pageAnnotations.forEach(annotation => {
+                            if (annotation.type !== 'Wsave' && annotation.type !== 'Wfill') {
+                                const element = createDraggableElement(annotation);
+                                if (element) {
+                                annotationLayer.appendChild(element)
+                                }
+                            }
+
+                        });
+                    }
+                });
+            });
+        }
+       });
+
+
+    });
+
+    function uploadPdfFromBytes(pdfData) {
+        if (pdfData) {
+            // Convert base64 bytes to Blob
+            //var byteArray = new Uint8Array(pdfData);
+             var byteArray = window.atob(pdfData);
+            var blob = new Blob([byteArray], { type: 'application/pdf' });
+
+            // Create a File object from Blob
+            var file = new File([blob], 'Credential_Report.pdf', { type: 'application/pdf' });
+
+            // Use DataTransfer to assign the file to the input element
+            var dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+
+            // Assign file to input
+            var fileInput = document.querySelector('input[type="file"]');
+            fileInput.files = dataTransfer.files;
+
+        }
+    }
+
+    function signDocument(){
+        // $.ajax({
+        //     type: "POST",
+        //     url: '@Url.Action("GetPDFBytes", "ESealRegistration")',
+        //     data: JSON.stringify(pdfViewModel),
+        //     contentType: 'application/json',
+        //     dataType: "json",
+        //     error: ajaxErrorHandler,
+        //     beforeSend: function () {
+        //         $('#overlay1').show();
+        //     },
+        //     complete: function () {
+        //         $('#overlay1').hide();
+        //     },
+        //     success: function (data) {
+        //         if (data.status == "Success") {
+        //             saveByteArray('@Model.CredentialName', data.result);
+        //         }
+        //         if (data.status == "Failed") {
+        //             swal({ type: 'error', title: "Error", text: data.message });
+        //         }
+        //     }
+        // });
+
+        //var byteCharacters = atob('@(Convert.ToBase64String(Model.CredentialPdfReport))');
+         var pdfData = @Html.Raw(Json.Serialize(Model.CredentialPdfReport));
+        var byteArray = window.atob(pdfData);
+        // var byteNumbers = new Array(byteCharacters.length);
+        // for (var i = 0; i < byteCharacters.length; i++) {
+        //     byteNumbers[i] = byteCharacters.charCodeAt(i);
+        // }
+        // var byteArray = new Uint8Array(byteNumbers);
+        var blob = new Blob([byteArray], { type: 'application/pdf' });
+        let signCordinates = {};
+         signCordinates[recpemail] = {
+                                //fieldName: anname,
+                                posX: 373,
+                                posY: 250,
+                                PageNumber: 1,
+                                width: 150,
+                                height: 20,
+
+                            };
+
+        var config = {
+                    //QrCodeRequired: QrCodeRequired,
+                    Signature: signCordinates,
+                    Eseal: null,
+                    Qrcode: null
+
+                }
+        var id = "@Model.credential_localId";
+        var credentialUid = "@Model.CredentialUId";
+        var file = $('#fileInput')[0].files[0];
+
+         var fileFormData = new FormData();
+                //fileFormData.append("File", blob, "Credential_Report");
+                fileFormData.append("File", file, "Credential_Report");
+                fileFormData.append("DocumentName", "Credential_Report");
+                // fileFormData.append("Rotation", Rotation);
+                // fileFormData.append("SettingConfig", JSON.stringify(SettingConfig));
+                 fileFormData.append("Config", JSON.stringify(config));
+                 fileFormData.append("Credential_localId", id);
+                 fileFormData.append("CredentialUId", credentialUid);
+                // fileFormData.append("Signatory", list.join(","));
+                // fileFormData.append("RoleList", roleList);
+                // fileFormData.append("QrCodeRequired", QrCodeRequired);
+
+                SaveDocument("@Url.Action("SaveNewDocument", "Wallet")", fileFormData)
+                    .then((response) => {
+                    if (response.status === "Success") {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success",
+                            text: response.message
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '@Url.Action("Index", "Wallet")';
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: response.message
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '@Url.Action("Index", "Wallet")';
+                            }
+                        });
+                    }
+                })
+                .catch((e) => {
+                    console.error(e);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Something went wrong!"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '@Url.Action("Index", "Wallet")';
+                        }
+                    });
+                });
+
+
+    }
+
+     function SaveDocument(url, formData) {
+
+             return new Promise(function (resolve, reject) {
+                var formdata = formData;
+                var urldata = url;
+
+                    // Proceed with the AJAX call
+                    $.ajax({
+                        url: url,
+                        data: formData,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        method: 'POST',
+                        beforeSend: function () {
+                             $('#overlay6').show();
+                        },
+                        complete: function () {
+                            $('#overlay6').hide();
+                        },
+                        success: function (data) {
+                            if (data.status == "Success") {
+                                resolve(data);
+                            }
+                            else {
+                                if (data.message === "Credits are not available" || data.message === "Eseal credits are not available") {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: "Info",
+                                    text: data.message,
+                                }).then((result) => {
+                                    if (result.isConfirmed || result.isDismissed) {
+                                        window.location.href = '@Url.Action("Index", "Wallet")';
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: "Info",
+                                    text: data.message,
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Retry',
+                                    cancelButtonText: 'Cancel'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        signRetry(data);
+                                    } else {
+                                        window.location.href = '@Url.Action("Index", "Wallet")';
+                                    }
+                                });
+                            }
+
+
+                            }
+                        },
+                        error: function (err) {
+                            reject(err);
+                        }
+                    });
+
+            });
+
+            function signRetry(data) {
+                var byteCharacters = atob('@(Convert.ToBase64String(Model.CredentialPdfReport))');
+                var byteNumbers = new Array(byteCharacters.length);
+                for (var i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                var byteArray = new Uint8Array(byteNumbers);
+                var blob = new Blob([byteArray], { type: 'application/pdf' });
+                var parsedModel = JSON.parse(data.result.model);
+                var documentRetryViewModel = new FormData();
+                documentRetryViewModel.append("File", blob, "Credential_Report");
+                documentRetryViewModel.append("Config", JSON.stringify(parsedModel));
+
+
+                $.ajax({
+
+                    url: "@Url.Action("SendSigningRequest", "Documents")",
+                    method: 'POST',
+                    data: documentRetryViewModel,
+                    contentType: false,
+                    processData: false,
+                    beforeSend: function () {
+                         $('#overlay6').show();
+                    },
+                    complete: function () {
+                        $('#overlay6').hide();
+                    },
+                    success: function (response) {
+                        if (response.status === "Success") {
+                            Swal.fire({
+                                icon: 'success',
+                                title: "Success",
+                                text: response.message,
+                            }).then((result) => {
+                                if (result.isConfirmed || result.isDismissed) {
+                                    window.location.href = '@Url.Action("Index", "Wallet")';
+                                }
+                            });
+
+                        } else {
+                            if (response.message === "Credits are not available" || response.message === "Eseal credits are not available") {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: "Info",
+                                    text: response.message,
+                                }).then((result) => {
+                                    if (result.isConfirmed || result.isDismissed) {
+                                        window.location.href = '@Url.Action("Index", "Wallet")';
+                                    }
+                                });
+
+                            } else {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: "Info",
+                                    text: response.message,
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Retry',
+                                    cancelButtonText: 'Cancel'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        signRetry(esealcorddata, signcorddata, data);
+                                    } else {
+                                        window.location.href = '@Url.Action("Index", "Wallet")';
+                                    }
+                                });
+                            }
+                        }
+                    },
+
+                    error: function (error) {
+                        setTimeout(function () {
+                            ajaxErrorHandler(error);
+                        }, 400);
+                    }
+                });
+            }
+     }
+
+
+
+</script>

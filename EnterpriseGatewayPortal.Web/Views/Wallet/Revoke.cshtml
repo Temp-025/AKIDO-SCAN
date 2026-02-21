@@ -1,0 +1,360 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.Wallet.RevokeCredentialViewModel
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+    {
+        new BreadCrumbModel { Title = "Wallet - Revoke Credential",Url = "", IconKey = "wallet-revoke"},
+    };
+}
+
+@{
+    ViewData["Title"] = " Credentials New";
+}
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+<style>
+
+    /* ----------- Select dropdown css -------------*/
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+        .select2-container .select2-selection--single {
+            border-radius: 8px;
+            align-items: center;
+            box-sizing: border-box;
+            justify-content: center;
+            height: 40px !important;
+            border: 1px solid #C3C6CB;
+            box-shadow: 0px 1px 2px 0px #0000001A !important;
+            color: #3E4046 !important;
+        }
+
+    .selection {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #3E4046 !important;
+        font-size: 14px;
+        font-family: inherit;
+        padding: 5px 10px;
+    }
+
+
+    /* Remove default arrow */
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border: none !important; /* removes default triangle */
+    }
+
+    /* Add your custom arrow */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        //background: url('@Url.Content("~/assets/images/dropDown-icon-brown.svg")'); /*previously used*/
+        //background: url('@Url.Content("~/assets/images/imgDropDownBrown.png")');
+        background: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M27.0613 13.0612L17.0613 23.0612C16.9219 23.2011 16.7563 23.312 16.574 23.3877C16.3917 23.4634 16.1962 23.5024 15.9988 23.5024C15.8013 23.5024 15.6059 23.4634 15.4235 23.3877C15.2412 23.312 15.0756 23.2011 14.9363 23.0612L4.93626 13.0612C4.65446 12.7794 4.49615 12.3972 4.49615 11.9987C4.49615 11.6002 4.65446 11.218 4.93626 10.9362C5.21805 10.6544 5.60024 10.4961 5.99876 10.4961C6.39727 10.4961 6.77946 10.6544 7.06126 10.9362L16 19.875L24.9388 10.935C25.2205 10.6532 25.6027 10.4949 26.0013 10.4949C26.3998 10.4949 26.782 10.6532 27.0638 10.935C27.3455 11.2168 27.5039 11.599 27.5039 11.9975C27.5039 12.396 27.3455 12.7782 27.0638 13.06L27.0613 13.0612Z' fill='%2392722A'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-size: 16px 16px;
+        width: 19px;
+        top: 11px;
+        vertical-align: middle;
+        height: 100%;
+    }
+
+    .select2-search__field {
+        display: none !important;
+    }
+
+    // .select2-search select2-search--dropdown {
+        // display: none !important;
+        //
+    }
+
+    .select2-container .select2-dropdown.select2-dropdown--below {
+        top: -5px !important;
+    }
+
+    .select2-container .select2-search.select2-search--dropdown {
+        padding: 0 !important;
+    }
+    .custom-check-box {
+        margin-right: 5px;
+        -webkit-print-color-adjust: exact;
+        vertical-align: top;
+        background-repeat: no-repeat;
+        background-position: 50%;
+        background-size: contain;
+        position: relative !important;
+        width: 1.125rem;
+        height: 1.125rem;
+        background-color: #fff;
+        border: .125rem solid rgba(0,0,0,0.3);
+    }
+
+    .popup {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        float: right;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    .popuptext {
+        visibility: hidden;
+        min-width: 200px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 5px;
+        position: relative;
+        z-index: 1111;
+        right: 3%;
+        margin-bottom: 35px;
+        margin-top: -60px;
+    }
+    /* The actual popup */
+    .popup .popuptext {
+        visibility: hidden;
+        min-width: 200px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 5px;
+        position: relative;
+        z-index: 1111;
+        right: 3%;
+        /* top: -43%; */
+        /* bottom: -28%; */
+        margin-bottom: 0px;
+        margin-top: -60px;
+    }
+
+        /* Popup arrow */
+        .popup .popuptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+
+    .popup:hover + .popuptext {
+        visibility: visible;
+        -webkit-animation: fadeIn 1s;
+        animation: fadeIn 1s;
+    }
+
+    .custom-check-box:hover {
+        outline: auto;
+        outline-color: #5d9ceca3;
+    }
+
+    .classshide {
+        display: none !important;
+    }
+
+    .fieldsetdata {
+        display: inline-block; /* Ensures the height adjusts based on the content */
+        border: 1px solid #D3D3D3;
+        padding: 20px;
+        border-radius: 10px;
+        width: 100%; /* Allows full width but adjusts height */
+        max-width: 1200px;
+        box-sizing: border-box; /* Ensures padding is included in width/height calculation */
+    }
+
+    #recplist {
+        display: flex;
+        flex-direction: column;
+        gap: 2px; /* Adjust spacing between rows */
+    }
+
+</style>
+
+
+<label class="sub-label">Revoke User Credential</label>
+<div class="row" id="spacingCss">
+
+    <div class="col-md-12 plr">
+        <div class="card-custom">
+            <div class="card-body">
+                <form enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <div class="form-group col-md-6" style="float:left;">
+                            
+                            <div class="form-group">
+                                <label asp-for="Credential" class="col-form-label s3"></label>
+                                <select asp-for="Credential" class="form-control select2"
+                                        asp-items="Model.CredentialList">
+                                    <option value="">-- Select Credential --</option>
+                                </select>
+                                <span asp-validation-for="Credential" class="text-danger"></span>
+                            </div>
+                           
+
+                        </div>
+                            <div class="form-group col-md-6" style="float:left;">
+                            <div class="form-group">
+                                <label asp-for="DocumentID" class="col-form-label s3"></label>
+                                <input asp-for="DocumentID" class="form-control" placeholder="Enter Document ID"/>
+
+                                <span asp-validation-for="DocumentID" class="text-danger"></span>
+                            </div>
+                           
+                        </div>
+                        </div>
+                    </div>
+
+                    <div style="padding-right: 10px">
+                        
+                         <div style="float: left;margin-top: 3px;padding-left: 22px;">
+                             <b>NOTE: </b>(*) Mark fields are mandatory.
+                         </div>
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-primary greenButton uaeid-primary" id="revoke" type="button" onclick="RevokeCredentials()">
+                                Revoke
+                            </button>
+                            &nbsp;&nbsp;
+
+                            <a asp-action="Index" class="btn btn-other">
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+
+    <script>
+       
+        $(document).ready(function () {
+
+            $('#networkOverlay').hide();
+            document.getElementById("navigationNetworkOverlay").style.display = "none";
+            $('.select2').select2();
+
+            $("#Wallet-Manager > a")
+                .attr("aria-expanded", "true")
+                .addClass("active");
+
+            $("#Wallet-Manager")
+                .addClass("submenu-active show");
+
+            $("#Wallet-Manager .submenu")
+                .addClass("show");
+
+            $('#Revoke-Credentials').addClass('active');
+
+            $('#homeMenu').addClass('breadcrumb-item').append('Wallet > Revoke Credential');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#RevokeCredentialMenu').addClass('active');
+        });
+
+        $('form').on('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Stop the default form submission
+                $('#revoke').click();
+            }
+        });
+
+        function RevokeCredentials() {
+            var validData = true;
+
+            var DocumentID = $('#DocumentID').val();
+
+            var Credential = $('#Credential').val();
+
+
+            if (DocumentID == null || DocumentID.trim() === '') {
+                $('#DocumentID').siblings(".text-danger").text("DocumentID is required.");
+                validData = false;
+            }
+            else {
+                $('#DocumentID').siblings(".text-danger").text(""); // Clear the validation message if no error
+            }
+
+            if (Credential == null || Credential.trim() === '') {
+                $('#Credential').siblings(".text-danger").text("Credential is required.");
+                validData = false;
+            }
+            else {
+                $('#Credential').siblings(".text-danger").text(""); // Clear the validation message if no error
+            }
+
+           
+            if (!validData) {
+                return;
+            }
+            var revokeCredentialViewModel = {
+                DocumentID: $('#DocumentID').val(),
+                Credential: $('#Credential').val(),
+            };
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("RevokeCategory", "Wallet")',
+                data: JSON.stringify(revokeCredentialViewModel),
+                contentType: "application/json",
+                beforeSend: function () {
+                    $('#overlay').show();
+                },
+                complete: function () {
+
+                    $('#overlay').hide();
+                },
+                success: function (data) {
+
+                    if (data.success == true) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: "Revoke Credentials",
+                            text: data.message,
+                            showCancelButton: false
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.reload();
+                            }
+                        });
+
+                    }
+
+                    if (data.success == false) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Revoke Credentials",
+                            text: data.message,
+                            showCancelButton: false
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.reload();
+                            }
+                        });
+
+                    }
+
+                },
+                error: ajaxErrorHandler
+            });
+        }
+
+    </script>
+}

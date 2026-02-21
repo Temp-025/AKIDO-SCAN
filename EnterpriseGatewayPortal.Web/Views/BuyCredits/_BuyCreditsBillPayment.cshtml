@@ -1,0 +1,262 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.BuyCredits.CreditsSummeryViewModel
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+
+
+<div class="row" id="spacingCss">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row p-b-20">
+                    <div class="col-md-12 col-sm-12 col-12">
+                        <div class="table-responsive">
+                            <div>
+                            <label class="col-form-label">DIGITAL SIGNATURE</label>
+                            <table class="table-striped table-bordered table-hover table-checkable order-column full-width table">
+                                <thead>
+                                    <tr>
+                                        <th>Credits</th>
+                                        <th>Base Price</th>
+                                        <th>Rate</th>
+                                        <th>Charges (@Model.DS_Tax%)</th>
+                                        <th>Discount (@Model.DS_Discount%)</th>
+                                        <th>Total Amount</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    <tr>
+                                        <td>@Model.DS_Credits</td>
+                                        <td>@Model.DS_BasePrice</td>
+                                        <td>@Model.DS_TotalRate</td>
+                                        <td>@Model.DS_TotalTax</td>
+                                        <td>@Model.DS_TotalDiscount</td>
+                                        <td>@Model.DS_TotalAmount</td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                            </div>
+                            <div>
+                            <label class="col-form-label">ESEAL SIGNATURE</label>
+                            <table class="table-striped table-bordered table-hover table-checkable order-column full-width table">
+                                <thead>
+                                    <tr>
+                                        <th>Credits</th>
+                                        <th>Base Price</th>
+                                        <th>Rate</th>
+                                        <th>Charges (@Model.ES_Taxp%)</th>
+                                        <th>Discount (@Model.ES_Discount%)</th>
+                                        <th>Total Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>@Model.ES_Credits</td>
+                                        <td>@Model.ES_BasePrice</td>
+                                        <td>@Model.ES_TotalsRate</td>
+                                        <td>@Model.ES_TotalTax</td>
+                                        <td>@Model.ES_TotalDiscount</td>
+                                        <td>@Model.ES_TotalAmount</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            </div>
+                            <div>
+                            <label class="col-form-label">USER SUBSCRIPTION</label>
+                            <table class="table-striped table-bordered table-hover table-checkable order-column full-width table">
+                                <thead>
+                                    <tr>
+                                        <th>Credits</th>
+                                        <th>Base Price</th>
+                                        <th>Rate</th>
+                                        <th>Charges (@Model.US_Taxper%)</th>
+                                        <th>Discount (@Model.US_Discountper%)</th>
+                                        <th>Total Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    <tr>
+                                        <td>@Model.US_Credits</td>
+                                        <td>@Model.US_BasePrice</td>
+                                        <td>@Model.US_TotalsRate</td>
+                                        <td>@Model.US_TotalTax</td>
+                                        <td>@Model.US_TotalDiscount</td>
+                                        <td>@Model.US_TotalAmount</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @*  <h3>Total Amount :</h3>@Model.GrandTotal *@
+                            </div>
+
+                            <table class="table-striped table-bordered table-hover table-checkable order-column full-width table">
+                               
+                                <tbody>
+                                    <tr>
+                                        <th>Total Amount :</th>
+                                        <th>@Model.GrandTotal</th>
+
+
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                       
+                        <div class="d-flex justify-content-end" style="padding-top: 31px;">
+                            <button type="button" id="payNow" class="btn btn-primary">Pay Now</button>
+                            &nbsp;&nbsp;
+                            <a type="button" class="btn btn-danger" asp-action="Index" asp-controller="BuyCredits">
+                                Cancel
+                            </a>
+                               
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="modalDiv" tabindex="-1" role="dialog" aria-labelledby="mobileNumModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Mobile Number</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        @* <label for="mobileNumber" class="col-form-label">Mobile Number:</label> *@
+                        <input type="text" class="form-control" id="mobileNumber">
+                    </div>
+                   
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="ProccedPayment()">Proceed Checkout</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        $('#networkOverlay').hide();
+
+    });
+    var paymentInfo = [];
+
+    $('#payNow').click(function () {
+        $('#modalDiv').modal('show');
+    });
+
+    function ProccedPayment() {
+       
+        var digitalSignature = {
+            discount: '@Model.DS_Discount',
+            rate: '@Model.DS_BasePrice',
+            previlageServiceId: '@Model.DS_PrevialageServiceId',
+            serviceName: '@Model.DS_DisplayName',
+            serviceId: '@Model.DS_ServiceId',
+            tax: '@Model.DS_Tax',
+            volume: '@Model.DS_Credits'
+        };
+
+        var eSealSignature = {
+            discount: '@Model.ES_Discount',
+            rate: '@Model.ES_BasePrice',
+            previlageServiceId: '@Model.ES_PrevialageServiceId',
+            serviceName: '@Model.ES_DisplayName',
+            serviceId: '@Model.ES_ServiceId',
+            tax: '@Model.ES_Taxp',
+            volume: '@Model.ES_Credits'
+        };
+
+        var userSubscription = {
+            discount: '@Model.US_Discountper',
+            rate: '@Model.US_BasePrice',
+            previlageServiceId: '@Model.US_PrevialageServiceId',
+            serviceName: '@Model.US_DisplayName',
+            serviceId: '@Model.US_ServiceId',
+            tax: '@Model.US_Taxper',
+            volume: '@Model.US_Credits'
+        };
+
+        paymentInfo = [digitalSignature, eSealSignature, userSubscription];
+
+        var grandTotal = '@Model.GrandTotal';
+        var payerMobile = $('#mobileNumber').val();
+
+        var viewModel = {
+            paymentInfo : paymentInfo,
+            grandTotal: grandTotal,
+            payerMobile: payerMobile,
+            orgId: '@Model.Org_Id',
+        }
+
+        $('#modalDiv').modal('hide');
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("ProceedCheckout", "BuyCredits")',
+            data: JSON.stringify(viewModel),
+            contentType: "application/json",
+
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+                $('#overlay').hide();
+            },
+            success: function (response) {
+               
+                if (response.success) {
+                   
+                    Swal.fire({
+                        icon: 'success',
+                        title: "Success",
+                        text: response.message
+                    }, function (isConfirm) {
+                        if (isConfirm) {
+
+                            window.location.href = '@Url.Action("Index", "BuyCredits")';
+
+                        }
+                    });
+                }
+                else {
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Error",
+                        text: response.message
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            paymentInfo = [];
+                        }
+                    });
+
+                }
+            },
+            error: function (response) {
+                
+                console.log('Error sending data:');
+            }
+        });
+
+    }
+
+</script>

@@ -1,0 +1,26 @@
+﻿
+
+@if (TempData["Alert"] != null)
+{
+    var alertBox = TempData["Alert"];
+
+<script>
+    $(document).ready(function () {
+       
+        let alertObj = @Html.Raw(@alertBox);
+
+        if (alertObj.IsSuccess) {
+                Swal.fire({ title: "Success", text: alertObj.Message, icon: "success", confirmButtonText: "Ok"});
+
+        } else {
+            if (alertObj.Type == 'info') {
+                    Swal.fire({ title: "Info", text: alertObj.Message, icon: "info", confirmButtonText: "Dismiss" });
+            }
+            else {
+                    Swal.fire({ title: "Failed", text: alertObj.Message, icon: "error", confirmButtonText: "Dismiss",});
+            }
+            
+        }
+    });
+</script>
+}

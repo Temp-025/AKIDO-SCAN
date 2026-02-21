@@ -1,0 +1,369 @@
+﻿@using EnterpriseGatewayPortal.Web.Models
+@model List<EnterpriseGatewayPortal.Core.Domain.Models.Bulksign>
+
+@{
+    var len = Model.Count();
+    await Html.RenderPartialAsync("_AlertBox");
+    var hasData = Model != null && Model.Count() > 0;
+}
+@{
+    var IDPLogin = User.FindFirst("IDPLogin").Value;
+    var userExist = User.FindFirst("UserExist").Value;
+    var template = "";
+    var bulkSign = "";
+    if (IDPLogin == "true" && userExist == "true")
+    {
+        template = User.FindFirst("Template").Value;
+        bulkSign = User.FindFirst("BulkSign").Value;
+
+    }
+    else
+    {
+        template = "false";
+        bulkSign = "false";
+    }
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+    {
+        new BreadCrumbModel { Title = "Bulk - Signing",Url =""},
+    };
+}
+<style>
+    .classshide {
+        display: none !important;
+    }
+
+
+    .custom-tabs {
+        display: flex;
+        justify-content: flex-start; /* align tabs to the left */
+        border-bottom: 1px solid #E2E8F0 !IMPORTANT;
+        margin-bottom: 20px;
+        position: relative;
+        flex-wrap: wrap; /* allows wrapping on smaller screens */
+        gap: 10px; /* adds spacing between tabs (responsive) */
+        margin-left: 12px !important;
+        margin-right: 11px !important;
+        margin-top: -18px !important;
+    }
+
+    .custom-tab {
+        display: inline-block;
+        padding: 8px 15px;
+        cursor: pointer;
+        font-weight: 500;
+        color: #555;
+        position: relative;
+        transition: color 0.3s;
+        font-size: 14px;
+        white-space: nowrap; /* prevent text breaking inside tab */
+    }
+
+
+        .custom-tab.active {
+            color: #92722A; /* active tab color */
+        }
+
+    /* underline indicator */
+    .tab-indicator {
+        position: absolute;
+        bottom: 0;
+        height: 3px;
+        background: #92722A;
+        transition: all 0.3s ease;
+    }
+
+    .card {
+        margin-right: 10px !important;
+        margin-left: 10px !important;
+        border: 1px solid #E2E8F0 !IMPORTANT;
+        box-shadow: none !important;
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+</style>
+@if (Model == null || Model.Count() == 0)
+{
+    <style>
+        table {
+            height: 70% !important;
+        }
+
+        .table-hover > tbody > tr:hover > td {
+            background: none !important;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        .dataTables_wrapper {
+            height: 100% !important;
+        }
+
+            .dataTables_wrapper > .row:nth-of-type(2) {
+                height: 100% !important;
+            }
+
+        td:not([style*="display: none"]) {
+            border-bottom-right-radius: 12px !important;
+            border-bottom-left-radius: 12px !important;
+        }
+    </style>
+}
+
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" id="spacingCss">
+    <div class="col-md-12">
+       
+            <div class="card-body">
+                <div class="row p-b-20">
+                <div class="col-md-12 col-sm-6 col-6">
+                    <div class="custom-tabs" id="tabContainer">
+                        <div class="custom-tab" data-target="GetBulkSigDataList">My List</div>
+                        <div class="custom-tab" data-target="GetReceivedBulkSignList">Received List</div>
+                        <div class="custom-tab active" data-target="GetSentBulkSignList">Send List</div>
+                        <div class="tab-indicator"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="row align-items-center justify-content-between" style="padding-left: 15px; padding-right: 15px;">
+                            <!-- Left: Search bar (will be injected by DataTables) -->
+                            <div class="col-md-6 col-sm-12 d-flex align-items-center" id="custom-search-container"></div>
+
+                           
+
+                        </div>
+                        <table id="scopesTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table @(Model == null || Model.Count() == 0 ? "empty-table" : "")">
+                            <thead>
+                                <tr>
+                                    <th>TemplateName</th>
+                                    <th>TransactionName</th>
+                                    <th>CreatedDate</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model == null || Model.Count() == 0)
+                                {
+                                    <tr>
+                                        <td style="display: none;"></td>
+                                        <td style="text-align:center" valign="top" colspan="6" class="dataTables_empty">
+                                            <img class="NoRecordsCls" src="~/assets/images/No-Records-icon.svg" alt="No records" style=" display:block; margin:0 auto 8px;">
+                                            <p class="NoRecordFound-paragarph">No records found</p>
+                                            <p class="NoRecordTable-Text">Get started by clicking on 'Perform Bulk Sign'</p>
+                                        </td>
+
+                                        <td style="display: none;"></td>
+                                        <td style="display: none;"></td>
+                                        <td style="display: none;"></td>
+
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr class="odd gradeX">
+
+                                            <td>@item.TemplateName</td>
+                                            <td>@item.Transaction</td>
+                                            <td>@item.CreatedAt</td>
+                                            <td>
+                                                <a asp-action="DocumentDetails" asp-route-correlationId="@item.CorelationId" asp-route-DestinationPath="@item.SourcePath">
+                                                    @{
+                                                        var status = item.Status.Trim().ToLower();
+                                                        var statusCapitalized = char.ToUpper(status[0]) + status.Substring(1);
+                                                        var cssClass = status switch
+                                                        {
+                                                            "active" => "status-tag status-active",
+                                                            "completed" => "status-tag status-active",
+                                                            "failed" => "status-tag status-failed",
+                                                            "declined" => "status-tag status-failed",
+                                                            "in progress" => "status-tag status-inprogress",
+                                                            "action required" => "status-tag wid status-na",
+                                                            _ => "status-tag status-na"
+                                                        };
+                                                        <span class="@cssClass">@statusCapitalized</span>
+                                                    }
+                                                </a>
+                                            </td>
+                                            <td class="valigntop">
+                                                <div class="btn-group">
+                                                    <button class="btn btn-xs deepPink-bgcolor no-margin" type="button" data-toggle="dropdown"
+                                                            aria-expanded="false">
+                                                        Actions
+                                                        <i class="fa fa-angle-down"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu pull-left" role="menu">
+                                                        <li>
+                                                            @if (item.Status == "Draft")
+                                                            {
+                                                                <a onclick="SendRequest('@item.CorelationId')">
+                                                                    <i class="icon-pencil"></i>Send Request
+                                                                </a>
+                                                                @*  <button type="button" class="btn btn-link btn-xs no-margin" onclick="SendRequest('@item.CorelationId')">
+                                                    <i class="icon-pencil"></i>Sign
+                                                    </button> *@
+                                                            }
+                                                            <a asp-action="DocumentDetails" asp-route-correlationId="@item.CorelationId" asp-route-DestinationPath="@item.SourcePath">
+                                                                <i class="icon-pencil"></i>View
+                                                            </a>
+                                                        </li>
+
+                                                    </ul>
+                                                </div>
+
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+              
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        
+         $("#builksignModule > a")
+            .attr("aria-expanded", "true")
+            .addClass("active");
+
+        $("#builksignModule")
+            .addClass("submenu-active show");
+
+        $("#builksignModule .submenu")
+            .addClass("show");
+
+        $("#BulkSignTransactions").addClass("active");
+
+        var table = $("#scopesTable").DataTable({
+            "bLengthChange": false,
+            "searching": true,
+            "paging": @hasData.ToString().ToLower(),
+            "info": @hasData.ToString().ToLower(),
+
+            "initComplete": function () {
+                // Move the search bar into our custom container
+                $(".dataTables_filter").appendTo("#custom-search-container");
+                $('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+                $('.dataTables_filter label').contents().filter(function () {
+                    return this.nodeType === 3;
+                }).remove();
+
+            }
+
+        });
+
+        
+        $('#homeMenu').addClass('breadcrumb-item').append('Bulksign > SentBulkSignList');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        $('#TransactionMenuItem').addClass('active');
+        document.getElementById("navigationNetworkOverlay").style.display = "none";
+        $('#networkOverlay').hide();
+    });
+
+    const tabs = document.querySelectorAll(".custom-tab");
+    const indicator = document.querySelector(".tab-indicator");
+
+    function updateIndicator(tab) {
+        indicator.style.width = tab.offsetWidth + "px";
+        indicator.style.left = tab.offsetLeft + "px";
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener("click", function () {
+            document.querySelector(".custom-tab.active").classList.remove("active");
+            this.classList.add("active");
+            updateIndicator(this);
+
+            // Navigate to ASP.NET MVC action inside BulkSign controller
+            const action = this.getAttribute("data-target");
+            document.getElementById("navigationNetworkOverlay").style.display = 'block';
+           // window.location.href = "/BulkSign/" + action;
+            window.location.href = '@Url.Action("__dummy__", "BulkSign")'.replace("__dummy__", action);
+
+        });
+    });
+
+    // Initialize indicator on page load
+    window.addEventListener("load", () => {
+        const activeTab = document.querySelector(".custom-tab.active");
+        updateIndicator(activeTab);
+    });
+     function performBulkSignButton() {
+        document.getElementById("navigationNetworkOverlay").style.display = "block";
+        window.location.href = '@Url.Action("UploadFiles", "BulkSign")';
+    }
+    function SendRequest(CorelationId) {
+        var correlationId = CorelationId;
+        $.ajax({
+            url: '@Url.Action("SendRequest", "BulkSign")',
+            method: 'POST',
+            contentType: "application/json",
+            data: JSON.stringify(correlationId),
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+                $('#overlay').hide();
+            },
+            success: function (response) {
+                if (response.success == false) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: "Bulk Signing",
+                        text: response.message,
+                        showCancelButton: true,
+                        confirmButtonText: 'Retry',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            SendRequest(correlationId);
+                        }
+                    });
+
+                }
+                else {
+                    Swal.fire({
+                        icon: 'success',
+                        title: "Bulk Signing",
+                        text: response.message,
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.reload();
+                        }
+                    });
+
+                }
+            },
+            error: function (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: "Send Request",
+                    text: "Failed to Send Request",
+                    showCancelButton: false,
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                    }
+                });
+
+                console.error('Error Performing Bulksign:', error);
+                if (error.responseText) {
+                    console.error('Error Response:', error.responseText);
+                }
+            }
+        });
+    }
+</script>

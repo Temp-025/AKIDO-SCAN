@@ -1,0 +1,839 @@
+﻿@using EnterpriseGatewayPortal.Web.Models
+@model EnterpriseGatewayPortal.Core.Domain.Models.Document
+@using System.Security.Claims;
+
+@{
+    var userEmail = User.FindFirst(ClaimTypes.Email).Value;
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+{
+        new BreadCrumbModel { Title = "Document - Signing" , Url = Url.Action("Index","Documnets")},
+        new BreadCrumbModel { Title = "Document Status" , Url = ""},
+    };
+}
+<style>
+    body {
+        color: #000;
+        overflow-x: hidden;
+        height: 100%;
+        background-repeat: no-repeat;
+    }
+
+    .card {
+        z-index: 0;
+        background-color: #ECEFF1;
+        padding-bottom: 20px;
+        margin-top: 90px;
+        margin-bottom: 90px;
+        border-radius: 10px;
+    }
+
+
+    /*Icon progressbar*/
+    #progressbar {
+        margin-bottom: 30px;
+        overflow: hidden;
+        color: #455A64;
+        padding-left: 0px;
+        margin-top: 30px;
+        width: 144%;
+    }
+
+        #progressbar li {
+            list-style-type: none;
+            font-size: 13px;
+            width: 23%;
+            float: left;
+            position: relative;
+            font-weight: 400;
+        }
+
+        #progressbar .step0:before {
+            font-family: FontAwesome;
+            content: "\f10c";
+            color: #fff;
+        }
+
+        #progressbar li:before {
+            width: 40px;
+            height: 40px;
+            line-height: 45px;
+            display: block;
+            font-size: 20px;
+            background: #C5CAE9;
+            border-radius: 50%;
+            margin: auto;
+            padding: 0px;
+        }
+
+        /*ProgressBar connectors*/
+        #progressbar li:after {
+            content: '';
+            width: 100%;
+            height: 12px;
+            background: #C5CAE9;
+            position: absolute;
+            left: 0;
+            top: 16px;
+            z-index: -1;
+        }
+
+        #progressbar li:last-child:after {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            position: absolute;
+            left: -50%;
+        }
+
+        #progressbar li:nth-child(2):after, #progressbar li:nth-child(3):after {
+            left: -50%;
+        }
+
+        #progressbar li:first-child:after {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+            position: absolute;
+            left: 50%;
+        }
+
+        #progressbar li:last-child:after {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        #progressbar li:first-child:after {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        /*Color number of the step and the connector before it*/
+        #progressbar li.active:before, #progressbar li.active:after {
+            background: mediumseagreen;
+        }
+
+        #progressbar li.active:before {
+            font-family: FontAwesome;
+            content: "\f00c";
+        }
+
+    .counter h3, p {
+        text-align: left;
+        padding-bottom: 12px;
+        color: black;
+    }
+
+    p {
+        padding: 0px !important;
+        margin-bottom: 10px !important;
+    }
+
+
+    /* ///////////////////////////////////////////////////////////////////// */
+
+    #progressbarFailed {
+        margin-bottom: 30px;
+        overflow: hidden;
+        color: #455A64;
+        padding-left: 0px;
+        margin-top: 30px;
+        width: 144%;
+    }
+
+        #progressbarFailed li {
+            list-style-type: none;
+            font-size: 13px;
+            width: 23%;
+            float: left;
+            position: relative;
+            font-weight: 400;
+        }
+
+        #progressbarFailed .step0:before {
+            font-family: FontAwesome;
+            content: "\f10c";
+            color: #fff;
+        }
+
+        #progressbarFailed li:before {
+            width: 40px;
+            height: 40px;
+            line-height: 45px;
+            display: block;
+            font-size: 20px;
+            background: #C5CAE9;
+            border-radius: 50%;
+            margin: auto;
+            padding: 0px;
+        }
+
+        /*ProgressBar connectors*/
+        #progressbarFailed li:after {
+            content: '';
+            width: 100%;
+            height: 12px;
+            background: #C5CAE9;
+            position: absolute;
+            left: 0;
+            top: 16px;
+            z-index: -1;
+        }
+
+        #progressbarFailed li:last-child:after {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            position: absolute;
+            left: -50%;
+        }
+
+        #progressbarFailed li:nth-child(2):after, #progressbarFailed li:nth-child(3):after {
+            left: -50%;
+        }
+
+        #progressbarFailed li:first-child:after {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+            position: absolute;
+            left: 50%;
+        }
+
+        #progressbarFailed li:last-child:after {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        #progressbarFailed li:first-child:after {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        /*Color number of the step and the connector before it*/
+        #progressbarFailed li.active:before, #progressbarFailed li.active:after {
+            background: #dc3545;
+        }
+
+        #progressbarFailed li.active:before {
+            font-family: FontAwesome;
+            content: "\f00d";
+        }
+
+        #progressbarFailed li.sent.active:before {
+            font-family: FontAwesome;
+            content: "\f00c";
+        }
+
+    /* ///////////////////////////////////////////////////////////////////// */
+
+    #progressbarInProgress {
+        margin-bottom: 30px;
+        overflow: hidden;
+        color: #455A64;
+        padding-left: 0px;
+        margin-top: 30px;
+        width: 144%;
+    }
+
+        #progressbarInProgress li {
+            list-style-type: none;
+            font-size: 13px;
+            width: 23%;
+            float: left;
+            position: relative;
+            font-weight: 400;
+        }
+
+        #progressbarInProgress .step0:before {
+            font-family: FontAwesome;
+            content: "\f10c";
+            color: #fff;
+        }
+
+        #progressbarInProgress li:before {
+            width: 40px;
+            height: 40px;
+            line-height: 45px;
+            display: block;
+            font-size: 20px;
+            background: #C5CAE9;
+            border-radius: 50%;
+            margin: auto;
+            padding: 0px;
+        }
+
+        /*ProgressBar connectors*/
+        #progressbarInProgress li:after {
+            content: '';
+            width: 100%;
+            height: 12px;
+            background: #C5CAE9;
+            position: absolute;
+            left: 0;
+            top: 16px;
+            z-index: -1;
+        }
+
+        #progressbarInProgress li:last-child:after {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            position: absolute;
+            left: -50%;
+        }
+
+        #progressbarInProgress li:nth-child(2):after, #progressbarInProgress li:nth-child(3):after {
+            left: -50%;
+        }
+
+        #progressbarInProgress li:first-child:after {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+            position: absolute;
+            left: 50%;
+        }
+
+        #progressbarInProgress li:last-child:after {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        #progressbarInProgress li:first-child:after {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        /*Color number of the step and the connector before it*/
+        #progressbarInProgress li.active:before, #progressbarInProgress li.active:after {
+            background: #faae2a;
+        }
+
+        #progressbarInProgress li.active:before {
+            font-family: FontAwesome;
+            content: "\f00c";
+        }
+
+        #progressbarInProgress li.complete.active:before {
+            background: #C5CAE9;
+        }
+
+        #progressbarInProgress li.complete.active:after {
+            background: #C5CAE9;
+        }
+
+    .classshide {
+        display: none !important;
+    }
+
+    .document-card {
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        display: flex;
+        width: 100%;
+        flex-direction: row;
+        justify-content: start;
+        gap: 20px;
+    }
+
+    .card-body {
+        padding: 20px !important;
+    }
+
+    .icon-wrapper {
+        width: 100px;
+        height: 100px;
+        background-color: #F9F7ED;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .col-md-7 {
+        width: 50%;
+        padding: 35px !important;
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        margin-right: 20px;
+    }
+
+    .document-details {
+        display: grid;
+        grid-template-columns: 200px 10px auto;
+        row-gap: 8px;
+        column-gap: 10px;
+        font-size: 12px;
+    }
+
+        .document-details .heading {
+            font-weight: bold;
+            color: #222;
+        }
+
+        .document-details .colon {
+            text-align: center;
+        }
+
+        .document-details .sub-content {
+            color: black;
+            font-weight: 400;
+        }
+
+    .heading {
+        color: #1B1D21;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .status-card {
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+
+    .rounded-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        border: none !important;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+        .rounded-table th,
+        .rounded-table td {
+            border: 1px solid #dee2e6;
+        }
+
+        .rounded-table thead th {
+            border-top: 1px solid #dee2e6;
+        }
+
+        /* Top-left and top-right */
+        .rounded-table thead tr:first-child th:first-child {
+            border-top-left-radius: 12px;
+        }
+
+        .rounded-table thead tr:first-child th:last-child {
+            border-top-right-radius: 12px;
+        }
+
+        /* Bottom-left and bottom-right */
+        .rounded-table tbody tr:last-child td:first-child {
+            border-bottom-left-radius: 12px;
+        }
+
+        .rounded-table tbody tr:last-child td:last-child {
+            border-bottom-right-radius: 12px;
+        }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" id="spacingCss">
+    <div class="col-md-12 plr">
+        <div class="card-custom">
+            <div class="card-body">
+                <div class="d-flex col-md-12 flex-row" style="padding-left:0px !important;">
+                    <!-- Left side with status bar -->
+                    <div class="col-md-7 document-card">
+                        <div class="icon-wrapper">
+                            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g clip-path="url(#clip0_3335_9511)">
+                                    <path d="M28.125 31.5H7.875C7.57663 31.5 7.29048 31.3815 7.07951 31.1705C6.86853 30.9595 6.75 30.6734 6.75 30.375V5.625C6.75 5.32663 6.86853 5.04048 7.07951 4.82951C7.29048 4.61853 7.57663 4.5 7.875 4.5H21.375L29.25 12.375V30.375C29.25 30.6734 29.1315 30.9595 28.9205 31.1705C28.7095 31.3815 28.4234 31.5 28.125 31.5Z" stroke="#92722A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M21.375 4.5V12.375H29.25" stroke="#92722A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M12.2717 23.5287C12.7035 23.5287 12.5006 23.7454 14.131 22.3787M14.131 22.3787C15.521 21.2133 16.9352 19.551 17.6717 17.392C19.2716 12.7009 9.67168 17.392 12.8717 21.3013C13.2654 21.7822 13.6895 22.1338 14.131 22.3787ZM14.131 22.3787C16.0542 23.4453 18.309 22.487 19.8366 21.3849C20.3035 21.0481 20.5369 20.8797 20.6762 20.9321C20.8157 20.9845 20.897 21.2859 21.06 21.8887C21.5814 23.8177 23.1215 25.3748 24.8717 22.8655" stroke="#92722A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </g>
+                                <defs>
+                                    <clipPath id="clip0_3335_9511">
+                                        <rect width="36" height="36" fill="white" />
+                                    </clipPath>
+                                </defs>
+                            </svg>
+                        </div>
+
+                        <div class="document-details">
+                            <span class="heading">Document Name</span>
+                            <span class="colon">:</span>
+                            <span class="sub-content">@Model.DocumentName</span>
+
+                            <span class="heading">Submitted Time</span>
+                            <span class="colon">:</span>
+                            <span class="sub-content">@Model.CreateTime</span>
+
+                            @if (Model.Status == "In Progress")
+                            {
+                                <span class="heading">Completed Time</span>
+                                <span class="colon">:</span>
+                                <span class="sub-content">----</span>
+                            }
+                            else if (Model.Status != "Declined" && Model.Status != "Recalled")
+                            {
+                                <span class="heading">Completed Time</span>
+                                <span class="colon">:</span>
+                                <span class="sub-content">@Model.CompleteTime</span>
+                            }
+                            @if (Model.Status == "Declined")
+                            {
+                                <span class="heading">Declined Remarks</span>
+                                <span class="colon">:</span>
+                                @foreach (var recepient in Model.Recepients)
+                                {
+                                    if (Model.DocumentId == recepient.Tempid && !string.IsNullOrWhiteSpace(recepient.Declineremark))
+                                    {
+                                        <span class="sub-content">@recepient.Declineremark</span>
+                                    }
+                                }
+
+                            }
+                        </div>
+
+                    </div>
+                    @if (Model.Status != "Recalled")
+                    {
+                        <div class="col-md-5 status-card">
+                            <div>
+                                <div class="d-flex" style="position:absolute;top:0;">
+                                    <h5 class="sub-label" style="padding-left:0px !important;">Document Status Bar <span class="text-primary font-weight-bold"></span></h5>
+                                </div>
+                            </div>
+                            <div class="px-md-4 container mx-auto" style="padding:0px !important;">
+                                <div class="">
+                                    <!-- Add class 'active' to progress -->
+                                    @if (Model.Status == "Completed")
+                                    {
+                                        <partial name="_Stepper"
+                                                 model="@(new List<StepModel> {
+                                                    new StepModel { StepNumber = 1, StepName = "Signatory Verification",   Status = "success" },
+                                                    new StepModel { StepNumber = 2, StepName = "Signed", Status = "success" },
+                                                    new StepModel { StepNumber = 3, StepName = "Completed", Status = "success" }
+                                                })" />
+                                    }
+                                    @if (Model.Status == "Failed")
+                                    {
+                                        <partial name="_Stepper"
+                                                 model="@(new List<StepModel> {
+                                                    new StepModel { StepNumber = 1, StepName = "Signatory Verification",   Status = "success" },
+                                                    new StepModel { StepNumber = 2, StepName = "Signed", Status = "error" },
+                                                    new StepModel { StepNumber = 3, StepName = "Failed", Status = "error" }
+                                                })" />
+
+                                    }
+                                    @if (Model.Status == "In Progress")
+                                    {
+                                        <partial name="_Stepper"
+                                                 model="@(new List<StepModel> {
+                                            new StepModel { StepNumber = 1, StepName = "Signatory Verification",   Status = "success" },
+                                            new StepModel { StepNumber = 2, StepName = "In Progress", Status = "inprogress" },
+                                            new StepModel { StepNumber = 3, StepName = "In Complete", Status = "incomplete" }
+                                        })" />
+                                    }
+                                    @if (Model.Status == "Declined")
+                                    {
+                                       <partial name="_Stepper"
+                                                model="@(new List<StepModel> {
+                                                new StepModel { StepNumber = 1, StepName = "Signatory Verification",   Status = "success" },
+                                                new StepModel { StepNumber = 2, StepName = "Declined", Status = "error" }
+                                            })" />
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <!-- Right side with document image, name, start, and end time -->
+                    @*@if (Model.Status == "Declined")
+                    {
+                        <div class="col-md-12">
+                            <div class="card-body" style="margin-top: -159px;">
+                                <h5 style="color:blueviolet">Decline Remarks</h5>
+                                @foreach (var recepient in Model.Recepients)
+                                {
+                                    if (Model.DocumentId == recepient.Tempid && !string.IsNullOrWhiteSpace(recepient.DeclineRemark))
+                                    {
+                                        <p style="padding-left: 96px; margin-top: 0px;">@recepient.DeclineRemark</p>
+                                    }
+                                }
+
+                            </div>
+                        </div>
+
+                    }*@
+
+                    @*@if (Model.Status == "In Progress")
+                        {
+                            <div class="col-md-12">
+                                <div class="card-body">
+                                    <button id="recallbutton" class="btn btn-primary uaeid-primary submit-button" onclick="Recall()">
+                                        Recall
+                                    </button>
+
+                                </div>
+                            </div>
+
+                        }*@
+
+
+                </div>
+                <div class="col-md-12 p-0">
+                    <div class="card-body" style="padding:20px 0px !important;">
+                        @if (Model.Status == "Completed")
+                        {
+                            <table id="scopesTable" class="table-striped table-bordered table-hover table-checkable order-column full-width rounded-table table">
+                                <thead>
+                                    <tr>
+                                        <th>FileName</th>
+                                        <th>Email</th>
+                                        <th>SignedBy</th>
+                                        <th>Status</th>
+                                        <th>Download</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model == null)
+                                    {
+                                        <tr>
+                                            <td style="text-align:center" valign="top" colspan="5" class="dataTables_empty">No record found</td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        <tr class="odd gradeX">
+                                            <td>@Model.DocumentName</td>
+                                            <td>@Model.OwnerEmail</td>
+                                            <td>@Model.OwnerName</td>
+                                            <td>@Model.Status</td>
+                                            <td>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16" onclick="downloadDoc('@Model.DocumentName', '@Model.FileId')">
+                                                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
+                                                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
+                                                </svg>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+
+                        @if (Model.Status == "Failed" || Model.Status == "Declined")
+                        {
+                            <table id="scopesTable" class="table-striped table-bordered table-hover table-checkable order-column full-width rounded-table table">
+                                <thead>
+                                    <tr>
+                                        <th>FileName</th>
+                                        <th>Email</th>
+                                        <th>Sign By</th>
+                                        <th>Status</th>
+                                        <th>Download</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model == null)
+                                    {
+                                        <tr>
+                                            <td style="text-align:center" valign="top" colspan="5" class="dataTables_empty">No record found</td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        <tr class="odd gradeX">
+                                            <td>@Model.DocumentName</td>
+                                            <td>@Model.OwnerEmail</td>
+                                            <td>---</td>
+                                            <td>@Model.Status</td>
+                                            <td>----</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+
+                        @if (Model.Status == "Recalled")
+                        {
+                            <table id="scopesTable" class="table-striped table-bordered table-hover table-checkable order-column full-width rounded-table table">
+                                <thead>
+                                    <tr>
+                                        <th>FileName</th>
+                                        <th>Email</th>
+                                        <th>Sign By</th>
+                                        <th>Status</th>
+                                        <th>Download</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model == null)
+                                    {
+                                        <tr>
+                                            <td style="text-align:center" valign="top" colspan="5" class="dataTables_empty">No record found</td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        <tr class="odd gradeX">
+                                            <td>@Model.DocumentName</td>
+                                            <td>@Model.OwnerEmail</td>
+                                            <td>---</td>
+                                            <td>@Model.Status</td>
+                                            <td>----</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+
+                        @if (Model.Status == "In Progress")
+                        {
+                            <table id="scopesTable" class="table-striped table-bordered table-hover table-checkable order-column full-width rounded-table table">
+                                <thead>
+                                    <tr>
+                                        <th>FileName</th>
+                                        <th>Email</th>
+                                        <th>Sign By</th>
+                                        <th>Status</th>
+                                        <th>Download</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model == null)
+                                    {
+                                        <tr>
+                                            <td style="text-align:center" valign="top" colspan="5" class="dataTables_empty">No record found</td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        <tr class="odd gradeX">
+                                            <td>@Model.DocumentName</td>
+                                            <td>@Model.OwnerEmail</td>
+                                            <td>@Model.OwnerName</td>
+                                            <td>@Model.Status</td>
+                                            <td>----</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end" style="padding-top: 31px;gap:10px;">
+                    @if (Model.Status == "In Progress")
+                    {
+                        <button id="recallbutton" class="btn btn-primary uaeid-primary submit-button" onclick="Recall()">
+                            Recall
+                        </button>
+
+                    }
+                    <a type="button" asp-action="Index" class="btn btn-other">
+                       Go Back
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+
+        $(document).ready(function () {
+
+            $("#DocumentSigningModule").addClass("active");
+
+            $('#homeMenu').addClass('breadcrumb-item').append('Document > Status');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#DocumentMenu').addClass('active');
+                $('#networkOverlay').hide();
+                document.getElementById("navigationNetworkOverlay").style.display = "none";
+        });
+
+
+        function downloadDoc(fileName, fieldID) {
+
+
+            $.ajax({
+                url: '@Url.Action("DownloadSignedDocument", "Documents")',
+                method: 'GET',
+                contentType: 'application/json',
+                data: { fileName: fileName, fileID: fieldID },
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (blob) {
+                    // Create a temporary link element
+                    var url = window.URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+
+                    // Append the link to the body
+                    document.body.appendChild(a);
+
+                    // Trigger a click on the link to start the download
+                    a.click();
+
+                    // Remove the link from the body
+                    document.body.removeChild(a);
+
+                    // Release the object URL
+                    window.URL.revokeObjectURL(url);
+                },
+                error: function (error) {
+                    // Handle errors
+                    console.error('Error downloading file:', error);
+                    Swal.fire({ type: 'info', title: "Download file", text: "Failed to download file", showCancelButton: false, closeOnConfirm: true }, function (isConfirm) {
+                        if (isConfirm) {
+                        }
+                    });
+                }
+            });
+        }
+
+            // Recall function
+            function Recall() {
+                Swal.fire({
+                    type: 'info',
+                    title: "Message",
+                    text: "Are you sure to recall document?",
+                    closeOnConfirm: true ,
+                    showCancelButton: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("Recall", "Documents")',
+                            method: 'PUT',
+                            dataType: 'json',
+                            data: { documentid: '@Model.DocumentId' }, // Stringify the data
+                            success: function (data) {
+                                if (data.success) {
+                                    Swal.fire({
+                                        type: 'info',
+                                        title: "Server Message",
+                                        text: data.message,
+                                        showCancelButton: false,
+                                        closeOnConfirm: true
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                                 window.location.href = '@Url.Action("Index", "Documents")';
+                                        }
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        type: 'info',
+                                        title: "Server Message",
+                                        text: data.message,
+                                        showCancelButton: false,
+                                        closeOnConfirm: true
+                                    }).then((result) => {
+                                        if (result.isConfirm) { }
+                                    });
+                                }
+                            },
+                            error: ajaxErrorHandler
+                        });
+                    } else {
+
+                    }
+                });
+
+            }
+
+    </script>
+}

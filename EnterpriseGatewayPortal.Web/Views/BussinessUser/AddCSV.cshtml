@@ -1,0 +1,672 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.BusinessUser.BusinessUserAddCsvViewModel
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+    {
+        new BreadCrumbModel { Title = "Business - Business Users", Url = Url.Action("List","BussinessUser"),IconKey = "business-users"},
+        new BreadCrumbModel { Title = "Add Using CSV", Url = "",IconKey = "add"}
+    };
+}
+
+<style>
+    .modal-dialog {
+        max-width: 900px;
+    }
+
+    .classshide {
+        display: none !important;
+    }
+
+    .cross {
+        color: black;
+        padding: 5px;
+        margin: 10px;
+    }
+
+    .custom-file-upload {
+        background: #f7f7f7;
+        padding: 3px 10px;
+        border: 1px solid #e3e3e3;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    #popupOverlay {
+        position: fixed;
+        top: 0;
+        z-index: 10000;
+        width: 100%;
+        height: 100%;
+        display: none;
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        margin: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: spin 2s linear infinite;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .custom-file-input-style {
+        border: 1px solid #CBA344;
+        border-radius: 4px;
+        padding: 0 !important;
+        padding-top: 6px !important;
+        height: 40px;
+        box-sizing: border-box;
+        /* color: #C3C6CB; */
+    }
+
+        .custom-file-input-style::file-selector-button {
+            border: none;
+            background-color: transparent;
+            font-weight: 400;
+            padding: 6px 12px;
+            margin: -6px 12px -6px 0; /* removes vertical spacing/gap */
+            border-right: 1px solid #CBA344;
+            cursor: pointer;
+            height: calc(100% + 6px); /* ensure full height including padding */
+            color: #6C4527;
+        }
+
+        .custom-file-input-style:hover::file-selector-button {
+            background-color: rgba(249, 247, 237, 1); /* on hover */
+        }
+
+        /*  .form-control:focus {
+                border: 1px solid #92722A;
+                color: #1B1D21;
+            } */
+
+        .custom-file-input-style:focus::file-selector-button {
+            border-right: 1px solid #92722A; /* change to focus color */
+        }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" id="spacingCss">
+    <div class="col-md-12">
+        <span class="sub-label" style="padding:0px 0px 10px 24px;">Add using CSV</span>
+        <div class="card" style="height: 80px;z-index:1;">
+            <div class="form-row" style="margin-top: 4px;">
+                <div class="form-group col-md-5">
+                    <div class="custom-file" style="width:92%">
+                        <input type="file" id="uploadBusinessUserCSV" class="form-control custom-file-input-style" accept=".csv">
+                        <label for="uploadBusinessUserCSV" class="form-label"></label>
+                        <span id="trustedStakeholderDtosList" class="text-danger"></span>
+                    </div>
+
+                    @*  <div class="form-group" style="margin-bottom:2.6rem;">
+                            <label asp-for="SignaturePhoto" class="form-label"></label>
+                            <input type="file" asp-for="SignaturePhoto" class="form-control custom-file-input-style" onchange="FileToBase64(this)" tabindex="1" accept=".jpg, .png, .jpeg" />
+                            <input type="hidden" asp-for="SignaturePhoto" id="BusinessUser_Signature" />
+
+                        </div> *@
+                </div>
+                <div class="d-flex flex-row">
+
+                    <a class="btn btn-info uaeid-primary text-center" href="@Url.Action("DownloadCSV", "BussinessUser")">Download Template</a>
+                    &nbsp;&nbsp;
+                    <button type="button" class="btn btn-primary uaeid-primary" onclick="submitFile()">Save</button>
+                    &nbsp;&nbsp;
+                    <form asp-controller="BussinessUser" asp-action="List" method="get" style="display:inline;">
+                        <button type="submit" class="btn btn-other">Cancel</button>
+                    </form>
+
+                </div>
+                    &nbsp;&nbsp;
+                    @*<div class="btn-group">
+                        <a class="btn btn-info" asp-action="Search" asp-controller="ControlledOnboarding"></i>Search</a>
+                        </div>*@
+            </div>
+        </div>
+    </div>
+</div>
+<div id="businessUserCsvData">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card-custom">
+                <div class="card-body">
+                    <table id="userList" class="table-striped table-bordered table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th width="20%">UAEID Email</th>
+                                <th width="20%">Employee Email</th>
+                                <th width="10%">ESeal</th>
+                                <th width="10%">Preparatory</th>
+                                <th width="10%">Bulk Sign</th>
+                                @* <th width="10%">Delegate</th> *@
+                                @*<th width="10%">Local Signing</th>*@
+                                <th width="10%">Digital Form</th>
+                                <th width="10%">Designation</th>
+                                <th width="10%">Signature Image</th>
+                                <th width="10%">Initial Image</th>
+                                <th width="10%">NIN</th>
+                                <th width="10%">Mobile No</th>
+                                <th width="10%">Passport Number</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var table;
+    var allowedCSVFileTypes = ['.csv'];
+    var emailRegex = /^([\w-\.]+)@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+    var binaryRegex = /^[01]$/;
+    var ninRegex = /^[A-Z0-9]{1,14}$/;
+    var passportRegex = /^[A-Z0-9]{1,12}$/;
+
+    $(document).ajaxSend(function (event, xhr, options) {
+
+        $('#popupOverlay').show();
+
+    }).ajaxComplete(function (event, xhr, options) {
+
+        $('#popupOverlay').hide();
+
+    }).ajaxError(function (event, jqxhr, settings, exception) {
+
+        $('#popupOverlay').hide();
+
+    });
+
+         function emailDomain(email){
+        return $.ajax({
+            url: '@Url.Action("GetOrgDetails", "BussinessUser")',
+            method: 'GET',
+            data: { email: email },
+            error: ajaxErrorHandler
+        });
+    }
+
+    $(document).ready(function () {
+        document.getElementById("navigationNetworkOverlay").style.display = "none";
+
+        $("#BusinessModule > a")
+            .attr("aria-expanded", "true")
+            .addClass("active");
+
+        $("#BusinessModule")
+            .addClass("submenu-active show");
+
+        $("#BusinessModule .submenu")
+            .addClass("show");
+
+        $('#Business-Users').addClass('active');
+
+        /*For Beadcrum Start*/
+        $('#homeMenu').addClass('breadcrumb-item').append('Business Users > Add CSV');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        $('#networkOverlay').hide();
+         const parentNavItem = document.querySelector(`[data-section="Business"] .nav-link`);
+    if (parentNavItem) {
+        parentNavItem.classList.add("active");
+    }
+        table = $('#userList').DataTable({
+            "columnDefs": [
+                { "targets": [2, 3, 4, 6], "visible": false },
+                {
+                    targets: 7,
+                    render: function (data, type) {
+                        if (type === 'display' && data) {
+                            return `<img src="data:image/png;base64,${data}"
+                                 style="width:70px;height:70px;object-fit:contain;" />`;
+                        }
+                        return data;
+                    }
+                },
+
+                {
+                    targets: 8,
+                    render: function (data, type) {
+                        if (type === 'display' && data) {
+                            return `<img src="data:image/png;base64,${data}"
+                                 style="width:32px;height:32px;object-fit:contain;" />`;
+                        }
+                        return data;
+                    }
+                }
+            ]
+        });
+
+        $("#businessUserCsvData").hide();
+
+        var previousFile = null;
+
+        $(document).on("change", '#uploadBusinessUserCSV', async function () {
+
+            var file = $(this).get(0).files[0];
+            var fileName = file ? file.name : "Choose File...";
+
+            // Check if the new file is the same as the previous file
+            if (file && previousFile && file.name === previousFile.name && file.size === previousFile.size) {
+
+                resetFileInput(this); // Reset the file input
+                return;
+            }
+
+            previousFile = file; // Update the previousFile variable with the new file
+
+
+            resetAndClearData();
+
+            if (file == undefined) {
+                fileName = "Choose File...";
+            }
+            else {
+                fileName = file.name;
+                var fileExtension = getExtension(file.name);
+                if (allowedCSVFileTypes.includes(fileExtension)) {
+                    var reader = new FileReader();
+
+                    reader.onload = async function (e) {
+                        $("#businessUserCsvData").show();
+                        var ugpassEmail;
+                        var employeeEmail;
+                        var eseal;
+                        var preparatory;
+                        var bulkSign;
+                        var delegation;
+                       // var lsaPrivilege;
+                        var digitalForm;
+                        var designation;
+                        var signatureImage;
+                        var initialImage;
+                        var nin;
+                        var mobileNo;
+                        var passport;
+                        var validData = true;
+                        var maxSize = 20;
+                        var newNumber;
+                        var rows = e.target.result.split("\n");
+
+                        for (var i = 1; i < rows.length; i++) {
+                            var cells = rows[i].replace("\r", "").split(",");
+
+
+                            if (cells.length == 12) {
+                                //ugpassEmail = cells[0];
+                                //employeeEmail = cells[1];
+                                //eseal = cells[2];
+                                //preparatory = cells[3];
+                                //bulkSign = cells[4];
+                                //delegation = cells[5];
+                                //lsaPrivilege = cells[6];
+                                //designation = cells[7];
+                                //signatureImage = cells[8];
+                                //nin = cells[9];
+                                //mobileNo = cells[10];
+                                //passport = cells[11];
+
+                                ugpassEmail = cells[0];
+                                employeeEmail = cells[1];
+                                eseal = cells[2];
+                                preparatory = cells[3];
+                                bulkSign = cells[4];
+                                //delegation = cells[5];
+                                digitalForm = cells[5];
+                                designation = cells[6];
+                                signatureImage = cells[7];
+                                initialImage = cells[8];
+                                nin = cells[9];
+                                mobileNo = cells[10];
+                                passport = cells[11];
+
+                                var stringLength = 0;
+                                var stringLengthInitial = 0;
+
+                                if (cells.length != 1) {
+                                    if (signatureImage.includes("base64,")) {
+                                        var image = signatureImage.split("base64,")[1];
+                                        stringLength = image.length;
+                                    }
+                                    else if (!signatureImage.includes("base64,")) {
+                                        stringLength = signatureImage.length;
+                                    }
+                                    else if (initialImage.includes("base64,")) {
+                                        var image = initialImage.split("base64,")[1];
+                                        stringLengthInitial = image.length;
+                                    }
+                                    else {
+                                        stringLengthInitial = initialImage.length;
+                                    }
+                                }
+
+
+                                var sizeInBytes = 4 * Math.ceil((stringLength / 3)) * 0.5624896334383812;
+                                var sizeInKb = sizeInBytes / 1000;
+
+                                var sizeInBytesInitial = 4 * Math.ceil((stringLengthInitial / 3)) * 0.5624896334383812;
+                                var sizeInKbInitial = sizeInBytesInitial / 1000;
+
+                                if (sizeInKb > maxSize) {
+                                    return Swal.fire({ icon: 'error', title: "Max size exceeded", text: "Signature file must be less than 20 Kb for " + email });
+                                }
+
+                                if (sizeInKbInitial > maxSize) {
+                                    return Swal.fire({ type: 'error', title: "Max size exceeded", text: "Initial image file must be less than 20 Kb for " + email });
+                                }
+                                if(preparatory != "" || bulkSign != "" || eseal != "" || digitalForm != "")
+                                {
+                                    if (!binaryRegex.test(preparatory) || !binaryRegex.test(bulkSign) || !binaryRegex.test(eseal) || !binaryRegex.test(digitalForm)/* !binaryRegex.test(delegation) || !binaryRegex.test(lsaPrivilege)*/){
+                                        Swal.fire({ icon: 'error', title: "Invalid Binary Value", text: "preparatory, bulkSign, eseal and digital form must be either 0 or 1." });
+                                        validData = false;
+                                        break;
+                                    }
+                                }
+                                if (nin && nin !== "") {
+
+
+                                    if (!ninRegex.test(nin)) {
+                                        Swal.fire({ icon: 'error', title: "Invalid NIN Number", text: "Please enter a valid NIN number accepts A-Z(capital)&0-9 and max length is 14." });
+                                        validData = false;
+                                        break;
+
+                                    }
+                                }
+                                if(passport && passport !== ""){
+
+                                    if (!passportRegex.test(passport)) {
+                                        Swal.fire({ icon: 'error', title: "Invalid Passport Number", text: "Please enter a valid passport number accepts A-Z(capital)&0-12 and max length is 12." });
+                                        validData = false;
+                                        break;
+
+                                    }
+                                }
+                                let domainResponse = await emailDomain(employeeEmail);
+
+                                if (employeeEmail == "" || !emailRegex.test(employeeEmail)) {
+                                    validData = false;
+                                    break;
+                                }
+                                else if(!domainResponse.success){
+                                    Swal.fire({ icon: 'error', title: "Invalid Email Domain", text: "Please enter a valid email domain for Employee email:" + employeeEmail });
+                                    validData = false;
+                                    break;
+                                }
+
+                                if (ugpassEmail && !emailRegex.test(ugpassEmail)) {
+                                    validData = false;
+                                    break;
+                                }
+                                if (mobileNo != "") {
+                                    newNumber = ValidateNumber(mobileNo);
+                                    if (newNumber == null) {
+                                        $('#MobileNumber').siblings(".text-danger").text("Invalid Mobile number");
+                                        validData = false;
+                                        break;
+                                    }
+                                    mobileNo = newNumber;
+                                    cells[10] = mobileNo;
+                                }
+                                if (validData) {
+                                    table.row.add(cells).draw();
+                                }
+                            }
+                        }
+
+                        if (!validData) {
+                            resetAndClearData();
+
+                            fileName = "Choose File...";
+                            $('.custom-file-label').html(fileName);
+                            // if (ugpassEmail && !emailRegex.test(ugpassEmail)) {
+                            //     Swal.fire({ type: 'error', title: "Invalid Email", text: "UgPass Email is msissing Or Invalid Email Regex" });
+                            // }
+                            // else if (employeeEmail == "" || !emailRegex.test(employeeEmail)) {
+                            //     Swal.fire({ type: 'error', title: "Invalid Email", text: "Employee Email is msissing Or Invalid Email Regex" });
+                            // }
+                            if (ugpassEmail && !emailRegex.test(ugpassEmail)) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: "Invalid UAEID Email",
+                                    text: `The UAEID email "${ugpassEmail}" is not in a valid format. Please enter a valid email address.`
+                                });
+                            }
+                            else if (!employeeEmail) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: "Missing Employee Email",
+                                    text: "Please enter the Employee Email."
+                                });
+                            }
+                            else if (!emailRegex.test(employeeEmail)) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: "Invalid Employee Email",
+                                    text: `The Employee Email "${employeeEmail}" is not in a valid format. Please enter a valid email address.`
+                                });
+                            }
+                            $('#uploadBusinessUserCSV').val('');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+                else {
+                    Swal.fire({ icon: 'error', title: "File Not Supported", text: "Files with extensions: " + allowedCSVFileTypes.join(',') + " are only supported." });
+                }
+            }
+
+            $(this).next('.custom-file-label').html(fileName);
+        });
+
+        // Function to reset the file input element
+        function resetFileInput(input) {
+            if (input) {
+                try {
+                    // Clear the file input by cloning and replacing it
+                    input.value = ''; // The input is read-only, so clear its value
+                    var clone = input.cloneNode(true);
+                    input.parentNode.replaceChild(clone, input);
+                    previousFile = null; // Reset the previousFile variable
+                } catch (error) {
+                    console.error('Error resetting file input:', error);
+                }
+            }
+        }
+
+        function resetAndClearData() {
+            table.clear().draw();
+            $("#businessUserCsvData").hide();
+            $('#uploadBusinessUserCSV').val('');
+        }
+    });
+
+
+
+    function submitFile() {
+        var trustedUserList = tableData();
+
+        if (trustedUserList.length == 0) {
+            Swal.fire({ icon: 'error', title: "Failed", text: "Please upload file" });
+        }
+        else {
+            $.ajax({
+                url: '@Url.Action("AddBusinessUser", "BussinessUser")',
+                data: JSON.stringify(trustedUserList),
+                type: "POST",
+                contentType: "application/json",
+                error: ajaxErrorHandler,
+                beforeSend: function () {
+                    $('#overlay').show();
+                },
+                complete: function () {
+                    $('#overlay').hide();
+                },
+                success: function (data) {
+                    if (data != null) {
+                        if (data.status == "Success") {
+                           Swal.fire({
+                                icon: 'success',
+                                title: "Success",
+                                text: data.message
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '@Url.Action("List", "BussinessUser")';
+                                }
+                            });
+
+                        }
+                        else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: "Failed",
+                                text: data.message,
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '@Url.Action("List", "BussinessUser")';
+                                }
+                            });
+
+                        }
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Failed",
+                            text: "Failed to add trusted users"
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '@Url.Action("List", "BussinessUser")';
+                            }
+                        });
+
+                    }
+                }
+            });
+        }
+    }
+
+    function tableData() {
+        var list = [];
+        var data = $('#userList').DataTable().rows().data();
+        var validatedMobileNumber;
+        for (var i = 0; i < data.length; i++) {
+
+            if (data[i][10] !== "" && data[i][10] !== null) {
+                validatedMobileNumber = ValidateNumber(data[i][10]);
+            } else {
+                validatedMobileNumber = data[i][10]; // Keep it unchanged if empty
+            }
+
+
+            var businessUser = {
+                //UgpassEmail: data[i][0],
+                //EmployeeEmail: data[i][1],
+                //ESealSignatory: data[i][2] == "1",
+                //ESealPrepatory: data[i][3] == "1",
+                //Bulksign: data[i][4] == "1",
+                //Delegate: data[i][5] == "1",
+                //LsaPrivilege: data[i][6] == "1",
+                //Designation: data[i][7],
+                //SignaturePhoto: data[i][8],
+                //NationalIdNumber: data[i][9],
+                //MobileNumber: data[i][10],
+                //PassportNumber: data[i][11]
+
+                UgpassEmail: data[i][0],
+                EmployeeEmail: data[i][1],
+                ESealSignatory: data[i][2] == "1",
+                ESealPrepatory: data[i][3] == "1",
+                Bulksign: data[i][4] == "1",
+                //Delegate: data[i][5] == "1",
+                DigitalForm: data[i][5] == "1",
+                Designation: data[i][6],
+                SignaturePhoto: data[i][7],
+                InitialImage: data[i][8],
+                NationalIdNumber: data[i][9],
+                MobileNumber: validatedMobileNumber,
+                PassportNumber: data[i][11]
+            }
+
+            list.push(businessUser);
+        }
+        return list;
+    }
+
+    function getExtension(filename) {
+
+        return '.' + filename.split('.').pop().toLowerCase();
+    }
+
+    function ValidateNumber(MobNumber) {
+
+        if (MobNumber.startsWith("+256")) {
+            if (MobNumber.length != 13) {
+                return null;
+            }
+        } else if (MobNumber.startsWith("256")) {
+            if (MobNumber.length != 12) {
+                return null;
+            }
+            MobNumber = "+" + MobNumber;
+
+        } else if (MobNumber.startsWith("+91")) {
+            if (MobNumber.length != 13) {
+                return null;
+            }
+        }
+        else if (MobNumber.startsWith("91")) {
+            if (MobNumber.length != 12) {
+                return null;
+            }
+            MobNumber = "+" + MobNumber;
+        }
+        else if (MobNumber.startsWith("0")) {
+            if (MobNumber.length == 10) {
+                MobNumber = MobNumber.replace("0", "+256");
+            }
+            else if (MobNumber.length == 11) {
+                MobNumber = MobNumber.replace("0", "+91");
+            } else {
+                return null;
+            }
+        }
+        else if (MobNumber.length == 9) {
+            MobNumber = "+256" + MobNumber;
+        }
+
+        else if (MobNumber.length == 10) {
+            MobNumber = "+91" + MobNumber;
+        }
+        else {
+            return Swal.fire({ icon: 'error', title: "mobile number", text: "Check your mobile number " });
+        }
+
+        return MobNumber
+    }
+
+
+</script>

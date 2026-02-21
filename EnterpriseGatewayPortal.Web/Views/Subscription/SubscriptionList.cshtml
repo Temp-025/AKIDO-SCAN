@@ -1,0 +1,219 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.SubscriptionVerification.SubscriptionVerificationListViewModel
+@using EnterpriseGatewayPortal.Core.Constants
+@{
+    ViewData["Title"] = "SubscriptionDetails";
+}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row p-b-20">
+                    <div class="col-md-6 col-sm-6 col-6">
+
+                        <div class="btn-group">
+                            <a class="btn btn-primary" asp-controller="Subscription" asp-action="CreateSubscription">
+                                <i class="fa fa-plus"></i>New Subscription
+                            </a>
+
+                        </div>
+                    </div>
+
+                </div>
+                <table id="SubscriptionTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table">
+                    <thead>
+                        <tr>
+                            @*<th hidden>Id</th>*@
+                            <th>Issuer Organization Name</th>
+                            <th>Document Type</th>
+                            <th>Subscription Date</th>
+                            <th>Status</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         @if (Model.SubscriptionVerifyLists == null || Model.SubscriptionVerifyLists.Count() == 0)
+                        {
+                            <tr>
+                                <td style="text-align:center" valign="top" colspan="5" class="dataTables_empty">No record found</td>
+                            </tr>
+                        }
+                        else
+                        {
+                        @foreach (var item in Model.SubscriptionVerifyLists)
+                        {
+                            <tr class="odd gradeX">
+                                <td>@item.DocumentIssuerName</td>
+                                <td>@item.DocumentTypes</td>
+                                <td>@item.SubscriptionDate</td>
+                                <td>@item.Status</td>
+
+                                <td class="valigntop">
+                                    <div class="btn-group">
+                                        <button class="btn btn-xs deepPink-bgcolor no-margin" type="button" data-toggle="dropdown"
+                                                aria-expanded="false">
+                                            Actions
+                                            <i class="fa fa-angle-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-left" role="menu">
+                                            <li>
+                                                <a asp-action="ViewSubscriptionDetails" asp-route-id="@item.Id">
+                                                    <i class="icon-pencil"></i>View
+                                                </a>
+                                            </li>
+                                                <li>
+                                                    <a asp-action="EditSubscription" asp-route-issuerUid="@item.IssuerUid">
+                                                        <i class="icon-pencil"></i>Edit
+                                                    </a>
+                                                </li>
+                                               @* <li>
+                                                    @if (item.Status == "Subscribed")
+                                                    {
+                                                        <a onclick="subscribe('@item.Id')">
+                                                            <i class="icon-pencil"></i>UnSubscribe
+                                                        </a>
+                                                    }
+                                                    @if (item.Status == "UnSubscribe")
+                                                    {
+                                                        <a onclick="unSubscribe('@item.Id')">
+                                                            <i class="icon-pencil"></i>Subscribe
+                                                        </a>
+                                                    }
+                                                </li>*@
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                         }
+                       }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+
+    <script>
+
+
+        $(document).ready(function () {
+            var DocumentVerificationLink = document.getElementById('DocumentVerificationModle').querySelector('.nav-link');
+            DocumentVerificationLink.click();
+            $('#homeMenu').addClass('breadcrumb-item').append('Subscription > Subscription List');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#SubscriptionMenu').addClass('active');
+            $('#networkOverlay').hide();
+            var table1 = $("#SubscriptionTable").DataTable({
+
+                "bLengthChange": false,
+                "searching": true
+
+            });
+
+        });
+
+        function subscribe(id) {
+            var updateSubscriptionStatus =
+            {
+                subscribeId: id,
+                action: Subscribed
+            };
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("UpdateStatus", "Subscription")',
+                data: JSON.stringify(updateSubscriptionStatus),
+                cache: false,
+                contentType: "application/json; charset=utf-8",
+                processData: false,
+                beforeSend: function () {
+                    $('#overlay').show();
+                },
+                complete: function () {
+
+                    $('#overlay').hide();
+                },
+                success: function (data) {
+                    if (data.status == "Success") {
+    Swal.fire({
+        icon: 'success', // 'type' becomes 'icon'
+        title: "Success",
+        text: data.message
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '@Url.Action("SubscriptionList", "Subscription")';
+        }
+    });
+}
+
+if (data.status == "Failed") {
+    Swal.fire({
+        icon: 'error', // 'type' becomes 'icon'
+        title: "Error",
+        text: data.message
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '@Url.Action("SubscriptionList", "Subscription")';
+        }
+    });
+}
+
+                }
+            });
+        };
+
+        function UnSubscribe(id) {
+            var updateSubscriptionStatus =
+            {
+                subscribeId: id,
+                action: UnSubscribe
+            };
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("UpdateStatus", "Subscription")',
+                data: JSON.stringify(updateSubscriptionStatus),
+                cache: false,
+                contentType: "application/json; charset=utf-8",
+                processData: false,
+                beforeSend: function () {
+                    $('#overlay').show();
+                },
+                complete: function () {
+
+                    $('#overlay').hide();
+                },
+                success: function (data) {
+                    if (data.status == "Success") {
+    Swal.fire({
+        icon: 'success', // 'type' is now 'icon'
+        title: "Success",
+        text: data.message
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '@Url.Action("SubscriptionList", "Subscription")';
+        }
+    });
+}
+
+if (data.status == "Failed") {
+    Swal.fire({
+        icon: 'error',
+        title: "Error",
+        text: data.message
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '@Url.Action("SubscriptionList", "Subscription")';
+        }
+    });
+}
+
+                }
+            });
+        };
+
+
+    </script>
+
+}

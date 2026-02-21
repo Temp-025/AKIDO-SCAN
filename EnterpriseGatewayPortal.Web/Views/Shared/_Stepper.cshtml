@@ -1,0 +1,396 @@
+﻿@model List<EnterpriseGatewayPortal.Web.Models.StepModel>
+
+<style>
+    .stepper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .step {
+        flex: 1;
+        position: relative;
+        text-align: center;
+        margin-right: 10px;
+    }
+
+        .step:last-child {
+            margin-right: 0;
+            text-align: right;
+        }
+
+        .step:first-child {
+            text-align: left;
+        }
+
+        .step .icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px auto;
+            position: relative;
+            z-index: 1;
+            color: white;
+            font-size: 18px;
+        }
+
+
+        .step.success .icon {
+            background-color: #4caf50;
+        }
+
+        .step.inprogress .icon {
+            background-color: #F29F0E;
+        }
+
+        .step.incomplete .icon {
+            background: #94A3B8;
+        }
+
+        .step.error .icon {
+            background: #f44336;
+        }
+
+        .step .label {
+            margin-top: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #333;
+            display: block;
+            text-align: center;
+        }
+
+    .success {
+        color: #4caf50;
+    }
+
+    .error {
+        color: #f44336;
+    }
+
+    .inprogress {
+        color: #F29F0E;
+    }
+
+    .incomplete {
+        color: #94A3B8;
+    }
+
+    .step.pending .label {
+        color: #999;
+    }
+
+    /*.step::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;*/ /* full step width → will fix below */
+    /*height: 3px;
+            background: #ccc;
+            z-index: 0;
+            transform: translateY(-50%);
+        }*/
+
+    /*.step .icon::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 100%;*/ /* Start from right edge of icon */
+    /*width: calc(100% + 50px);*/ /* 👈 adjust this until it matches gap */
+    /*height: 3px;
+            background: #ccc;
+            transform: translateY(-50%);
+            z-index: -1;
+        }*/
+
+    .step:last-child .icon::after {
+        content: none;
+    }
+
+    .step:last-child::after {
+        content: none;
+    }
+
+    .step.success::after {
+        background: linear-gradient(to right, #4caf50, #f44336);
+    }
+
+    .step.error::after {
+        background: #f44336;
+    }
+
+    .step.pending::after {
+        background: #ccc;
+    }
+
+    .step:last-child .icon {
+        margin-right: 0;
+    }
+
+    .step:first-child .icon {
+        margin-left: 0;
+    }
+
+    .connector {
+        position: absolute;
+        top: 50%;
+        left: 135%;
+        height: 3px;
+        background: #ccc;
+        transform: translateY(-50%);
+        z-index: -1;
+        border-radius: 10px;
+    }
+
+    .custom-label {
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .step.inprogress .icon::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 25px;
+        height: 25px;
+        background: rgba(242, 159, 14, 0.4);
+        border-radius: 50%;
+        transform: translate(-50%, -50%) scale(1);
+        z-index: 0;
+        animation: pulse-wave 1.8s ease-out infinite;
+    }
+
+    @@keyframes pulse-wave {
+        0% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0.8;
+        }
+
+        70% {
+            transform: translate(-50%, -50%) scale(2.3);
+            opacity: 0;
+        }
+
+        100% {
+            transform: translate(-50%, -50%) scale(2.3);
+            opacity: 0;
+        }
+    }
+</style>
+
+<div class="stepper">
+    @for (int i = 0; i < Model.Count; i++)
+    {
+        var step = Model[i];
+        <div class="step @(step.Status)">
+            <span class="icon">
+                @if (step.Status == "success")
+                {
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 1.875C8.39303 1.875 6.82214 2.35152 5.486 3.24431C4.14985 4.1371 3.10844 5.40605 2.49348 6.8907C1.87852 8.37535 1.71762 10.009 2.03112 11.5851C2.34463 13.1612 3.11846 14.6089 4.25476 15.7452C5.39106 16.8815 6.8388 17.6554 8.4149 17.9689C9.99099 18.2824 11.6247 18.1215 13.1093 17.5065C14.594 16.8916 15.8629 15.8502 16.7557 14.514C17.6485 13.1779 18.125 11.607 18.125 10C18.1227 7.84581 17.266 5.78051 15.7427 4.25727C14.2195 2.73403 12.1542 1.87727 10 1.875ZM13.5672 8.56719L9.19219 12.9422C9.13415 13.0003 9.06522 13.0464 8.98934 13.0779C8.91347 13.1093 8.83214 13.1255 8.75 13.1255C8.66787 13.1255 8.58654 13.1093 8.51067 13.0779C8.43479 13.0464 8.36586 13.0003 8.30782 12.9422L6.43282 11.0672C6.31554 10.9499 6.24966 10.7909 6.24966 10.625C6.24966 10.4591 6.31554 10.3001 6.43282 10.1828C6.55009 10.0655 6.70915 9.99965 6.875 9.99965C7.04086 9.99965 7.19992 10.0655 7.31719 10.1828L8.75 11.6164L12.6828 7.68281C12.7409 7.62474 12.8098 7.57868 12.8857 7.54725C12.9616 7.51583 13.0429 7.49965 13.125 7.49965C13.2071 7.49965 13.2884 7.51583 13.3643 7.54725C13.4402 7.57868 13.5091 7.62474 13.5672 7.68281C13.6253 7.74088 13.6713 7.80982 13.7027 7.88569C13.7342 7.96156 13.7504 8.04288 13.7504 8.125C13.7504 8.20712 13.7342 8.28844 13.7027 8.36431C13.6713 8.44018 13.6253 8.50912 13.5672 8.56719Z" fill="white" />
+                    </svg>
+                }
+                else if (step.Status == "error")
+                {
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 1.875C8.39303 1.875 6.82214 2.35152 5.486 3.24431C4.14985 4.1371 3.10844 5.40605 2.49348 6.8907C1.87852 8.37535 1.71762 10.009 2.03112 11.5851C2.34463 13.1612 3.11846 14.6089 4.25476 15.7452C5.39106 16.8815 6.8388 17.6554 8.4149 17.9689C9.99099 18.2824 11.6247 18.1215 13.1093 17.5065C14.594 16.8916 15.8629 15.8502 16.7557 14.514C17.6485 13.1779 18.125 11.607 18.125 10C18.1227 7.84581 17.266 5.78051 15.7427 4.25727C14.2195 2.73403 12.1542 1.87727 10 1.875ZM12.9422 12.0578C13.0003 12.1159 13.0463 12.1848 13.0777 12.2607C13.1092 12.3366 13.1254 12.4179 13.1254 12.5C13.1254 12.5821 13.1092 12.6634 13.0777 12.7393C13.0463 12.8152 13.0003 12.8841 12.9422 12.9422C12.8841 13.0003 12.8152 13.0463 12.7393 13.0777C12.6634 13.1092 12.5821 13.1253 12.5 13.1253C12.4179 13.1253 12.3366 13.1092 12.2607 13.0777C12.1848 13.0463 12.1159 13.0003 12.0578 12.9422L10 10.8836L7.94219 12.9422C7.88412 13.0003 7.81518 13.0463 7.73931 13.0777C7.66344 13.1092 7.58213 13.1253 7.5 13.1253C7.41788 13.1253 7.33656 13.1092 7.26069 13.0777C7.18482 13.0463 7.11588 13.0003 7.05782 12.9422C6.99975 12.8841 6.95368 12.8152 6.92226 12.7393C6.89083 12.6634 6.87466 12.5821 6.87466 12.5C6.87466 12.4179 6.89083 12.3366 6.92226 12.2607C6.95368 12.1848 6.99975 12.1159 7.05782 12.0578L9.11641 10L7.05782 7.94219C6.94054 7.82491 6.87466 7.66585 6.87466 7.5C6.87466 7.33415 6.94054 7.17509 7.05782 7.05781C7.17509 6.94054 7.33415 6.87465 7.5 6.87465C7.66586 6.87465 7.82492 6.94054 7.94219 7.05781L10 9.11641L12.0578 7.05781C12.1159 6.99974 12.1848 6.95368 12.2607 6.92225C12.3366 6.89083 12.4179 6.87465 12.5 6.87465C12.5821 6.87465 12.6634 6.89083 12.7393 6.92225C12.8152 6.95368 12.8841 6.99974 12.9422 7.05781C13.0003 7.11588 13.0463 7.18482 13.0777 7.26069C13.1092 7.33656 13.1254 7.41788 13.1254 7.5C13.1254 7.58212 13.1092 7.66344 13.0777 7.73931C13.0463 7.81518 13.0003 7.88412 12.9422 7.94219L10.8836 10L12.9422 12.0578Z" fill="white" />
+                    </svg>
+                }
+                else if (step.Status == "inprogress")
+                {
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16.2496 7.50017C16.2496 7.31475 16.3046 7.13349 16.4076 6.97932C16.5106 6.82515 16.657 6.70499 16.8283 6.63403C16.9996 6.56308 17.1881 6.54451 17.37 6.58068C17.5518 6.61686 17.7189 6.70615 17.85 6.83726C17.9811 6.96837 18.0704 7.13542 18.1066 7.31727C18.1427 7.49913 18.1242 7.68763 18.0532 7.85894C17.9822 8.03024 17.8621 8.17666 17.7079 8.27967C17.5537 8.38269 17.3725 8.43767 17.1871 8.43767C16.9384 8.43767 16.7 8.3389 16.5242 8.16308C16.3483 7.98727 16.2496 7.74881 16.2496 7.50017ZM15.3121 5.62517C15.4975 5.62517 15.6787 5.57019 15.8329 5.46717C15.9871 5.36416 16.1072 5.21774 16.1782 5.04644C16.2492 4.87513 16.2677 4.68663 16.2316 4.50477C16.1954 4.32292 16.1061 4.15587 15.975 4.02476C15.8439 3.89365 15.6768 3.80436 15.495 3.76818C15.3131 3.73201 15.1246 3.75058 14.9533 3.82153C14.782 3.89249 14.6356 4.01265 14.5326 4.16682C14.4296 4.32099 14.3746 4.50225 14.3746 4.68767C14.3746 4.93631 14.4733 5.17477 14.6492 5.35058C14.825 5.5264 15.0634 5.62517 15.3121 5.62517ZM17.5511 10.0002C17.386 9.98655 17.2222 10.0391 17.0958 10.1461C16.9694 10.2532 16.8906 10.4061 16.8769 10.5713C16.7651 11.8779 16.2823 13.1254 15.4856 14.1669C14.6888 15.2085 13.6111 16.0008 12.3793 16.4507C11.1475 16.9006 9.8128 16.9893 8.5323 16.7063C7.2518 16.4234 6.07875 15.7806 5.15117 14.8536C4.22358 13.9266 3.58006 12.754 3.29632 11.4736C3.01258 10.1933 3.10043 8.85858 3.54952 7.62649C3.99861 6.3944 4.79027 5.31621 5.83134 4.51877C6.87242 3.72134 8.11959 3.23784 9.42613 3.12517C9.50821 3.1184 9.58814 3.09553 9.66138 3.05786C9.73462 3.0202 9.79972 2.96848 9.85297 2.90565C9.90622 2.84283 9.94657 2.77013 9.97172 2.69171C9.99688 2.61329 10.0063 2.53068 9.99957 2.44861C9.9928 2.36653 9.96992 2.28659 9.93226 2.21336C9.8946 2.14012 9.84287 2.07502 9.78005 2.02177C9.71722 1.96852 9.64453 1.92817 9.56611 1.90301C9.48769 1.87786 9.40508 1.8684 9.323 1.87517C7.77927 2.00796 6.30558 2.57888 5.0753 3.52076C3.84502 4.46265 2.90934 5.73631 2.37834 7.19191C1.84734 8.64751 1.74311 10.2245 2.07792 11.7373C2.41272 13.2501 3.17263 14.6359 4.26825 15.7315C5.36386 16.8271 6.74959 17.587 8.26242 17.9218C9.77524 18.2566 11.3522 18.1524 12.8078 17.6214C14.2634 17.0904 15.5371 16.1547 16.479 14.9244C17.4209 13.6942 17.9918 12.2205 18.1246 10.6767C18.1316 10.5946 18.1224 10.5119 18.0973 10.4333C18.0723 10.3548 18.0319 10.282 17.9786 10.2191C17.9253 10.1562 17.8601 10.1045 17.7868 10.0669C17.7134 10.0294 17.6333 10.0067 17.5511 10.0002ZM9.99957 4.37517C11.1121 4.37517 12.1996 4.70507 13.1247 5.32315C14.0497 5.94124 14.7706 6.81974 15.1964 7.84758C15.6221 8.87541 15.7335 10.0064 15.5165 11.0976C15.2994 12.1887 14.7637 13.191 13.977 13.9776C13.1904 14.7643 12.1881 15.3 11.097 15.5171C10.0058 15.7341 8.87481 15.6227 7.84697 15.197C6.81914 14.7712 5.94063 14.0503 5.32255 13.1253C4.70447 12.2002 4.37457 11.1127 4.37457 10.0002C4.37622 8.50883 4.96939 7.07906 6.02392 6.02452C7.07845 4.96999 8.50823 4.37682 9.99957 4.37517ZM9.37457 10.0002C9.37457 10.1659 9.44042 10.3249 9.55763 10.4421C9.67484 10.5593 9.83381 10.6252 9.99957 10.6252H13.7496C13.9153 10.6252 14.0743 10.5593 14.1915 10.4421C14.3087 10.3249 14.3746 10.1659 14.3746 10.0002C14.3746 9.83441 14.3087 9.67544 14.1915 9.55823C14.0743 9.44102 13.9153 9.37517 13.7496 9.37517H10.6246V6.25017C10.6246 6.08441 10.5587 5.92544 10.4415 5.80823C10.3243 5.69102 10.1653 5.62517 9.99957 5.62517C9.83381 5.62517 9.67484 5.69102 9.55763 5.80823C9.44042 5.92544 9.37457 6.08441 9.37457 6.25017V10.0002ZM12.4996 3.75017C12.685 3.75017 12.8662 3.69519 13.0204 3.59217C13.1746 3.48916 13.2947 3.34274 13.3657 3.17144C13.4367 3.00013 13.4552 2.81163 13.4191 2.62977C13.3829 2.44792 13.2936 2.28087 13.1625 2.14976C13.0314 2.01865 12.8643 1.92936 12.6825 1.89318C12.5006 1.85701 12.3121 1.87558 12.1408 1.94653C11.9695 2.01749 11.8231 2.13765 11.7201 2.29182C11.6171 2.44599 11.5621 2.62725 11.5621 2.81267C11.5621 3.06131 11.6608 3.29977 11.8367 3.47558C12.0125 3.6514 12.2509 3.75017 12.4996 3.75017Z" fill="white" />
+                    </svg>
+                }
+                else if (step.Status == "incomplete")
+                {
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 1.875C8.39303 1.875 6.82214 2.35152 5.486 3.24431C4.14985 4.1371 3.10844 5.40605 2.49348 6.8907C1.87852 8.37535 1.71762 10.009 2.03112 11.5851C2.34463 13.1612 3.11846 14.6089 4.25476 15.7452C5.39106 16.8815 6.8388 17.6554 8.4149 17.9689C9.99099 18.2824 11.6247 18.1215 13.1093 17.5065C14.594 16.8916 15.8629 15.8502 16.7557 14.514C17.6485 13.1779 18.125 11.607 18.125 10C18.1227 7.84581 17.266 5.78051 15.7427 4.25727C14.2195 2.73403 12.1542 1.87727 10 1.875ZM9.375 6.25C9.375 6.08424 9.44085 5.92527 9.55806 5.80806C9.67527 5.69085 9.83424 5.625 10 5.625C10.1658 5.625 10.3247 5.69085 10.4419 5.80806C10.5592 5.92527 10.625 6.08424 10.625 6.25V10.625C10.625 10.7908 10.5592 10.9497 10.4419 11.0669C10.3247 11.1842 10.1658 11.25 10 11.25C9.83424 11.25 9.67527 11.1842 9.55806 11.0669C9.44085 10.9497 9.375 10.7908 9.375 10.625V6.25ZM10 14.375C9.81458 14.375 9.63333 14.32 9.47916 14.217C9.32499 14.114 9.20482 13.9676 9.13387 13.7963C9.06291 13.625 9.04434 13.4365 9.08052 13.2546C9.11669 13.0727 9.20598 12.9057 9.33709 12.7746C9.4682 12.6435 9.63525 12.5542 9.81711 12.518C9.99896 12.4818 10.1875 12.5004 10.3588 12.5714C10.5301 12.6423 10.6765 12.7625 10.7795 12.9167C10.8825 13.0708 10.9375 13.2521 10.9375 13.4375C10.9375 13.6861 10.8387 13.9246 10.6629 14.1004C10.4871 14.2762 10.2486 14.375 10 14.375Z" fill="white" />
+                    </svg>
+                }
+                else
+                {
+                    <i class="fa fa-circle"></i>
+                }
+            </span>
+            <span class="@step.Status custom-label">@step.StepName</span>
+        </div>
+    }
+</div>
+<script>
+    (function () {
+        const GAP_PERCENT = 5;
+        const MAX_RETRIES = 12;
+        const DEBOUNCE_MS = 80;
+
+        function debounce(fn, wait) {
+            let t;
+            return function (...args) {
+                clearTimeout(t);
+                t = setTimeout(() => fn.apply(this, args), wait);
+            };
+        }
+
+        function computeStatus(el) {
+            const parent = el.parentElement;
+            if (!parent) return 'pending';
+            if (parent.classList.contains('success')) return 'success';
+            if (parent.classList.contains('error')) return 'error';
+            if (parent.classList.contains('inprogress')) return 'inprogress';
+            if (parent.classList.contains('incomplete')) return 'incomplete';
+            return 'pending';
+        }
+
+        function applyConnectorColor(line, curStatus, nextStatus) {
+            if (curStatus === "success" && nextStatus === "success") {
+                line.style.background = "#4caf50";
+            } else if (curStatus === "success" && nextStatus === "error") {
+                line.style.background = "linear-gradient(to right, #4caf50, #f44336)";
+            } else if (curStatus === "success" && nextStatus === "inprogress") {
+                line.style.background = "linear-gradient(to right, #4caf50, #F29F0E)";
+            } else if (curStatus === "success" && (nextStatus === "incomplete")) {
+                line.style.background = "linear-gradient(to right, #4caf50,#CBD5E1 )";
+            } else if (curStatus === "error" && (nextStatus === "inprogress" || nextStatus === "incomplete")) {
+                line.style.background = "linear-gradient(to right, #f44336, #ccc)";
+            } else if (curStatus === "error" && nextStatus === "success") {
+                line.style.background = "linear-gradient(to right, #f44336, #4caf50)";
+            } else if (curStatus === "error" && nextStatus === "error") {
+                line.style.backgroundColor = "rgba(234, 79, 73, 1)";
+            } else {
+                line.style.background = "#CBD5E1";
+            }
+        }
+
+        function removeOldConnectors(stepper) {
+            stepper.querySelectorAll('.connector').forEach(n => n.remove());
+        }
+
+        function createConnectors() {
+            const stepper = document.querySelector('.stepper');
+            if (!stepper) return;
+
+            const icons = Array.from(stepper.querySelectorAll('.step .icon'));
+            if (icons.length < 2) {
+                removeOldConnectors(stepper);
+                return;
+            }
+
+            const containerWidth = stepper.getBoundingClientRect().width;
+            const GAP = (containerWidth * GAP_PERCENT) / 100;
+
+            removeOldConnectors(stepper);
+
+            icons.forEach((icon, index) => {
+                if (index >= icons.length - 1) return;
+                const nextIcon = icons[index + 1];
+
+                // bounding rects give reliable positions even when layout changes
+                const rect1 = icon.getBoundingClientRect();
+                const rect2 = nextIcon.getBoundingClientRect();
+
+                let distance = (rect2.left - rect1.right) - GAP;
+                if (distance < 6) distance = 6; // minimum visual gap
+
+                const line = document.createElement('div');
+                line.className = 'connector';
+
+                // position from right edge of the icon
+                line.style.left = (icon.offsetWidth) + 10 + 'px';
+                line.style.width = distance + 'px';
+                line.style.height = '3px';
+                line.style.top = '50%';
+                line.style.transform = 'translateY(-50%)';
+                line.style.borderRadius = '10px';
+
+                // determine statuses and color the connector
+                const curStatus = computeStatus(icon);
+                const nextStatus = computeStatus(nextIcon);
+                applyConnectorColor(line, curStatus, nextStatus);
+
+                // ensure connectors sit behind icons (z-index)
+                line.style.zIndex = '0';
+                icon.appendChild(line);
+            });
+        }
+
+        // Wait until icons have a computed width (visible & rendered). Retry a few times.
+        function updateConnectors(retry = 0) {
+            const stepper = document.querySelector('.stepper');
+            if (!stepper) return;
+
+            const icons = Array.from(stepper.querySelectorAll('.step .icon'));
+            if (icons.length === 0) return;
+
+            const haveSizes = icons.every(ic => ic.offsetWidth > 0 && ic.getBoundingClientRect().width > 0);
+
+            if (!haveSizes && retry < MAX_RETRIES) {
+                // give layout a moment to settle (use rAF then timeout)
+                requestAnimationFrame(() => setTimeout(() => updateConnectors(retry + 1), 40));
+                return;
+            }
+
+            createConnectors();
+        }
+
+        const debouncedUpdate = debounce(() => updateConnectors(0), DEBOUNCE_MS);
+
+        function setupObservers() {
+            const stepper = document.querySelector('.stepper');
+            if (!stepper) return;
+
+            // disconnect previous observers if any (avoids duplicates on re-init)
+            if (stepper._stepperRo) {
+                stepper._stepperRo.disconnect();
+                stepper._stepperRo = null;
+            }
+            if (stepper._stepperMo) {
+                stepper._stepperMo.disconnect();
+                stepper._stepperMo = null;
+            }
+
+            // ResizeObserver watches size changes of the stepper itself
+            if (window.ResizeObserver) {
+                const ro = new ResizeObserver(debouncedUpdate);
+                ro.observe(stepper);
+                stepper._stepperRo = ro;
+            } else {
+                window.addEventListener('resize', debouncedUpdate);
+            }
+
+            // MutationObserver watches for class/style changes inside the stepper (status changes, DOM swaps)
+            const mo = new MutationObserver(debouncedUpdate);
+            mo.observe(stepper, { subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+            stepper._stepperMo = mo;
+
+            // If your sidebar toggles by adding/removing a class on a parent, you can observe that parent too:
+            // Example: const sidebar = document.querySelector('.sidebar'); if (sidebar) { const mo2 = new MutationObserver(debouncedUpdate); mo2.observe(sidebar, { attributes: true, attributeFilter: ['class', 'style'] }); stepper._sidebarMo = mo2; }
+        }
+
+        // Expose init so callers can re-run after dynamic loads
+        window.initStepper = function () {
+            updateConnectors(0);
+            setupObservers();
+        };
+
+        // Auto init once DOM is ready (with small delay to allow transition/paint)
+        function autoInit() {
+            // small delay so browser has applied layout/transition done
+            setTimeout(() => {
+                window.initStepper();
+            }, 60);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', autoInit);
+        } else {
+            autoInit();
+        }
+
+    })();
+</script>

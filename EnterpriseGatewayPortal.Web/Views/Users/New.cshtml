@@ -1,0 +1,665 @@
+﻿@using EnterpriseGatewayPortal.Web.Models
+@model EnterpriseGatewayPortal.Web.Models.Users.UserNewViewModel;
+
+@{
+    ViewData["Title"] = "User New";
+}
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+    {
+        new BreadCrumbModel { Title = "Adminstration - Users",Url = Url.Action("List","Users"),IconKey = "adminUsers"},
+        new BreadCrumbModel { Title = "Add" , Url = "",IconKey = "add"}
+    };
+}
+<style>
+    .classshide {
+        display: none !important;
+    }
+
+    /* ------- mobileNumber css ------------------------- */
+    .styled-input-group {
+        display: flex;  
+        align-items: center;
+       
+        border: 1px solid #E2E8F0 !IMPORTANT;
+       
+        border-radius: 8px;
+        padding: 6px 10px;
+        background-color: #fff;
+        height: 40px;
+    }
+
+    .country-code-dropdown {
+        appearance: none;
+        border: none;
+        margin-left: -4px;
+        background: transparent;
+        color: #CBA344;
+        font-weight: 500;
+        font-size: 14px;
+        padding-right: 34px;
+        margin-right: 0;
+        position: relative;
+        z-index: 2;
+        background-image: url('@Url.Content("~/assets/images/imgDropDownBrown.png")');
+        background-repeat: no-repeat;
+        background-size: 18px 18px; /* ↓ decreased size */
+        background-position: right 8px center; /* keeps it aligned nicely */
+    }
+
+        .country-code-dropdown:focus {
+            outline: none;
+        }
+
+    .mobile-input {
+        border: none;
+        flex: 1;
+        font-size: 16px;
+        color: #3E4046 !important;
+        padding: 4px 0;
+        background-color: transparent;
+    }
+
+        .mobile-input::placeholder {
+            color: #999;
+        }
+
+        .mobile-input:focus {
+            outline: none;
+        }
+
+    .country-code-dropdown::-ms-expand {
+        display: none;
+    }
+
+    .country-code-dropdown::after {
+        content: "\F282";
+        position: absolute;
+        right: 10px;
+        width: 12px;
+        height: 12px;
+        background-image: url('@Url.Content("~/assets/images/imgDropDownBrown.png")');
+        background-size: 12px 12px;
+        background-repeat: no-repeat;
+        background-size: contain;
+        pointer-events: none;
+    }
+
+    .country-code-dropdown::before {
+        margin-left: 3px;
+    }
+
+    option {
+        color: rgba(0, 0, 0, 0.87);
+    }
+    .c-radio span {
+        width: 24px !important;
+        height: 24px !important;
+        bottom: 2px !important;
+    }
+
+    .c-radio input[type=radio]:checked + span {
+        border-color: #92722A !important;
+        width: 24px;
+        height: 24px;
+        bottom: 2px;
+    }
+
+    .c-checkbox input[type=radio]:checked + span:before, .c-radio input[type=radio]:checked + span:before {
+        color: #92722A !important;
+            padding: 2px;
+    }
+
+    .c-radio:hover span {
+        border-color: #92722A !important;
+    }
+
+    /* ----------- Select dropdown css -------------*/
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+        .select2-container .select2-selection--single {
+            border-radius: 8px;
+            align-items: center;
+            box-sizing: border-box;
+            justify-content: center;
+            height: 40px !important;
+            border: 1px solid #E2E8F0 !IMPORTANT;
+           
+            color: #3E4046 !important;
+        }
+
+    .selection {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #3E4046 !important;
+        font-size: 14px;
+        font-family: inherit;
+        padding: 5px 10px;
+    }
+
+
+    /* Remove default arrow */
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border: none !important; /* removes default triangle */
+    }
+
+    /* Add your custom arrow */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+       // background: url('@Url.Content("~/assets/images/dropDown-icon-brown.svg")'); /*previously used*/
+        //background: url('@Url.Content("~/assets/images/imgDropDownBrown.png")');
+        background: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M27.0613 13.0612L17.0613 23.0612C16.9219 23.2011 16.7563 23.312 16.574 23.3877C16.3917 23.4634 16.1962 23.5024 15.9988 23.5024C15.8013 23.5024 15.6059 23.4634 15.4235 23.3877C15.2412 23.312 15.0756 23.2011 14.9363 23.0612L4.93626 13.0612C4.65446 12.7794 4.49615 12.3972 4.49615 11.9987C4.49615 11.6002 4.65446 11.218 4.93626 10.9362C5.21805 10.6544 5.60024 10.4961 5.99876 10.4961C6.39727 10.4961 6.77946 10.6544 7.06126 10.9362L16 19.875L24.9388 10.935C25.2205 10.6532 25.6027 10.4949 26.0013 10.4949C26.3998 10.4949 26.782 10.6532 27.0638 10.935C27.3455 11.2168 27.5039 11.599 27.5039 11.9975C27.5039 12.396 27.3455 12.7782 27.0638 13.06L27.0613 13.0612Z' fill='%2392722A'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-size: 16px 16px;
+        width: 19px;
+        top: 11px;
+        vertical-align: middle;
+        height: 100%;
+    }
+
+    .select2-search__field {
+        display: none !important;
+    }
+
+    // .select2-search select2-search--dropdown {
+        // display: none !important;
+        //
+    }
+
+    .select2-container .select2-dropdown.select2-dropdown--below {
+        top: -5px !important;
+        border-radius: 8px !important;
+        border: 1px solid #C3C6CB;
+        box-shadow: 0px 1px 2px 0px #0000001A;
+    }
+
+    .select2-container .select2-search.select2-search--dropdown {
+        padding: 0 !important;
+    }
+
+    
+    /*---------------------------------------------------------------------*/
+
+
+    .select2-results__options{
+        border-radius:8px !important;
+    }
+
+    /* ----------- Select dropdown css -------------*/
+
+    /* Selection box */
+    .country-code-dropdown + .select2-container--default .select2-selection--single {
+        border: none;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        padding: 6px 10px;
+        position: relative;
+        padding-left: 0px;
+        top: 0px;
+        font-size: 14px;
+        font-weight: 500;
+        height: 28px !important;
+        box-shadow: none !important;
+        color: #92722A !important;
+        border: none !important;
+    }
+
+    #countryCode + .select2-container {
+        width: unset !important;
+    }
+
+    /* Rendered text */
+    .country-code-dropdown + .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #92722A !important;
+        padding-left: 0;
+        padding-right: 34px;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    /* Remove default arrow */
+    .country-code-dropdown + .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border: none !important;
+    }
+
+    /* Custom arrow */
+    .country-code-dropdown + .select2-container--default .select2-selection--single .select2-selection__arrow {
+        // background: url('@Url.Content("~/assets/images/imgDropDownBrown.png")') no-repeat center; /*previously used*/
+
+        background: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M27.0613 13.0612L17.0613 23.0612C16.9219 23.2011 16.7563 23.312 16.574 23.3877C16.3917 23.4634 16.1962 23.5024 15.9988 23.5024C15.8013 23.5024 15.6059 23.4634 15.4235 23.3877C15.2412 23.312 15.0756 23.2011 14.9363 23.0612L4.93626 13.0612C4.65446 12.7794 4.49615 12.3972 4.49615 11.9987C4.49615 11.6002 4.65446 11.218 4.93626 10.9362C5.21805 10.6544 5.60024 10.4961 5.99876 10.4961C6.39727 10.4961 6.77946 10.6544 7.06126 10.9362L16 19.875L24.9388 10.935C25.2205 10.6532 25.6027 10.4949 26.0013 10.4949C26.3998 10.4949 26.782 10.6532 27.0638 10.935C27.3455 11.2168 27.5039 11.599 27.5039 11.9975C27.5039 12.396 27.3455 12.7782 27.0638 13.06L27.0613 13.0612Z' fill='%2392722A'/%3E%3C/svg%3E");
+        background-size: 18px 18px;
+        width: 18px;
+        height: 18px;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    /* Hide search box inside dropdown */
+    .country-code-dropdown + .select2-container .select2-search__field {
+        display: none !important;
+    }
+
+    /* Dropdown menu */
+    .country-code-dropdown + .select2-container .select2-dropdown {
+        border-radius: 8px !important;
+        border: 1px solid #C3C6CB;
+        box-shadow: 0px 1px 2px 0px #0000001A;
+    }
+
+    #countryCode + .select2-container .select2-results {
+        border-radius: 8px !important;
+        border: 1px solid #C3C6CB;
+        box-shadow: 0px 1px 2px 0px #0000001A;
+    }
+
+   
+
+    #select2-countryCode-results{
+        border-radius: 8px !important;
+       
+    }
+
+   
+
+
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<label class="form-label sub-label">Add User</label>
+<div class="row" id="spacingCss">
+
+    <div class="col-md-12 plr">
+        <div class="card-custom">
+            <div class="card-body">
+                <form asp-action="Save">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <div class="form-group col-md-6" style="float:left;">
+
+                            <div class="form-group">
+                                <label asp-for="FullName" class="col-form-label s3"></label>
+                                <input asp-for="FullName" class="form-control local_input_cls" />
+                                <span asp-validation-for="FullName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="MailId" class="col-form-label s3"></label>
+                                <input asp-for="MailId" class="form-control local_input_cls" />
+                                <span asp-validation-for="MailId" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="RoleId" class="col-form-label s3"></label>
+                                <select asp-for="RoleId" class="form-control select2"
+                                        asp-items="@Model.Roles"></select>
+                                <span asp-validation-for="RoleId" class="text-danger"></span>
+                            </div>
+                            @* <div class="form-group">
+                                <label asp-for="gender" class="col-form-label s3"></label>
+                                <div class="form-control" style="border:none">
+                                    <label class="c-radio">
+                                        <input id="gender" name="gender" type="radio" value="1" checked="checked" />
+                                        <span class="fa fa-mars"></span> Male
+                                    </label>
+                                    <label class="c-radio">
+                                        <input id="gender" name="gender" type="radio" value="0" />
+                                        <span class="fa fa-venus"></span> Female
+                                    </label>
+                                    <span asp-validation-for="gender" class="text-danger"></span>
+                                </div>
+                            </div> *@
+                        </div>
+
+                            <div class="form-group col-md-6" style="float:left;">
+                            @* <div class="form-group">
+                                <label asp-for="MobileNo" class="col-form-label s3"></label>
+                                <div class="input-box">
+                                    <span class="prefix">+91</span>
+                                    <input asp-for="MobileNo" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" class="form-control" />
+                                </div>
+                                <span asp-validation-for="MobileNo" class="text-danger"></span>
+                            </div> *@
+
+                            <div class="form-group">
+                                <label asp-for="MobileNo" class="col-form-label s3">Mobile number</label>
+                                <div class="styled-input-group">
+                                    <select id="countryCode" class="country-code-dropdown select2">
+                                        <option value="+971">&nbsp;&nbsp;+971</option>
+                                    </select>
+                                    <input asp-for="MobileNo" type="text" class="mobile-input" maxlength="9"
+                                           oninput="this.value = this.value.replace(/[^0-9]/g, '')" tabindex="2" />
+                                </div>
+                                <span asp-validation-for="MobileNo" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="gender" class="col-form-label s3"></label>
+                                <div class="form-control" style="margin-left: -10px;border: none !important; box-shadow: none !important;">
+                                    <label class="c-radio col-form-label" style="display:inline-block">
+                                        <input id="gender" name="gender" type="radio" value="1" checked="checked" />
+                                        <span class="fa fa-mars"></span> Male
+                                    </label>
+                                    <label class="c-radio col-form-label" style="display:inline-block">
+                                        <input id="gender" name="gender" type="radio" value="0" />
+                                        <span class="fa fa-venus"></span> Female
+                                    </label>
+                                    <span asp-validation-for="gender" class="text-danger"></span>
+                                </div>
+                            </div>
+                            
+                            
+                           
+                        </div>
+                        </div>
+                    </div>
+
+                    <div style="padding-right: 10px">
+                        <div style="padding-right: 10px">
+                            <div style="float: left;margin-top: 4px;padding-left: 22px;">
+                                <b>NOTE: </b>(*) Mark fields are mandatory.
+                            </div>
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="List" class="btn btn-other">
+                                Cancel
+                            </a>
+                            &nbsp; &nbsp;&nbsp;
+
+                            @*  <a asp-action="List" class="btn btn-danger uaeid-secondary">
+                                Cancel
+                            </a> *@
+                           
+                            <button class="btn btn-primary uaeid-primary" type="submit">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+
+    .input-box {
+        display: flex;
+        align-items: center;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding-left: 0.5rem;
+        overflow: hidden;
+        font-family: sans-serif;
+    }
+
+        .input-box .prefix {
+            font-weight: 300;
+            font-size: 14px;
+            color: #999;
+        }
+
+        .input-box input {
+            flex-grow: 1;
+            font-size: 14px;
+            background: #fff;
+            border: none;
+            outline: none;
+            padding: 0.5rem;
+        }
+
+        .input-box:focus-within {
+            border-color: #777;
+        }
+
+    .c-checkbox,
+    .c-radio {
+        margin-right: 4px;
+    }
+
+        .c-checkbox *,
+        .c-radio * {
+            cursor: pointer;
+        }
+
+        .c-checkbox input,
+        .c-radio input {
+            opacity: 0;
+            position: absolute;
+            margin-left: 0 !important;
+        }
+
+        .c-checkbox span,
+        .c-radio span {
+            position: relative;
+            display: inline-block;
+            vertical-align: top;
+            width: 20px;
+            height: 20px;
+            border-radius: 2px;
+            border: 1px solid #ccc;
+            margin-right: 5px;
+            text-align: center;
+        }
+
+            .c-checkbox span:before,
+            .c-radio span:before {
+                margin-left: 1px;
+            }
+
+        .c-checkbox:hover span,
+        .c-radio:hover span {
+            border-color: #5d9cec;
+        }
+
+    .form-inline .c-checkbox span, .form-inline
+    .c-radio span {
+        margin-left: 0;
+    }
+
+    .c-checkbox.c-checkbox-rounded span, .c-checkbox.c-radio-rounded span,
+    .c-radio.c-checkbox-rounded span,
+    .c-radio.c-radio-rounded span {
+        border-radius: 500px;
+    }
+
+    /* override for radio */
+    .c-radio span {
+        border-radius: 500px;
+    }
+
+        /* the icon */
+        .c-checkbox span:before,
+        .c-radio span:before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0;
+            text-align: center !important;
+            font-size: 12px;
+            line-height: 18px;
+            vertical-align: middle;
+        }
+
+    /* Checked state */
+    .c-checkbox,
+    .c-radio {
+        /* override for radio */
+        /* Disable state */
+        /* override for radio */
+    }
+
+        .c-checkbox input[type=checkbox]:checked + span:before,
+        .c-checkbox input[type=radio]:checked + span:before,
+        .c-radio input[type=checkbox]:checked + span:before,
+        .c-radio input[type=radio]:checked + span:before {
+            color: #fff;
+            opacity: 1;
+            transition: color .3s ease-out;
+        }
+
+        .c-checkbox input[type=checkbox]:checked + span,
+        .c-checkbox input[type=radio]:checked + span,
+        .c-radio input[type=checkbox]:checked + span,
+        .c-radio input[type=radio]:checked + span {
+            border-color: #5d9cec;
+            background-color: #5d9cec;
+        }
+
+        .c-checkbox input[type=radio]:checked + span,
+        .c-radio input[type=radio]:checked + span {
+            background-color: #fff;
+        }
+
+            .c-checkbox input[type=radio]:checked + span:before,
+            .c-radio input[type=radio]:checked + span:before {
+                color: #5d9cec;
+            }
+
+        .c-checkbox input[type=checkbox]:disabled + span,
+        .c-checkbox input[type=radio]:disabled + span,
+        .c-radio input[type=checkbox]:disabled + span,
+        .c-radio input[type=radio]:disabled + span {
+            border-color: #ddd !important;
+            background-color: #ddd !important;
+        }
+
+        .c-checkbox input[type=radio]:disabled + span,
+        .c-radio input[type=radio]:disabled + span {
+            background-color: #fff !important;
+        }
+
+            .c-checkbox input[type=radio]:disabled + span:before,
+            .c-radio input[type=radio]:disabled + span:before {
+                color: #ddd;
+            }
+
+        .c-radio.c-radio-nofont {
+            /* override for radio */
+            /* Disable state */
+            /* override for radio */
+        }
+
+            .c-radio.c-radio-nofont span:before {
+                content: "";
+                width: 10px;
+                height: 10px;
+                top: 50%;
+                left: 50%;
+                margin-top: -5px;
+                margin-left: -5px;
+                border-radius: 500px;
+            }
+
+            .c-radio.c-radio-nofont input[type=radio]:checked + span:before {
+                color: #fff;
+                opacity: 1;
+                transition: color .3s ease-out;
+            }
+
+            .c-radio.c-radio-nofont input[type=radio]:checked + span {
+                border-color: #5d9cec;
+                background-color: #5d9cec;
+            }
+
+            .c-radio.c-radio-nofont input[type=radio]:checked + span {
+                background-color: #fff;
+            }
+
+                .c-radio.c-radio-nofont input[type=radio]:checked + span:before {
+                    background-color: #5d9cec;
+                }
+
+            .c-radio.c-radio-nofont input[type=radio]:disabled + span {
+                border-color: #ddd !important;
+                background-color: #ddd !important;
+            }
+
+            .c-radio.c-radio-nofont input[type=radio]:disabled + span {
+                background-color: #fff !important;
+            }
+
+                .c-radio.c-radio-nofont input[type=radio]:disabled + span:before {
+                    background-color: #ddd;
+                }
+</style>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+@section Scripts {
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src='~/lib/select2/dist/js/select2.min.js' type='text/javascript'></script>
+
+
+    <script>
+
+        $(document).ready(function () {
+            document.getElementById("navigationNetworkOverlay").style.display = "none";
+
+            $("#Administration > a")
+                .attr("aria-expanded", "true")
+                .addClass("active");
+
+            $("#Administration")
+                .addClass("submenu-active show");
+
+            $("#Administration .submenu")
+                .addClass("show");
+
+            $('#Users').addClass('active');
+
+            if ($('#sidebar ul li.dropdown.active')) {
+                $('#sidebar ul li.dropdown.active ul').addClass('show');
+                $('#eSeal').addClass('active');
+                $('#sidebar ul li.dropdown.active a.nav-link.drop-logo').attr('aria-expanded', 'true');
+            }
+            /*For Beadcrum Start*/
+            $('#homeMenu').removeClass('breadcrumb-item');
+            $('#homeMenu').addClass('breadcrumb-item').append('Users > Add');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#networkOverlay').hide();
+            $('.select2').select2();
+             $('#countryCode').select2();
+                    //For Horizontal Menu highlight
+        const parentNavItem = document.querySelector(`[data-section="Admin"] .nav-link`);
+        if (parentNavItem) {
+            parentNavItem.classList.add("active");
+        }
+            var today = new Date();
+
+            $('#Dob').datepicker({
+                dateFormat: "yy-mm-dd",
+                yearRange: "-100:+0",
+                changeMonth: true,
+                changeYear: true,
+                maxDate: new Date(today.getFullYear(), today.getMonth(), today.getDate())
+            });
+
+            //$('#Password, #ConfPassword').on('keyup', function () {
+            //    if ($('#Password').val() == $('#ConfPassword').val()) {
+            //        $('#message').html('Matching').css('color', 'green');
+            //    } else
+            //        $('#message').html('Not Matching').css('color', 'red');
+            //});
+        });
+    </script>
+
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+}
+

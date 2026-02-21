@@ -1,0 +1,178 @@
+﻿@using EnterpriseGatewayPortal.Web.Models
+@model EnterpriseGatewayPortal.Web.ViewModel.KycApplications.KycApplicationNewViewModel
+
+@{
+    ViewData["Title"] = "Services Edit";
+}
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+    {
+        new BreadCrumbModel { Title = "Api Keys",Url = Url.Action("Index","KycApplications"),IconKey = "business-applications"},
+        new BreadCrumbModel { Title = "Create" , Url = "",IconKey = "edit"}
+    };
+}
+<style>
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+        .select2-container .select2-selection--single {
+            height: 35px !important;
+        }
+
+    .selection {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #555555b3;
+        font-size: 14px;
+        font-family: inherit;
+    }
+
+    .custom-check-box {
+        margin-right: 5px;
+        -webkit-print-color-adjust: exact;
+        vertical-align: top;
+        background-repeat: no-repeat;
+        background-position: 50%;
+        background-size: contain;
+        position: relative !important;
+        width: 1.125rem;
+        height: 1.125rem;
+        background-color: #fff;
+        border: .125rem solid rgba(0,0,0,0.3);
+    }
+
+
+
+    .classshide {
+        display: none !important;
+    }
+</style>
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<label class="form-label sub-label">Edit Api Keys</label>
+<div class="row" id="spacingCss">
+
+    <div class="col-md-12 plr">
+        <div class="card-custom">
+            <div class="card-body">
+
+                <form id="uform" enctype="multipart/form-data" asp-action="Update">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-row">
+                        <div class="col-md-12 form-group">
+                            <div class="form-group col-md-6" style="float:left;">
+                                <div class="form-group" hidden>
+                                    <input asp-for="Id" class="form-control" value=@Model.Id />
+                                </div>
+
+                                @*<div class="form-group">
+                                        <label asp-for="OrganizationId" class="col-form-label s3"></label>
+                                        <select asp-for="OrganizationId" class="form-control"
+                                        asp-items="Model.OrganizatioList">
+                                        <option value="">-- Select Organization --</option>
+                                        </select>
+                                        <span asp-validation-for="OrganizationId" class="text-danger"></span>
+                                    </div>*@
+                                <div class="form-group">
+                                    <label asp-for="OrgName" class="col-form-label"></label>
+                                    <input asp-for="OrgName" class="form-control" readonly />
+                                    <span asp-validation-for="OrgName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="ApplicationName" class="col-form-label"></label>
+                                    <input asp-for="ApplicationName" class="form-control" />
+                                    <span asp-validation-for="ApplicationName" class="text-danger"></span>
+                                </div>
+
+
+
+                            </div>
+                            <div class="form-group col-md-6" style="float:right;">
+                                <div class="form-group">
+                                    <label asp-for="ClientId" class="col-form-label"></label>
+                                    <input asp-for="ClientId" class="form-control" readonly />
+                                    <span asp-validation-for="ClientId" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="ClientSecret" class="col-form-label"></label>
+                                    <textarea asp-for="ClientSecret" class="form-control" readonly></textarea>
+                                    <span asp-validation-for="ClientSecret" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div style="padding-right: 10px;padding-left:20px;" class="d-flex justify-content-between flex-row">
+                        <div style="float: left; margin-top: 10px;">
+                            <b>NOTE: </b>(*) Mark fields are mandatory.
+                        </div>
+                        <div class="d-flex">
+                            <div class="d-flex justify-content-end">
+
+                                <a asp-action="Index" class="btn btn-other">
+                                    Cancel
+                                </a>
+                                &nbsp;&nbsp;
+                                <button class="btn btn-primary uaeid-primary" type="submit">
+                                    Update
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        var operationName = "";
+        var operationUrl = "";
+        $(document).ready(function () {
+
+            $("#IdValidation > a")
+                .attr("aria-expanded", "true")
+                .addClass("active");
+
+            $("#IdValidation")
+                .addClass("submenu-active show");
+
+            $("#IdValidation .submenu")
+                .addClass("show");
+
+            $("#Kyc-Applications").addClass("active");
+
+            //  document.getElementById("navigationNetworkOverlay").style.display = "none";
+            // var KycAppLink = document.getElementById('KYCModle').querySelector('.nav-link');
+            // KycAppLink.click();
+            // $('#KycApplicationMenu').addClass('active');
+            /*For Beadcrum Start*/
+            $('#homeMenu').addClass('breadcrumb-item').append('KYC Application > Edit');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#networkOverlay').hide();
+            document.getElementById("navigationNetworkOverlay").style.display = "none";
+
+           
+        });
+
+       
+    </script>
+}
+

@@ -1,0 +1,829 @@
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@inject IHttpContextAccessor httpContextAccessor
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    var theme = httpContextAccessor.HttpContext.Request.Cookies["theme"];
+
+    var presentLayout = Context.Request.Cookies["NavigationLayout"];
+
+    var adminUserExist = User.FindFirst("AdminUserExist")?.Value?.ToLower() == "true";
+    var businessUserExist = User.FindFirst("UserExist")?.Value?.ToLower() == "true";
+}
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <noscript>Please enable java script in your browser.</noscript>
+    <title>@ViewData["Title"] Enterprise Gateway</title>
+    @* <link rel="icon" type="image/x-icon" href="~/assets/favicon.ico" asp-append-version="true" /> *@
+    <link rel="icon" type="image/x-icon" href="~/assets/UAEIDfavicon.png" asp-append-version="true" />
+    @* <link rel="icon" type="image/x-icon" href="~/assets/images/MyTrustNewPNG.png" asp-append-version="true" /> *@
+
+    <!-- Global stylesheets -->
+    <link href="~/assets/css/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    @*<link href="~/assets/css/icomoon/styles.min.css" rel="stylesheet" type="text/css" asp-append-version="true"/>*@
+    <link href="~/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <link href="~/assets/appcss/customAppStyles.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <link href="~/assets/appcss/appStyles.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+
+    <!--Poppins-->
+    @*<link href="~/assets/css/poppins.min.css" rel="stylesheet" type="text/css" asp-append-version="true"/>*@
+    <link href="~/lib/sweetalert/dist/sweetalert.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <script src="~/assets/js/sweetalert2@11.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link href="~/lib/phosphor/regular/style.css" rel="stylesheet" />
+
+    <script>
+        Swal = Swal.mixin({
+            customClass: {
+                popup: 'custom-swal-popup',
+                title: 'custom-swal-title',
+                htmlContainer: 'custom-swal-content',
+                confirmButton: 'custom-swal-confirm-btn',
+                cancelButton: 'custom-swal-cancel-btn'
+            },
+            buttonsStyling: false
+        });
+
+        const originalSwalFire = Swal.fire;
+
+        Swal.fire = function (options) {
+            if (typeof options === "string") {
+                options = { title: options };
+            }
+
+            const type = options.icon || options.type || "info";
+            let iconHtml = "";
+
+            switch (type) {
+                case "info":
+                    iconHtml = '<img src="@Url.Content("~/assets/images/Info.svg")" class="custom-swal-icon">';
+                    break;
+                case "warning":
+                    iconHtml = '<img src="@Url.Content("~/assets/images/Warning.svg")" class="custom-swal-icon">';
+                    break;
+                case "error":
+                    iconHtml = '<img src="@Url.Content("~/assets/images/Error.svg")" class="custom-swal-icon">';
+                    break;
+                case "success":
+                    iconHtml = '<img src="@Url.Content("~/assets/images/Success.svg")" class="custom-swal-icon">';
+                    break;
+                default:
+                    iconHtml = "";
+            }
+
+            options.iconHtml = iconHtml;
+            options.icon = undefined;
+
+            return originalSwalFire.call(this, options);
+        };
+    </script>
+
+    <!--Inter Font-->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
+    <!-- data tables -->
+    <link href="~/assets/plugins/datatables/plugins/bootstrap/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <link href='~/lib/select2/dist/css/select2.min.css' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="~/assets/externalCss/uaeid.css" type="text/css" asp-append-version="true" />
+
+    @* <link rel="stylesheet" href="~/assets/externalCss/yellow.css" type="text/css" asp-append-version="true" />*@
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .layout-container {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            flex-shrink: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #f8f9fa;
+            overflow-y: auto;
+            transition: width 0.3s ease;
+            z-index: 1001;
+        }
+
+            .sidebar.collapsed {
+                width: 70px;
+            }
+
+        /* Right side = header + breadcrumb + main content */
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .main-header {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            z-index: 1003;
+            border-bottom: 1px solid #eee;
+            flex-shrink: 0;
+        }
+
+        .breadcrumb-bar {
+            height: 40px;
+            background: #fafafa;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 1002;
+        }
+
+        .main-content-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+
+        .breadcrumb-wrapper {
+            margin-top: 0px !important;
+            padding: 10px 28px !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="overlay">
+        <div class="cv-spinner">
+            <span class="spinner">
+
+            </span>
+        </div>
+    </div>
+    <div id="overlay1">
+        <div class="cv-spinner">
+            <span class="spinner">
+
+            </span>
+        </div>
+    </div>
+    <div id="overlay2">
+        <div class="cv-spinner">
+            <span class="spinner">
+
+            </span>
+        </div>
+    </div>
+    <div id="overlay6">
+        <div class="cv-spinner">
+            <span class="spinner">
+            </span>
+
+        </div>
+        <div class="loadertext" id="loadingText">Please check your UAEID Mobile Application for entering pin...</div>
+    </div>
+
+    <div id="networkOverlay" style="position: fixed; top: 0; z-index: 100000; width: 100%; height: 100%; background-color:rgba(0,0,0,0.3);">
+        <div class="cv-spinner">
+            <span class="spinner">
+
+            </span>
+        </div>
+    </div>
+
+    <div id="navigationNetworkOverlay" style="position: fixed; top: 0; z-index: 100000; width: 100%; height: 100%; background-color:rgba(0,0,0,0.3); display:none !important; ">
+        <div class="cv-spinner">
+            <span class="spinner">
+
+            </span>
+        </div>
+    </div>
+
+    <div class="layout-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            @* Sidebar partials *@
+            @if (adminUserExist && businessUserExist)
+            {
+                if (presentLayout == "BusinessUserLayout")
+                {
+                    <partial name="_TempSidebar" />
+                }
+                else
+                {
+                    <partial name="_TempSidebar" />
+                }
+            }
+            else if (adminUserExist)
+            {
+                <partial name="_TempSidebar" />
+            }
+            else if (businessUserExist)
+            {
+                <partial name="_TempSidebar" />
+            }
+            else
+            {
+                <partial name="_TempSidebar" />
+            }
+        </nav>
+
+        <!-- Main wrapper -->
+        <div class="main-wrapper">
+            <!-- Header -->
+            <header class="main-header">
+                <partial name="_Verticalheader" />
+            </header>
+
+            <!-- Breadcrumb (fixed under header) -->
+            @if (ViewBag.Breadcrumb != null)
+            {
+                <div class="breadcrumb-bar">
+                    <partial name="_Breadcrumb" model="ViewBag.Breadcrumb as List<BreadCrumbModel>"/>
+                </div>
+            }
+
+            <!-- Main content -->
+            <main role="main" class="main-content-area">
+                <div class="container-fluid h-100 plr pt p-3">
+                    <partial name="_Alert"/>
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <!-- SCRIPTS -->
+    <script src="~/global_assets/js/main/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/assets/js/popper.min.js" asp-append-version="true"></script>
+    <script src="~/assets/js/dasboardCardAnimate.js" asp-append-version="true"></script>
+
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>*@
+
+    <script src="~/assets/js/bootstrap3-typeahead.min.js" asp-append-version="true"></script>
+
+    @*<div id="modal-placeholder">*@
+    @await Html.PartialAsync("_ModalDialog")
+    @*</div>*@
+
+
+
+    <script src="~/assets/js/bootstrap.min.js" asp-append-version="true"></script>
+    @*<script src="~/assets/javascript/dropdown_collaspse.js" asp-append-version="true"></script>*@
+    <script src="~/assets/javascript/index.js" asp-append-version="true"></script>
+    <script src="~/assets/javascript/sidebar_jquery.js" asp-append-version="true"></script>
+    <script src='~/lib/select2/dist/js/select2.min.js' type='text/javascript'></script>
+
+    <!-- data tables -->
+    <script src="~/assets/plugins/datatables/jquery.dataTables.min.js" asp-append-version="true"></script>
+    <script src="~/assets/plugins/datatables/plugins/bootstrap/dataTables.bootstrap4.min.js" asp-append-version="true"></script>
+    @* <script src='~/WebViewer/lib/webviewer.min.js'></script> *@
+    <script src='~/WebViewer-8.12.3/lib/webviewer.min.js'></script>
+
+    <script type="text/javascript">
+        var webviwerInstance;
+        var isWebViewLoaded = false;
+        var isDeletingInitials = false;
+        var isDeletingAnnotationActive = false;
+        var initialsDelete = false;
+
+        $(document).ready(function () {
+
+            $('.theme-changer').on('click', "a", function () {
+                var item = $(this).attr('name');
+                $.post('@Url.Action("SetTheme", "Home")',
+                    {
+                        data: item
+                    })
+                    .done(function () {
+                        location.reload();
+                    });
+            });
+
+
+
+            var BasePath = '@Json.Serialize(@Configuration.GetSection("WebViwerBasePath").Value)';
+            //var BasePath = @Configuration.GetSection("WebViwerBasePath").Value
+
+            const viewerElement = document.getElementById('viewer');
+            WebViewer({
+                //licenseKey: "DigitalTrust Technologies Pvt Ltd(digitaltrusttech.com):OEM:Digital Signature Services Portal::B+:AMS(20220630):5CA5A97D0477080A7360B13AC982736160617FD5F900ED4BF50419D44A60189E528AB6F5C7",
+                licenseKey: "DigitalTrust Technologies Pvt Ltd:OEM:Digital Signature Services Portal::B+:AMS(20270629):3CA5587D04B7080AC360B13AC982536160617FD5F900ED4BF50419D44A60189E528AB6F5C7",
+
+                path: BasePath,
+                //initialDoc: 'https://pdftron.s3.amazonaws.com/downloads/pl/demo-annotated.pdf', // replace with your own PDF file
+                initialDoc: BasePath + '/Doc1.pdf', // replace with your own PDF file
+                preloadWorker: "All",
+                fullAPI: true,
+                disabledElements: [
+                    //viewControlsButton',
+                    //'viewControlsOverlay',
+                    'ribbons',
+                    'toggleNotesButton'
+                ]
+            }, viewerElement).then((instance) => {
+                //let pdfData = filedata; // Add the base64 data prefix
+                //instance.loadDocument(pdfData);
+                webviwerInstance = instance;
+                isWebViewLoaded = true;
+                webviwerInstance.disableElements(["toolbarGroup-Edit"]);
+                webviwerInstance.disableElements(["toolbarGroup-Insert"]);
+                webviwerInstance.setZoomLevel('60%');
+                webviwerInstance.disableElements([
+                    "downloadButton",
+                    "signatureModal",
+                    "zoomOverlayButton",
+                    //"header",
+                    //"toolsHeader",
+                ]);
+
+                const { docViewer, Annotations } = webviwerInstance;
+                const annotManager = docViewer.getAnnotationManager();
+
+                annotManager.on('annotationChanged', annotationChangedHandler);
+                // annotManager.on("annotationChanged", annotationChangedHandler().then(() => {
+                //    const { docViewer, Annotations } = webviwerInstance;
+                //    const annotManager = docViewer.getAnnotationManager();
+                //    isDeletingInitials = false
+                //    isDeletingAnnotationActive = false
+                //    annotManager.on('annotationChanged', annotationChangedHandler);
+                //}))
+
+            });
+
+
+
+
+
+            //var placeholderElement = $('#modal-placeholder');
+            //placeholderElement.on('click', '[data-submit="modal"]', function (event) {
+            //    event.preventDefault();
+
+            //    var form = $(this).parents('.modal').find('form');
+            //    var actionUrl = form.attr('action');
+            //    var dataToSend = form.serialize();
+
+            //   placeholderElement.find('.modal').modal('hide');
+            //    $.ajax({
+            //        type: "POST",
+            //        url: actionUrl,
+            //        data: dataToSend,
+            //        dataType: "json",
+            //        beforeSend: function () {
+            //            $('#overlay').show();
+            //        },
+            //        complete: function () {
+            //            $('#overlay').hide();
+            //        }
+            //    }).done(function (response) {
+            //        if (response.status == "Success") {
+            //            type = 'success';
+            //        }
+            //        else {
+            //            type = 'error';
+            //        }
+            //        swal({ type: type, title: response.title, text: response.message }, function (isConfirm) {
+            //            if (isConfirm) {
+            //                if (type == 'success') {
+            //                    if (response.organizationName)
+            //                    {
+            //                        getOrganizationDetails(response.organizationName);
+            //                    }
+            //                    else
+            //                    {
+            //                        window.location.reload();
+            //                    }
+            //                }
+            //            }
+            //        });
+            //    });
+            //});
+
+            $('input[type=text]:not([readonly]),input[type=url]:not([readonly]),input[type=tel]:not([readonly]),input[type=password]:not([readonly]),input[type=radio]:not([readonly]),textarea:not([readonly]),select:not([readonly]),input[type=email]:not([readonly]),input[type=number]:not([readonly])').each(function () {
+                var req = $(this).attr('data-val-required');
+                var exclude = $(this).attr('data-exclude');
+                if (undefined != req && undefined == exclude) {
+                    var label = $('label[for="' + $(this).attr('id') + '"]');
+                    var text = label.text();
+                    if (text.length > 0 && !text.includes("*")) {
+                        label.append(' <span style="color:#ff0000b3;">*</span>');
+                    }
+                }
+            });
+
+            $("input:text,form").attr("autocomplete", "off");
+
+            $(".datepicker").change(function () {
+                var errirdivId = "#" + this.id + "-error";
+                if ($(this).hasClass("input-validation-error") && $(this).val() != "") {
+                    $(this).removeClass("input-validation-error");
+                    $(errirdivId).text("");
+                    $(this).closest("span").addClass("field-validation-valid");
+                }
+            })
+        });
+
+        $(document).on('click', '#sidebar ul li', function () {
+            $('#sidebar ul li').removeClass('active');
+            $(this).addClass("active");
+        });
+
+        $(document).on('click', '#sidebar ul li ul li a', function () {
+            $('#sidebar ul li ul li a').removeClass('active');
+            $(this).addClass("active");
+        });
+
+        $("#sidebar ul li").on("click", function () {
+            $('#sidebar ul li ul li a').removeClass('active');
+        });
+
+        function ajaxErrorHandler(xhr, status, error) {
+            switch (xhr.status) {
+              case 400:
+                Swal.fire({
+                  icon: "error",
+                  title: "Error",
+                  text: "Cannot process your request"
+                });
+                break;
+
+              case 401:
+                Swal.fire({
+                  icon: "info",
+                  title: "Session Expired",
+                  text: "Click on 'Ok' button to login again!"
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("Index", "Login")';
+                  }
+                });
+                break;
+
+              case 403:
+                Swal.fire({
+                  icon: "error",
+                  title: "Forbidden",
+                  text: "You do not have access to this resource"
+                });
+                break;
+
+              case 404:
+                Swal.fire({
+                  icon: "error",
+                  title: "Not Found",
+                  text: "The resource you requested could not be found"
+                });
+                break;
+
+              case 408:
+                Swal.fire({
+                  icon: "error",
+                  title: "Timeout",
+                  text: "The request timed out"
+                });
+                break;
+
+              case 500:
+                Swal.fire({
+                  icon: "error",
+                  title: "Server Error",
+                  text: "Something went wrong, please try again later"
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    // You can reload or handle accordingly
+                    // window.location.reload();
+                  }
+                });
+                break;
+
+              case 502:
+                Swal.fire({
+                  icon: "error",
+                  title: "Bad Gateway",
+                  text: "Invalid response"
+                });
+                break;
+
+              case 503:
+                Swal.fire({
+                  icon: "error",
+                  title: "Service Unavailable",
+                  text: "The service is currently unavailable, please try again later"
+                });
+                break;
+
+              case 504:
+                Swal.fire({
+                  icon: "error",
+                  title: "Gateway Timeout",
+                  text: "Gateway timeout error occurred"
+                });
+                break;
+
+              default:
+                const errors = [
+                  "Bad Request",
+                  "Bad Gateway",
+                  "Not Found",
+                  "Internal Server Error",
+                  "Forbidden",
+                  "Unauthorized",
+                  "Service Unavailable"
+                ];
+
+                if (xhr.readyState === 0 && xhr.status === 0 && xhr.responseJSON === undefined) {
+                  if (!errors.includes(error)) {
+                    if (window.navigator.onLine) {
+                      if (!error) {
+                        error = "Something went wrong, please try later";
+                      }
+                      Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: error
+                      });
+                    } else {
+                      Swal.fire({
+                        icon: "info",
+                        title: "No Internet",
+                        text: "Check your network connection!"
+                      }).then((result) => {
+                        if (result.isConfirmed) {
+                          window.location.reload();
+                        }
+                      });
+                    }
+                  } else {
+                    Swal.fire({
+                      icon: "error",
+                      title: "Error",
+                      text: "Something went wrong, please try later"
+                    });
+                  }
+                }
+                break;
+            }
+
+
+        }
+        //function getblob(file, fileName) {
+        //    return new Promise((resolve, reject) => {
+        //        var reader = new FileReader();
+        //        reader.onload = function () {
+        //            // console.log(reader.result);
+        //            // document.getElementById("display").src = reader.result;
+        //            // image editing
+        //            // ...
+        //            var blob = window.dataURLtoBlob(reader.result);
+        //            console.log(blob, new File([blob], fileName, {
+        //                type: "application/pdf"
+        //            }));
+        //            resolve(blob);
+        //        };
+        //        reader.onerror = error => reject(error);
+        //        reader.readAsDataURL(file);
+
+        //    });
+        //}
+
+        function getblob(file, fileName) {
+            return new Promise((resolve, reject) => {
+                var reader = new FileReader();
+
+                reader.onload = function () {
+                    // No need to convert to data URL for PDF files, just create a Blob
+                    var blob = new Blob([reader.result], { type: "application/pdf" });
+
+                    // Create a new File from the Blob
+                    var newFile = new File([blob], fileName, {
+                        type: "application/pdf",
+                    });
+
+                    resolve(newFile);
+                };
+
+                reader.onerror = (error) => reject(error);
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        const annotationChangedHandler = async (annotations, action) => {
+
+            const { docViewer, Annotations } = webviwerInstance;
+            const annotManager = docViewer.getAnnotationManager();
+            const doc = docViewer.getDocument();
+            const totalPages = doc.getPageCount();
+
+            try {
+
+                if (action === 'modify') {
+                    const doc = docViewer.getDocument();
+                    const totalPages = doc.getPageCount();
+
+                    annotations.forEach(async (annotation) => {
+                        if (annotation.getCustomData("type") === "INITIAL") {
+
+
+                            Swal.fire({
+                                icon: 'info',
+                                title: "Message",
+                                text: "Do you want to modify the initial annotation at the same location on every page where it is present?",
+                                showCancelButton: true,
+                                confirmButtonText: 'Yes',
+                                cancelButtonText: 'No',
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    const name = annotation.custom?.name;
+                                    const pageNumber = annotation.PageNumber;
+                                    const modifiedX = annotation.X;
+                                    const modifiedY = annotation.Y;
+                                    const modifiedWidth = annotation.Width;
+                                    const modifiedHeight = annotation.Height;
+                                    const rotation = annotation.Rotation;
+
+                                    for (let i = 1; i <= totalPages; i++) {
+                                        if (i !== pageNumber) {
+                                            const pageAnnotations = annotManager.getAnnotationsList().filter(
+                                                annot => annot.PageNumber === i
+                                                    && annot.getCustomData("type") === "INITIAL"
+                                                    && annot.custom?.name === name
+                                            );
+
+                                            pageAnnotations.forEach(annot => {
+                                                annot.X = modifiedX;
+                                                annot.Y = modifiedY;
+                                                annot.Width = modifiedWidth;
+                                                annot.Height = modifiedHeight;
+                                                annot.Rotation = rotation;
+                                                annotManager.redrawAnnotation(annot);
+                                            });
+                                        }
+                                    }
+                                }
+                            });
+
+                        }
+                    });
+                }
+
+                else if (action === 'delete') {
+
+                    // annotManager.off('annotationChanged', annotationChangedHandler);
+                    if (isDeletingAnnotationActive) {
+                        // Skip handling if deletion process is active
+                        return;
+                    }
+
+                    if (initialsDelete) {
+                        return;
+                    }
+
+                    annotations.forEach(async (annotation) => {
+
+                        var initialBtnId = document.getElementById('initialButton');
+
+                        // if (annotation.getCustomData("type") === "SIGNATURE" && initialBtnId != null) {
+
+                        //     var annotList = [];
+                        //     for (let i = 0; i < totalPages; i++) {
+                        //         const signature_annotations = annotManager.getAnnotationsList().filter(annot => ((annot.PageNumber === (i + 1)) && (annot.getCustomData("type") === "SIGNATURE") && (annot.custom?.name === `${"SIGNATURE"}_${PerpareDocumentContext.selectuser}_`)));
+
+                        //         if (signature_annotations.length > 0) {
+                        //             annotList.push(signature_annotations);
+
+                        //         }
+
+                        //     }
+
+                        //     if (annotList.length > 0) {
+                        //         // initialBtnId.disabled = false;
+                        //         $("#Initial").removeClass("classshide");
+                        //     }
+                        //     else {
+                        //         //initialBtnId.disabled = true;
+                        //         $("#Initial").addClass("classshide");
+                        //     }
+
+                        // }
+
+                        var annotList = [];
+                        var annotListEseal = [];
+
+                        for (let i = 0; i < totalPages; i++) {
+                            const signature_annotations = annotManager.getAnnotationsList().filter(annot => ((annot.PageNumber === (i + 1)) && (annot.getCustomData("type") === "SIGNATURE") && (annot.custom?.name === `${"SIGNATURE"}_${PerpareDocumentContext.selectuser}_`)));
+
+                            if (signature_annotations.length > 0) {
+                                annotList.push(signature_annotations);
+
+                            }
+
+                        }
+
+                        for (let i = 0; i < totalPages; i++) {
+                            const eseal_annotations = annotManager.getAnnotationsList().filter(annot => ((annot.PageNumber === (i + 1)) && (annot.getCustomData("type") === "ESEAL") && (annot.custom?.name === `${"ESEAL"}_${PerpareDocumentContext.selectuser}_`)));
+
+                            if (eseal_annotations.length > 0) {
+                                annotListEseal.push(eseal_annotations);
+
+                            }
+
+                        }
+
+
+                        if ((annotation.getCustomData("type") === "ESEAL" || annotation.getCustomData("type") === "SIGNATURE") && initialBtnId != null) {
+
+                            var initialReq = document.getElementById('InitialRequired');
+
+                            if(initialReq.checked)
+                            {
+                                if (annotList.length > 0 || annotListEseal.length > 0) {
+                                    initialBtnId.disabled = false;
+                                   // $("#Initial").removeClass("classshide");
+
+                                }
+                                else {
+                                    initialBtnId.disabled = true;
+                                   // $("#Initial").addClass("classshide");
+
+                                }
+                            }
+                        }
+
+                        if (annotation.getCustomData("type") === "INITIAL") {
+                            if (!isDeletingInitials) {
+                                isDeletingInitials = true;
+
+
+
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: "Message",
+                                    text: "Do you want to delete initials on every page at the same location?",
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Yes',
+                                    cancelButtonText: 'No',
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        isDeletingAnnotationActive = true;
+                                        const name = annotation.custom?.name;
+                                        const doc = docViewer.getDocument();
+                                        const totalPages = doc.getPageCount();
+
+                                        for (let i = 1; i <= totalPages; i++) {
+                                            if (i !== annotation.PageNumber) { // Skip the current page
+                                                const pageAnnotations = annotManager.getAnnotationsList().filter(
+                                                    annot => annot.PageNumber === i
+                                                        && annot.getCustomData("type") === "INITIAL"
+                                                        && annot.custom?.name === name
+                                                );
+                                                pageAnnotations.forEach(annot => {
+                                                    annotManager.deleteAnnotation(annot, true);
+                                                });
+                                            }
+                                        }
+                                    } else {
+                                        isDeletingInitials = false;
+                                    }
+                                });
+
+
+                            }
+                        }
+                    });
+                }
+            }
+            finally {
+                // Reattach the event listener after operations are complete
+                isDeletingInitials = false
+                isDeletingAnnotationActive = false
+                //annotManager.on('annotationChanged', annotationChangedHandler);
+            }
+        }
+
+
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+

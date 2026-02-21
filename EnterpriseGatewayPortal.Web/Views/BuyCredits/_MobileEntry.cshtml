@@ -1,0 +1,192 @@
+﻿@using DocumentFormat.OpenXml.EMMA;
+@using Newtonsoft.Json;
+@model EnterpriseGatewayPortal.Web.ViewModel.BuyCredits.PaymentRequestViewModel
+
+<style>
+    .sweet-alertClass p {
+       font-size:15px;
+    }
+
+       /* .sweet-alertClass p:first-of-type::first-line {
+            color: red; 
+        }*/
+
+    .text-center {
+        margin-bottom: 10px;
+    }
+    .box-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    .box-container1 {
+        display: flex;
+        justify-content: center;
+    }
+    .box {
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 16px;
+        line-height: 22px;
+        padding: 10px 20px;
+        border: none;
+        width:25%;
+        border: 1px solid #007bff;
+        transition: background 200ms ease, border-color 200ms ease;
+    }
+
+        .box:focus {
+            outline: none; /* Remove focus outline */
+            border-color: #007bff; /* Border color on focus */
+        }
+ 
+    .box-svg {
+        /* border-radius: 50px; */
+        border-top-right-radius: 50px; 
+        border-bottom-right-radius: 50px;
+        background: #007bff;
+        text-decoration: none;
+        color: #fff !important;
+        font-size: 16px;
+        line-height: 22px;
+        padding: 10px 20px;
+        border: none;
+        
+        border: 1px solid #007bff;
+        transition: background 200ms ease, border-color 200ms ease;
+    }
+
+    .box-svg:focus {
+        outline: none; /* Remove focus outline */
+        border-color: #007bff; /* Border color on focus */
+    }
+
+        .placeholder:focus {
+            display: none;
+        }
+</style>
+
+@{
+    string paymentRequestsJson = JsonConvert.SerializeObject(Model.PaymentRequests);
+
+}
+
+<div class="row" id="spacingCss">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <!-- Added class "text-center" here -->
+                            <img src="~/assets/images/MobileSVG.svg" style="height: 82px;margin-bottom: 10px;" />
+                           
+                        </div>
+                        <div class="col-md-12 text-center">
+                            <!-- Added class "text-center" here -->
+                            <h2 style="font-weight: 500;color: black;">
+                                Mobile Number
+                            </h2>
+                        </div>
+                        <div class="col-md-12 text-center" style="justify-items:center;">
+                            <!-- Added class "text-center" here -->
+                            <p style="font-weight: 400;font-size: 20px;">Please Enter your Momo account mobile number</p>
+                        </div>
+
+                        <div class="col-md-12 text-center">
+                            <!-- Added class "text-center" here -->
+                          
+                            <div class="box-container">
+@*                                 <input type="text" placeholder="Enter Mobile Number..." class="form-control box" id="mobileNumber" asp-for="MobNumber">
+ *@                            <input type="text" placeholder="Enter Mobile Number..." class="form-control box" id="mobileNumber" asp-for="MobNumber"
+                                   pattern="\d{15}" minlength="15" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+
+                            </div>
+                        <div class="box-container1">
+                            
+                            <span id="MobNumSpan" class="text-danger" style="margin-right:75px;"></span>
+                        </div>
+                            <input type="hidden" id="PaymentRequests" name="PaymentRequests" value="@paymentRequestsJson" asp-for="PaymentRequests"  />
+
+                        </div>
+
+                    </div>
+                    <div class="d-flex justify-content-end" style="padding-top: 31px;">
+                       <button type="button" class="btn btn-primary btn-lg" onclick="ProccedPayment()">Proceed Checkout</button>                       
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+
+    $(document).ready(function () {
+
+        $('#networkOverlay').hide();
+
+    });
+    function ProccedPayment(){
+        
+        var paymentDetails = @Html.Raw(JsonConvert.SerializeObject(Model.PaymentRequests));
+        var validData = true;
+        var MobNum = $('#mobileNumber').val();
+
+        if (MobNum == null || MobNum.trim() === '') {
+            $('#MobNumSpan').text("Please Enter Mobile Number.").addClass("text-danger");
+            validData = false;
+        }
+        else {
+            $('#MobNumSpan').text("").addClass("text-danger");
+        }
+        if (!validData) {
+            return;
+        }
+
+        var viewModel=
+        { 
+            MobNumber: $('#mobileNumber').val(),
+            PaymentRequests: paymentDetails 
+        }
+      
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("Checkout", "BuyCredits")',
+            data: viewModel,
+            //contentType: "application/json",
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+                $('#overlay').hide();
+            },
+            success: function (data) {
+
+                if (data != null) {
+                    $('#modalDialogDiv').modal('hide');
+                    $('#organizationDiv').css('display', 'none');
+                    $('#paymentInitiateDiv').html(data);
+                }
+                else {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Error",
+                        text: response.message
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            paymentInfo = [];
+                        }
+                    });
+
+                }
+            },
+            error: function (response) {
+                Swal.fire({ icon: 'error', title: "Error", text: "Error sending data" });
+            }
+        });
+
+    }
+
+</script>
+                            

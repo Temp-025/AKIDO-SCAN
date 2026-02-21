@@ -1,0 +1,213 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.DocumentTemplates.DocumentTemplatesListViewModel
+@using EnterpriseGatewayPortal.Web.Models
+
+@inject IHttpContextAccessor httpContextAccessor
+
+@{
+    ViewData["Title"] = "Index";
+    var theme = httpContextAccessor.HttpContext.Request.Cookies["theme"];
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+     {
+         new BreadCrumbModel { Title = "Bulk - Signing - Templates" , Url = ""},
+     };
+}
+@{
+    var hasData = Model != null && Model.Documents != null && Model.Documents.Any();
+
+}
+<style>
+    .classshide {
+        display: none !important;
+    }
+
+
+</style>
+
+@if (Model == null || Model.Documents.Count() == 0)
+{
+    <style>
+        table {
+            height: 70% !important;
+        }
+
+        .table-hover > tbody > tr:hover > td {
+            background: none !important;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        .dataTables_wrapper {
+            height: 100% !important;
+        }
+
+            .dataTables_wrapper > .row:nth-of-type(2) {
+                height: 100% !important;
+            }
+
+        td:not([style*="display: none"]) {
+            border-bottom-right-radius: 12px !important;
+            border-bottom-left-radius: 12px !important;
+        }
+    </style>
+}
+
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" style="height:100%;">
+    <div class="col-md-12 plr">
+        
+            <div class="card-body">
+                
+                <div class="row align-items-center justify-content-between" style="padding-left: 15px; padding-right: 15px;">
+                    <!-- Left: Search bar (will be injected by DataTables) -->
+                    <div class="col-md-6 col-sm-12 d-flex align-items-center plr" id="custom-search-container"></div>
+
+                    <!-- Right: Buttons -->
+                    <div class="col-md-6 col-sm-12 plr text-right">
+                        <div class="btn-group">
+                            <a class="btn btn-primary uaeid-primary" onclick="createTemplate()">
+                                <i class="fa fa-plus"></i>Create Template
+                            </a>
+
+                        </div>
+                       
+                    </div>
+                </div>
+                <table id="templatesTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table @(Model == null || Model.Documents.Count() == 0 ? "empty-table" : "")">
+                    <thead>
+                        <tr>
+                            <th hidden>Id</th>
+                            <th>Template Name</th>
+                            <th>Document Name</th>
+
+                            <th>Created By</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @if (Model == null || Model.Documents == null || Model.Documents.Count() == 0)
+                        {
+                           
+                            <tr>
+                                <td style="display: none;"></td>
+                                <td style="text-align:center" valign="top" colspan="6" class="dataTables_empty">
+                                    <img class="NoRecordsCls" src="~/assets/images/No-Records-icon.svg" alt="No records" style=" display:block; margin:0 auto 8px;">
+                                    <p class="NoRecordFound-paragarph">No records found</p>
+                                    <p class="NoRecordTable-Text">Get started by clicking on 'Create Template'</p>
+                                </td>                           
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.Documents)
+                            {
+
+                                <tr>
+                                    @* <td><input onclick="dell(this)" class="RowCheckbox" type="checkbox" data-ng-hide="@item._id" /></td>*@
+                                    <td hidden>@item._id</td>
+                                    <td style="text-align:start !important;">@item.TemplateName</td>
+                                    <td style="text-align:start !important;">@item.DocumentName</td>
+
+                                    <td style="text-align:start !important;">@item.createdBy</td>
+                                    <td style="text-align:start !important;">@item.status</td>
+                                    <td class="valigntop" align="center">
+                                        <div class="btn-group">
+                                            <button class="btn btn-xs deepPink-bgcolor no-margin" type="button" data-toggle="dropdown"
+                                                    aria-expanded="false">
+                                                Actions
+                                                <i class="fa fa-angle-down"></i>
+                                            </button>
+                                            <ul class="dropdown-menu pull-left" role="menu">
+                                                <li>
+                                                    <a asp-action="Preview" asp-route-templateId="@item._id" onclick="document.getElementById('navigationNetworkOverlay').style.display='block'">
+                                                    <img src="~/assets/images/Eye_View_Icon.svg" alt="edit" style="position: relative;bottom: 1px;width: 18px;height: 18px;" />Preview
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a asp-action="GetTemplateDetails" asp-route-templateId="@item._id" onclick="document.getElementById('navigationNetworkOverlay').style.display='block'">
+                                                    <img src="~/assets/images/Pencil-edit-icon.svg" alt="edit" style="position: relative;bottom: 1px;width: 18px;height: 18px;" />Edit
+                                                    </a>
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+       
+    </div>
+
+</div>
+<script src="site.js" async></script>
+@section scripts {
+
+    <script>
+    $(document).ready(function () {
+        var theme = '@theme';
+
+        $("#builksignModule > a")
+            .attr("aria-expanded", "true")
+            .addClass("active");
+
+        $("#builksignModule")
+            .addClass("submenu-active show");
+
+        $("#builksignModule .submenu")
+            .addClass("show");
+
+        $("#Templates").addClass("active");
+
+
+
+        if (theme === 'Yellow') {
+            var bulkSignLink = document.getElementById('builksignModle')?.querySelector('.nav-link');
+            if (bulkSignLink) {
+                bulkSignLink.click();
+            }
+        }
+
+        $('#homeMenu').addClass('breadcrumb-item').append('Bulk signing > Templates > Templates List');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        $('#TemplateMenu').addClass('active');
+        document.getElementById("navigationNetworkOverlay").style.display = "none";
+        $('#networkOverlay').hide();
+
+        var table = $("#templatesTable").DataTable({
+            "bLengthChange": false,
+            "searching": true,
+            "paging": @hasData.ToString().ToLower(),
+            "info": @hasData.ToString().ToLower(),
+                 "initComplete": function () {
+                    // Move the search bar into our custom container
+                    $(".dataTables_filter").appendTo("#custom-search-container");
+                    $('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+                    $('.dataTables_filter label').contents().filter(function () {
+                        return this.nodeType === 3;
+                    }).remove();
+
+                }
+        });
+    });
+
+    function createTemplate() {
+        document.getElementById("navigationNetworkOverlay").style.display = "block";
+        window.location.href = '@Url.Action("Create", "DocumentTemplates")';
+    }
+    </script>
+
+}

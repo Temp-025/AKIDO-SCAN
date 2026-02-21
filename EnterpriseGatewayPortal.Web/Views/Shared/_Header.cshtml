@@ -1,0 +1,678 @@
+﻿@using System.Security.Claims;
+
+@inject IConfiguration Configuration
+@inject IHttpContextAccessor httpContextAccessor
+
+@{
+    //var IsChekerUser = User.FindFirst("IsUserChecker").Value;
+    var id = int.Parse(User.FindFirst(ClaimTypes.UserData).Value);
+    var IDPLogin = User.FindFirst("IDPLogin").Value;
+    var adminUserExist = User.FindFirst("AdminUserExist").Value;
+    var RoleId = User.FindFirst("UserRoleID").Value;
+    var businessUserExist = User.FindFirst("UserExist").Value;
+    var spoc_email = User.FindFirst("SpocEmail").Value;
+    var user_email = User.FindFirst("userEmail").Value;
+    var prePaidOrPostPaid = User.FindFirst("PrePaidOrPostPiad").Value;
+    var suid = "";
+    var template = "false";
+    var bulkSign = "false";
+    if (IDPLogin == "true")
+    {
+         suid = User.FindFirst("Suid").Value;
+    }
+    if (IDPLogin == "true" && businessUserExist == "true")
+    {
+        template = User.FindFirst("Template").Value;
+        bulkSign = User.FindFirst("BulkSign").Value;
+    }
+}
+
+<style>
+    .spin {
+        width: 10px !important;
+        height: 10px !important;
+    }
+
+    .badge {
+        top: 0;
+        right: 2px;
+        z-index: 2;
+        position: absolute;
+        display: inline-block;
+        /* padding: .25em .4em; */
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: initial;
+        border-radius: .25rem;
+        transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+    .badge-danger {
+        color: #fff;
+        background-color: #dc3545;
+    }
+
+    .badge-pill {
+        padding-right: 0.7em;
+        padding-left: 0.7em;
+        border-radius: 10rem;
+        padding-top: 0.2rem;
+    }
+
+    .dropdown-item {
+        color: #333;
+    }
+
+    .logo-svg {
+        position: relative;
+        width: 3rem;
+        height: 3rem;
+        padding:5px;
+    }
+
+    .alert {
+        background-color: #acc43d;
+        margin: 0px auto;
+        border: 0px;
+        border-radius: 0px;
+        width: 500px;
+        font-size: 21px;
+        margin-top: 50px;
+        height: 0px;
+        display: inline-table;
+        padding: 20px !important;
+    }
+
+    .toolcontainerviwer {
+        width: 400px;
+        background-color: floralwhite;
+        border-radius: 10px;    
+        right: 14.5%;    
+        top:1%;
+        box-shadow: 5px 10px 10px rgba(0, 0, 0, 0.3);
+        border:2px solid #ccc;
+        z-index: 1;
+    }
+
+        .toolcontainerviwer::after {
+            content: "";
+            position: absolute;
+            top: 30%;
+            left: 100%; 
+            transform: translateY(-50%);
+            border-bottom: 10px solid transparent;
+            border-left: 30px solid floralwhite;
+            border-right: 10px solid transparent;
+            border-top: 5px solid transparent;
+            z-index: 1;
+        }
+
+        .toolcontainerviwer::before {
+            content: "";
+            position: absolute;
+            top: 30%;
+            left: 100%;
+            transform: translateY(-50%) translateX(2px); 
+            border-bottom: 11px solid transparent; 
+            border-left: 34px solid #ccc; 
+            border-right: 10px solid transparent;
+            border-top: 5px solid transparent;
+            z-index: 0;
+        }
+
+    @@media screen and (max-width: 500px) {
+        .toolcontainerviwer {
+            width: 80%; /* Adjust as needed */
+            right: auto;
+            left: 10px;
+            top: 10px;
+        }
+
+        .toolcontainerviwer::after {
+            left: 100%;
+            transform: translateY(-50%) translateX(-10px); /* Adjust as needed */
+        }
+
+        .toolcontainerviwer::before {
+            left: 100%;
+            transform: translateY(-50%) translateX(-8px); /* Adjust as needed */
+        }
+    }
+
+    .notification-text {
+        white-space: nowrap;
+        padding: 10px;
+    }
+
+    .header-content{
+        display:flex;
+        flex-direction:row;
+        justify-content:space-between;
+        width:100%;
+        align-items:center;
+        height:100%;
+    }
+    
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light navbar-default sticky-top" id="navbar"
+        style=" box-shadow: none !important; border-bottom: 1px solid #D1D5DB !important; "
+     >
+    <div class="header-content">
+        <div class="navbar-header d-inline">
+            @{
+                var PresentlayoutType = Context.Request.Cookies["NavigationLayout"];
+            }
+            @{
+                var theme = httpContextAccessor.HttpContext.Request.Cookies["theme"];
+            }
+            @if (PresentlayoutType == "BusinessUserLayout" &&  theme == "Uaeid")
+             {
+                <h3 class="gap-header">
+                    <img id="primaryImage" alt="" width="250" height="60"
+                         style="padding: 8px 109px 5px 0px; margin-left: -6%;" src="~/assets/images/NewUAEIDprimaryImg.svg" /> 
+                </h3>
+            }
+            else
+            {
+                <button type="button" id="sidebarCollapse" class="navbar-btn">
+                    <i class="fa fa-bars fa-lg"></i>
+                    <span></span>
+                </button>
+
+            }
+             
+            @*<span style="align-self: center;font-size: 12px; margin-left: 20px;">
+                <strong>Certificates Available: </strong>&nbsp;
+                <span id="licensesAvailableSpan"></span>
+                <div id="spinner" class="cv-spinner" style="display: initial;">
+                    <span class="spinnerSmall spin">
+                    </span>
+                </div>
+            </span>&nbsp;&nbsp;*@
+
+        </div>
+        
+
+        <!-- Ensure navbar visibility -->
+        <style>
+            @@media screen (width <= 425px) {
+                .horizontalNavbar {
+                    display: none !important;
+                    background-color: aqua !important;
+                }
+            }
+
+            .horizontalNavbar {
+                display:none;
+            }
+
+            @@media screen and (min-width: 768px) {
+                .horizontalNavbar {
+                    display: flex;
+                    width: 39rem;
+                    margin-left: 0;
+                    justify-content: center;
+                    z-index: 9999;
+                    position: relative;
+                    height: 60px;
+                    font-size: 15px;
+                    padding: 1px 6px;
+                    color: #5d667d;
+                    box-shadow: none !important;
+                    border: none;
+                    border-radius: 0;
+                    margin-left: -74px;
+                    flex-direction:row;
+                }
+            }
+
+            @@media screen (width <= 768px){
+                        .header-content{
+                            width:auto;
+                        }
+                   }
+
+            .horizontalNavbar .nav-link{
+                color:black !important;
+                border-bottom: 1px solid black;
+            }
+
+                .horizontalNavbar li a {
+                }
+
+                .horizontalNavbar  li:hover > a {
+                    color: #6C4527 !important;
+                    font-weight: 700 !important;
+                    /*                    transition: 0.3s ease-in-out;*/
+                    padding: 20px 10px 17px 0px;
+                    border-bottom: 4px solid #5D3B26;
+                }
+
+            .dropdown-hover {
+                position: relative;
+            }
+
+            .dropdown-hover:hover .dashColSubmenu {
+                display: block;
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .dropdown-hover > .dashColSubmenu {
+                display: none;
+                opacity: 0;
+                visibility: hidden;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                min-width: 200px;
+                background-color: white;
+                border: 1px solid #eee;
+                border-radius: 4px;
+                box-shadow: 0 6px 12px rgba(0,0,0,.175);
+                transition: all 0.3s ease-in-out;
+                z-index: 1000;
+                padding: 20px;
+            }
+
+            .horizontalNavbar .dropdown-hover .list-unstyledData {
+                list-style: none;
+                padding-left: 0;
+                padding:10px;
+                font-size:16px;
+            }
+
+                .horizontalNavbar .dropdown-hover .list-unstyledData > li {
+                    padding:10px;
+                }
+
+                .horizontalNavbar .dropdown-hover > .nav-data {
+                    padding: 8px 15px;
+                }
+
+            .horizontalNavbar .dashColSubmenu li:hover > a {
+                color: #6C4527 !important;
+                font-weight: 600 !important;
+                border-bottom: none !important;
+                text-decoration: underline;
+            }
+
+            .dropdown-hover .collapse {
+                display: block;
+                height: auto !important;
+            }
+
+
+
+            body {
+                margin: 0;
+                padding-top: 70px;
+            }
+
+            .navbar-content{
+                width:100%;
+            }
+
+            .navbar-content > ul{
+                display:flex;
+                flex-direction:row;
+                justify-content:space-between;
+            }
+
+            #navbarContent ul li a i.dashboardNew-icon {
+                content: url(../../assets/images/DashboardNew.svg-Black.svg)
+            }
+
+            #navbarContent ul li a i.DocumentSigning-icon {
+                content: url(../../assets/images/Document_Signing_W.svg-B_uaeid.svg)
+            }
+
+            #navbarContent ul li a i.bulkSigning-icon {
+                content: url(../../assets/images/bulk_sign_W.svg-B-uaeid.svg)
+            }
+
+            .aligned-div {
+                display: flex !important;
+                color: black !important;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                padding: 20px 10px 15px 0px !important;
+            }
+            .aligned-div-bulksign {
+                display: flex !important;
+                color: black !important;
+                flex-direction: row;
+                align-items: end;
+                justify-content: center;
+                padding: 20px 10px 15px 0px !important;
+            }
+
+        </style>
+        @{
+             var Presentlayout = Context.Request.Cookies["NavigationLayout"];
+         }
+        @{
+            var uaeidTheme = httpContextAccessor.HttpContext.Request.Cookies["theme"];
+        }
+        @if (Presentlayout == "BusinessUserLayout" && uaeidTheme == "Uaeid")
+        {
+         <div class="horizontalNavbar fixed-top" id="topNavBar">
+         
+            @*<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent"
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>*@
+
+            <div class="navbar-content" id="navbarContent">
+                <ul class="navbar-nav ml-auto" style="font-size: initial;font-weight: 600; gap:5px !important">
+                    <li class="nav-item" id="navDashboard">
+                        <a class="aligned-div" asp-controller="Dashboard" asp-action="Index" onclick="showLoader()">
+                                <i class="dashboardNew-icon" style="padding:0px 12px;height:15px;"></i>Dashboard
+                        </a>
+                    </li>
+
+                    @if (User.IsInRole("Document Signing") && businessUserExist == "true")
+                    {
+                        <li class="nav-item" id="navDocSign">
+                            <a class="aligned-div" asp-controller="Documents" asp-action="Index" onclick="showLoader(); Document(event)">
+                                    <i class="DocumentSigning-icon" style="padding:0px 12px;height:15px;"></i>Document Signing
+                                </a>
+                        </li>
+                    }
+
+                        @if (User.IsInRole("Bulk signing") && (businessUserExist == "true") && template == "true" && bulkSign == "true")
+                        {
+
+                            <li class="dropdown dropdown-hover" id="builksignModle">
+                                <a class="aligned-div-bulksign" href="#selfServicePortal" data-toggle="collapse" aria-expanded="false">
+                                    <i class="bulkSigning-icon" style="padding:0px 12px;height:15px;"></i>Bulk signing
+                                    <img src="~/assets/images/down arrow.svg" height="18" width="18"/>
+                                </a>
+                                <ul class="list-unstyledData dashColSubmenu collapse" id="selfServicePortal">
+
+
+                                    @if (User.IsInRole("Templates"))
+                                    {
+                                        <li class="nav-data" id="TemplateMenu">
+                                            <a class="nav-data" asp-controller="DocumentTemplates" asp-action="Index" onclick="Template(event)">Templates</a>
+                                        </li>
+                                    }
+
+                                    @if (User.IsInRole("Transactions"))
+                                    {
+                                        <li class="nav-data" id="TransactionMenuItem">
+                                            <a class="nav-data" asp-controller="BulkSign" asp-action="GetBulkSigDataList" onclick="Transaction(event)">Transactions</a>
+                                        </li>
+                                    }
+
+
+
+
+                                </ul>
+                            </li>
+                        }
+                        else if (User.IsInRole("Bulk signing") && (businessUserExist == "true") && bulkSign == "true" && template == "false")
+                        {
+                            <li class="dropdown" id="builksignModle">
+                                <a class="nav-link drop-logo" href="#selfServicePortal" data-toggle="collapse" aria-expanded="false">
+                                    <i class="bulkSigning-icon" style="padding:0px 12px"></i>
+                                    Bulk signing
+                                </a>
+                                <ul class="list-unstyledData dashColSubmenu collapse" id="selfServicePortal">
+
+
+
+
+                                    @if (User.IsInRole("Transactions"))
+                                    {
+                                        <li class="nav-data" id="TransactionMenuItem">
+                                            <a class="nav-data" asp-controller="BulkSign" asp-action="GetBulkSigDataList" onclick="Transaction(event)">Transactions</a>
+                                        </li>
+                                    }
+
+
+
+
+                                </ul>
+                            </li>
+                        }
+                        else if (User.IsInRole("Bulk signing") && (businessUserExist == "true") && template == "true" && bulkSign == "false")
+                        {
+
+                            <li class="dropdown" id="builksignModle">
+                                <a class="nav-link" href="#selfServicePortal" data-toggle="collapse" aria-expanded="false">
+                                    Bulk signing
+                                </a>
+                                <ul class="list-unstyledData dashColSubmenu collapse" id="selfServicePortal">
+
+
+                                    @if (User.IsInRole("Templates"))
+                                    {
+                                        <li class="nav-data" id="TemplateMenu">
+                                            <a class="nav-data" asp-controller="DocumentTemplates" asp-action="Index" onclick="Template(event)">Templates</a>
+                                        </li>
+                                    }
+
+                                    @if (User.IsInRole("Transactions"))
+                                    {
+                                        <li class="nav-data" id="TransactionMenuItem">
+                                            <a class="nav-data" asp-controller="BulkSign" asp-action="GetBulkSigDataList" onclick="Transaction(event)">Transactions</a>
+                                        </li>
+                                    }
+
+                                </ul>
+                            </li>
+                        }
+                </ul>
+            </div>
+        </div>
+        }
+
+
+        <div id="notificationContainer" class="toolcontainerviwer classshow" style="display: none; position:fixed">
+            <div class="slider-container">
+                <div class="slider-turn" style="padding:10px">
+                    <p id="closeButton" style="display: flex;justify-content: end;margin: 0px;padding: 0px;">
+                        <img src="~/assets/svgg/Close_Button.svg" style="height:17.5px" />
+                    </p>                                          
+                    <p id="notificationMessage" class="fontcolortooltip" style="padding-left: 15px;padding-right: 15px;font-size:13.5px;margin-bottom:4.5px;">                                            
+                    </p>
+                  
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6" style="display:contents">
+         @*    <ul id="notificationList">
+                <!-- Notifications will be dynamically added here -->
+            </ul> *@
+            <div class="row">
+                <div class="dropdown">
+                  @*   <svg id="clickableSvg" class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="c-icon" role="img">
+                        <path fill="var(--ci-primary-color, currentColor)" d="M450.27,348.569,406.6,267.945V184c0-83.813-68.187-152-152-152s-152,68.187-152,152v83.945L58.928,348.568A24,24,0,0,0,80.031,384h86.935c-.238,2.636-.367,5.3-.367,8a88,88,0,0,0,176,0c0-2.7-.129-5.364-.367-8h86.935a24,24,0,0,0,21.1-35.431ZM310.6,392a56,56,0,1,1-111.419-8H310.018A56.14,56.14,0,0,1,310.6,392ZM93.462,352,134.6,276.055V184a120,120,0,0,1,240,0v92.055L415.736,352Z" class="ci-primary"></path>
+                    </svg> code for notification*@
+                    @* <a id="tooltipAnchor" href="#" data-toggle="tooltip" data-placement="bottom" title=" Tooltip hello <div class='tooltip-content'><button type='button' class='btn btn-secondary' onclick='hideTooltip()' aria-label='Close'><span aria-hidden='true'>close</span></button></div>" data-html="true">
+                        <img src="~/assets/svgg/NotificationSvg.svg" />
+                    </a> *@
+                    @* <span id="notificationCount" class="badge badge-pill badge-danger">0</span> *@
+                   @*  <div id="dropdownMenu" class="dropdown-menu pt-0" role="menu" aria-hidden="false" style="position:absolute;inset: 15px 0px auto auto; margin: 0px; transform: translate3d(0px, 32px, 0px);background: ghostwhite; text-align:center;padding:5px;height:auto" data-popper-placement="bottom-end" >
+                        <div id="notificationContent" class="dropdown-header bg-light text-center" tabindex="-1" style="min-width: 300px; background-color:#ebedef !important">
+                        </div>
+                    </div>  code for notification*@
+                </div>                                  
+                @*<span style="align-self: center;font-size: 12px;"><strong>Last Login: </strong>&nbsp;@User.FindFirst("LastLoginTime").Value</span>&nbsp;&nbsp;*@                              
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle custom-profile-dropdown" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: rgba(57, 50, 50, 1); text-transform: capitalize;">
+                        <i class="fa fa-user-circle fa-2x"></i>&nbsp;
+                        @User.Identity.Name
+                    </a>
+                    <!-- Here's the magic. Add the .animate and .slide-in classes to your .dropdown-menu and you're all set! -->
+                    <div class="dropdown-menu dropdown-menu-right animate slideIn profileDropdown" aria-labelledby="navbarDropdown">
+                        @{
+                            var layoutType = Context.Request.Cookies["NavigationLayout"];
+                        }
+                        @if (adminUserExist.ToLower() == "true" && layoutType != "BusinessUserLayout")
+                        {
+                            <a class="dropdown-item" asp-controller="UserDashboard" asp-action="Profile">Profile</a>
+
+                            <a class="dropdown-item" asp-controller="UserDashboard" asp-action="ChangePassword" asp-route-id="@id">Change Password</a>
+
+                            <a class="dropdown-item" asp-controller="UserDashboard" asp-action="ChangeSecurityQuestion">Change Security Question</a>
+                        }
+                        @if (adminUserExist.ToLower() == "true" && businessUserExist.ToLower() == "true")
+                        {
+
+                            if (layoutType == "BusinessUserLayout")
+                            {
+                                <a class="dropdown-item" href="#" onclick="ChangeLayout('AdminLayout')">Admin Panel</a>
+                            }
+                            else
+                            {
+                                <a class="dropdown-item" href="#" onclick="ChangeLayout('BusinessUserLayout')">Business User Panel</a>
+                            }
+                        }
+                        <hr class="header-hr" />
+
+                        <hr class="header-hr" />
+
+                        <hr class="header-hr" />
+
+                        <div class="col">
+                            <div style="height:6px"></div>
+                            <span style="padding-left:8px">Select Theme</span>
+                            <li class="pl10 ml10 mt10 theme-changer">
+                                <a class="color-tag clickable mr15 change-theme" style="background:orange" name="Yellow"> </a>
+                                <a class="color-tag clickable mr15 change-theme" style="background:#9A6A2C" name="Uaeid"> </a>
+                            </li>
+                            <div style="height:6px"></div>
+                        </div>
+
+                        @if (IDPLogin.ToLower() == "true")
+                        {
+                            <a class="dropdown-item" asp-controller="Logout" asp-action="Index1">Logout</a>
+                        }
+                        else
+                        {
+                            <a class="dropdown-item" asp-controller="Logout" asp-action="Index">Logout</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</nav>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.8/signalr.min.js"></script>
+
+<script>
+    var userSuid = '@suid';
+    var flag = false;
+    var svg = document.getElementById('clickableSvg');
+    var dropdownMenu = document.getElementById('dropdownMenu');
+
+    var Url = @Json.Serialize(@Configuration.GetSection("SigningPortalUrl").Value);
+    var idpLogin = "";
+    var bulkSign = "";
+    var spoc_Email = "";
+    var user_Email = "";
+
+    $(document).ready(function () {
+       
+        idpLogin = '@IDPLogin';
+        bulkSign = '@bulkSign';
+        spoc_Email = '@spoc_email';
+        user_Email = '@user_email';
+        prePaidOrPostPaid = '@prePaidOrPostPaid';
+    });
+       function ChangeLayout(layoutType) {
+            $.ajax({
+                url: '@Url.Action("SetLayout", "Home")', 
+                type: 'POST',
+                data: { Layout: layoutType },
+                success: function (response) {
+                    //window.location.reload();
+                    window.location.href = response.redirectUrl;
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error setting cookie:", error);
+
+                }
+            });
+        }
+
+    function SignatureTemplates() {
+        $('#overlay').show();
+    }
+    function Template(event) {
+
+        event.preventDefault();
+        if (idpLogin === "false") {
+            Swal.fire({ icon: 'info', title: "Information", text: "Login with UAEID to access this module" });
+        } else {
+            window.location.href = '@Url.Action("Index", "DocumentTemplates")'
+        }
+    }
+    function Transaction(event) {
+        event.preventDefault();
+        if (idpLogin == "false") {
+            Swal.fire({ icon: 'info', title: "Information", text: "Login with UAEID to access this module" });
+        } else {
+            window.location.href = '@Url.Action("GetBulkSigDataList", "BulkSign")'
+        }
+    }
+    function Document(event) {
+        event.preventDefault();
+        if (idpLogin == "false") {
+            Swal.fire({ icon: 'info', title: "Information", text: "Login with UAEID to access this module" });
+        }
+        else {
+            window.location.href = '@Url.Action("Index", "Documents")'
+        }
+    }
+    function CheckSpoc(event) {
+        event.preventDefault();
+
+        if (spoc_Email != user_Email) {
+            Swal.fire({ icon: 'info', title: "Information", text: "Only Spoc email can access this module" });
+        }
+        else if (prePaidOrPostPaid == "True") {
+            Swal.fire({ icon: 'info', title: "Information", text: "Only PrePaid Organization can access this module" });
+        }
+        else if (idpLogin == "false") {
+            Swla.fire({ icon: 'info', title: "Information", text: "Login with UAEID to access this module" });
+        }
+        else {
+            window.location.href = '@Url.Action("Index", "BuyCredits")'
+        }
+
+    }
+
+    function CheckSpocBalance(event) {
+        event.preventDefault();
+
+        if (spoc_Email != user_Email) {
+            Swal.fire({ icon: 'info', title: "Information", text: "Only Spoc email can access this module" });
+        }
+        else if (prePaidOrPostPaid == "True") {
+            Swal.fire({ icon: 'info', title: "Information", text: "Only PrePaid Organization can access this module" });
+        }
+        else {
+            window.location.href = '@Url.Action("BalanceList", "BalanceSheets")'
+        }
+
+    }
+
+
+    function showLoader() {
+
+        document.getElementById("navigationNetworkOverlay").style.display = "block";
+    }
+
+</script>

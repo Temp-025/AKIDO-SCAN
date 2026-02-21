@@ -1,0 +1,75 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.KYCMethods.RequestNewMethodsViewModel
+
+@if (Model.RequestNewMethods != null && Model.RequestNewMethods.Any())
+{
+    <div class="methods-list">
+        @foreach (var method in Model.RequestNewMethods)
+        {
+            <div class="kyc-card" data-name="@method.MethodName.ToLower()">
+
+                <!-- Title + View Button -->
+                <div class="kyc-header mb-2">
+                    <div class="d-flex align-items-center" style="gap:10px;">
+                        <div class="kyc-title">@method.MethodName</div>
+                    </div>
+
+                    <button type="button"
+                            class="btn btn-primary uaeid-primary view-details-btn"
+                            data-methoduid="@method.MethodUid"
+                            data-methodname="@method.MethodName"
+                            data-pricing="@method.Pricing"
+                            data-status="@method.Status"
+                            data-description="@method.Description"
+                            data-methodtype="@method.MethodType"
+                            data-processingtime="@method.ProcessingTime"
+                            data-confidencethreshold="@method.ConfidenceThreshold"
+                            data-requeststatus="@method.RequestStatus"
+                            data-isrequested="@method.IsRequested.ToString()"
+                            data-targetsegments='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(method.TargetSegments ?? new List<string>()))'
+                            data-mandatory='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(method.MandatoryAttributes ?? new List<string>()))'
+                            data-optional='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(method.OptionalAttributes ?? new List<string>()))'>
+                        View Details
+                    </button>
+                </div>
+
+                <!-- Method Type -->
+                <div class="kyc-method-type mb-3">@method.MethodType</div>
+
+                <hr />
+
+                <!-- Pricing -->
+                <div class="mb-3">
+                    <span class="font-weight-bold">Pricing Per Verification (AED): </span>
+                    <span class="font-weight-bold">@method.Pricing</span>
+                </div>
+
+                <!-- Target Segments -->
+                @if (method.TargetSegments != null && method.TargetSegments.Any())
+                {
+                    <div class="mb-2">
+                        <span class="font-weight-bold d-block mb-1">Target Segments:</span>
+                        <div class="d-flex flex-wrap" style="gap:6px;">
+                            @foreach (var segment in method.TargetSegments)
+                            {
+                                <div class="kyc-modal-tag">@segment</div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Request Button -->
+                @*<div class="mt-3">
+                    <button class="btn btn-primary w-100"
+                            onclick="sendRequest('@method.MethodUid')">
+                        Request Method
+                    </button>
+                </div>*@
+
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="no-results">No new KYC methods available to request.</div>
+}

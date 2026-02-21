@@ -1,0 +1,194 @@
+﻿@model List<EnterpriseGatewayPortal.Core.DTOs.DigitalFormResponseDTO>
+
+@{
+    Layout = "~/Views/Shared/_LayoutDigitalForms.cshtml";
+}
+
+<style>
+    .tooltip {
+        z-index: 10052 !important;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body">
+                <table id="responseList" class="table-striped table-bordered table-hover table-checkable order-column full-width table">
+                    <thead>
+                        <tr>
+                            <th>USER</th>
+                            <th>SIGNED DATE</th>
+                            <th>STATUS</th>
+                            <th style="text-align:center">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || Model.Count == 0)
+                        {
+                            <tr>
+                                <td style="text-align:center" valign="top" colspan="7" class="dataTables_empty">No record found</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr class="odd gradeX">
+                                    <td>@(string.IsNullOrWhiteSpace(item.CreatedBy) ? "N/A" : item.CreatedBy)</td>
+                                    <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    <td>@item.Status</td>                                
+                                    <td class="valigntop" style="text-align:center">
+                                        <div class="btn-group" onclick="modalForm('@item.EdmsId','@item.SignerName')">
+                                            <a href="#">
+                                                <img src="~/assets/images/eyeicon.png" alt="View" />
+                                            </a>
+                                        </div>
+
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal fade" id="digitalFormModal" tabindex="-1" role="dialog" aria-labelledby="digitalFormModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content" style="width:120%;max-width:600px">
+                        <div class="modal-header" style="justify-content:end" onclick="DownloadForm()">
+                            <img data-toggle="tooltip" data-placement="left" title="Download PDF" style="text-align:left" src="~/assets/svgg/SaveDownload.svg" />
+                        </div>
+                        <div class="modal-body">
+                            <div id='Viewer1' style='width: 550px; height: 550px; margin: 0 auto;'></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function base64ToBlob(base64) {
+
+        const binaryString = window.atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+
+
+        for (let i = 0; i < len; ++i) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return new Blob([bytes], { type: 'application/pdf' });
+    }
+
+    $(document).ready(function () {
+
+        $('#digitalFormsMenu').addClass('active');
+
+        $('#homeMenu').removeClass('breadcrumb-item');
+        $('#homeMenu').addClass('breadcrumb-item').append('Digital Forms > Responses');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+
+        var table1 = $("#responseList").DataTable({
+            "bLengthChange": false,
+            "searching": true
+        });
+
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+
+    var Documentbase64 = "";
+    var FileName = "";
+
+    function modalForm(EdmsId, SignerName) {
+
+        var intervalId = "";
+        intervalId = setInterval(function () {
+            if (isWebViewerLoaded) {
+                clearInterval(intervalId);
+            }
+        }, 3000);
+
+        $("#digitalFormModal").modal('show');
+        FileName = SignerName + "_signed";
+        const url = `@Url.Action("GetPreviewConfig", "DigitalForm")`;
+
+        $.ajax({
+            url: `${url}/${EdmsId}`,
+            type: 'GET',
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+                $('#overlay').hide();
+            },
+            success: function (resp) {
+                if (resp.success) {
+                    Documentbase64 = resp.resource;
+
+                    webviwerInstance.UI.loadDocument(base64ToBlob(Documentbase64), { filename: FileName });
+                    const { Annotations, documentViewer, PDFNet, Tools, annotationManager } = webviwerInstance.Core
+
+                    documentViewer.addEventListener('documentLoaded', () => {
+
+                        webviwerInstance.UI.setZoomLevel("90%");
+                        const zoom = webviwerInstance.UI.getZoomLevel("90%");//documentViewer.getZoomLevel();
+                    });
+
+                    documentViewer.addEventListener('annotationsLoaded', () => {
+                        annotationManager.getAnnotationsList().forEach(annot => {
+                            annot.ReadOnly = true;
+                        });
+                    });
+
+                } else {
+                   Swal.fire({
+                      title: 'Error',
+                      text: resp.message,
+                      icon: 'error',
+                      confirmButtonText: 'OK'
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        window.location.href = '@Url.Action("Index", "DigitalForm")';
+                      }
+                    });
+
+                }
+            },
+            error: function (xhr, status, error) {
+               Swal.fire({
+                  title: 'Error',
+                  text: 'Something went wrong!',
+                  icon: 'error',
+                  confirmButtonText: 'OK'
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("Index", "DigitalForm")';
+                  }
+                });
+
+            }
+        });
+    }
+
+    function downloadBlobAsFile(blob, filename) {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function DownloadForm() {
+
+        const base64Data = Documentbase64;
+        const blob = base64ToBlob(base64Data);
+        const filename = FileName;
+        downloadBlobAsFile(blob, filename);
+    }
+
+</script>

@@ -1,0 +1,291 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.Wallet.PdfViewModel
+
+<style>
+	.pdfView table {
+		border-collapse: collapse;
+	}
+
+	.pdfView {
+
+		max-width: 800px;
+		margin: auto;
+		padding: 30px;
+		border: 1px solid #eee;
+		box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+		font-size: 16px;
+		line-height: 24px;
+		font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+		color: #555;
+		max-height: 700px;
+		overflow-y: auto;
+		scrollbar-width: thin; /* Firefox */
+		scrollbar-color: transparent transparent;
+	}
+
+
+		.pdfView table td {
+			padding: 8px;
+			vertical-align: top;
+		}
+
+		.pdfView table {
+			width: 100%;
+			line-height: inherit;
+			text-align: left;
+		}
+
+	.logo {
+		width: 100%;
+		height: 150px;
+		text-align: center;
+	}
+
+	.container {
+		display: inline;
+		position: relative;
+		padding-left: 35px;
+		margin-bottom: 12px;
+		cursor: pointer;
+		font-size: 16px;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+
+		/* Hide the browser's default checkbox */
+		.container input {
+			position: absolute;
+			opacity: 0;
+			cursor: pointer;
+			height: 0;
+			width: 0;
+		}
+
+	/* Create a custom checkbox */
+	.checkmark {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 20px;
+		width: 20px;
+		background-color: #eee;
+	}
+
+	/* On mouse-over, add a grey background color */
+	.container:hover input ~ .checkmark {
+		background-color: #ccc;
+	}
+
+	/* When the checkbox is checked, add a blue background */
+	.container input:checked ~ .checkmark {
+		background-color: #2196F3;
+		border-radius: 5px;
+	}
+
+	/* Create the checkmark/indicator (hidden when not checked) */
+	.checkmark:after {
+		content: "";
+		position: absolute;
+		display: none;
+	}
+
+	/* Show the checkmark when checked */
+	.container input:checked ~ .checkmark:after {
+		display: block;
+	}
+
+	/* Style the checkmark/indicator */
+	.container .checkmark:after {
+		left: 7px;
+		top: 3px;
+		width: 3px;
+		height: 8px;
+		border: solid white;
+		border-width: 0 3px 3px 0;
+		-webkit-transform: rotate(45deg);
+		-ms-transform: rotate(45deg);
+		transform: rotate(45deg);
+	}
+
+	label {
+		display: inline-block;
+		width: 200px;
+		height: 10px;
+	}
+
+	.col12 {
+		border-bottom: 1px solid black;
+	}
+
+		.col12:last-child {
+			border-bottom: none;
+		}
+</style>
+<div class="card-custom">
+	<div class="card-body">
+		<div>
+			@* <div class="logo">
+			<img style='width:342px;height:93px' src="@Model.Logo" />
+
+			</div>  *@
+
+			<div class="pdfView">
+				<table align='center'>
+					<h2 style="font-weight:bold; color: #3498db; padding-bottom: 15px;">Credential Report</h2>
+					<tr>
+						<th style="min-width:210px"></th>
+						<th></th>
+						<th></th>
+					</tr>
+					<tr>
+						<td>Credential Name</td>
+						<td>:</td>
+						<td>
+							@if (string.IsNullOrEmpty(Model.CredentialName))
+							{
+								<label>NA</label>
+							}
+							else
+							{
+								<label>@Model.CredentialName</label>
+							}
+						</td>
+					</tr>
+					<tr>
+						<td>Category</td>
+						<td>:</td>
+						<td>
+							@if (string.IsNullOrEmpty(Model.Category))
+							{
+								<label>NA</label>
+							}
+							else
+							{
+								<label>@Model.Category</label>
+							}
+						</td>
+					</tr>
+					<tr>
+						<td>Authentication Scheme</td>
+						<td>:</td>
+						<td>
+							@if (string.IsNullOrEmpty(Model.AuthenticationScheme))
+							{
+								<label>NA</label>
+							}
+							else
+							{
+								<label>@Model.AuthenticationScheme</label>
+							}
+						</td>
+					</tr>
+					<tr>
+						<td>Status</td>
+						<td>:</td>
+						<td>
+							@if (string.IsNullOrEmpty(Model.Status))
+							{
+								<label>NA</label>
+							}
+							else
+							{
+								<label>@Model.Status</label>
+							}
+						</td>
+					</tr>
+
+				</table>
+
+				<table align='center'>
+					<tr>
+						<td><div style="float:left">Data Attributes</div><div style="margin-left:33%; padding-left:3px"></div></td>
+
+					</tr>
+					<table class="split-table" style="border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, .15);">
+
+
+						@foreach (var orgUser in Model.DataAttributes)
+						{
+
+
+							<tr class="col12">
+								<td>
+
+									<div class="box" style="width:700px; margin:10px;display:table; border:none; height:100px;">
+										<div class="box-row" style="display:table-row;">
+											<div class="box-cell" style=" display:table-cell;   width:60%; height:60%;">
+												<table align='center'>
+													<tr>
+														<td><label>Attribute</label></td>
+														<td> : </td>
+														<td>
+															@if (string.IsNullOrEmpty(orgUser.Attribute))
+															{
+																<label>NA</label>
+															}
+															else
+															{
+																<label>@orgUser.Attribute</label>
+															}
+														</td>
+													</tr>
+													<tr>
+														<td> <label>Display Name</label> </td>
+														<td> : </td>
+														<td>
+															@if (string.IsNullOrEmpty(orgUser.DisplayName))
+															{
+																<label>NA</label>
+															}
+															else
+															{
+																<lable>@orgUser.DisplayName</lable>
+															}
+														</td>
+													</tr>
+													<tr>
+														<td><label>DataType</label></td>
+														<td> : </td>
+														<td>
+															@if (orgUser.DataType == null)
+
+															{
+																<label>NA</label>
+															}
+															else
+															{
+																<lable>@orgUser.DataType</lable>
+															}
+														</td>
+
+													</tr>
+
+												</table>
+											</div>
+
+										</div>
+
+									</div>
+								</td>
+
+
+
+							</tr>
+
+						}
+					</table>
+
+				</table>
+
+
+			</div>
+			<div style="margin-top:40px">
+			</div>
+			<div align="right" style="margin-right:50px;margin-top:40px">
+			</div>
+		</div>
+	</div>
+
+</div>
+

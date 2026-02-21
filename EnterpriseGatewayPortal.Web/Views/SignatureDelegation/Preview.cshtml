@@ -1,0 +1,151 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.SignatureDelegation.ViewDelegateViewModel
+
+<style>
+    .classshide {
+        display: none !important;
+    }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card c-main">
+            <div class="card-body">
+                
+                <div class="row" style="margin-left:40px">
+                    <div class="col-sm-5">
+                        <div class="from-group row">
+                            <label class="col-sm-3" ">Start Date:</label>
+                            <label class="col-sm-6">@Model.StartDateTime</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <div class="from-group row">
+                            <label class="col-sm-3">End Date:</label>
+                            <label class="col-sm-6">@Model.EndDateTime</label>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="from-group row">
+                            <label class="col-sm-3">Status :</label>
+                            <label class="col-sm-6" style=" color: @(Model.DelegationStatus == "Pending" ? "rgb(245, 124, 0) !important" : Model.DelegationStatus == "Scheduled" ? "green !important" : Model.DelegationStatus == "Cancelled" ? "red !important" : "") ;">@Model.DelegationStatus</label>
+                        </div>
+                    </div>
+                </div>
+                <br />
+
+                <div class="row" style="margin-left:40px">
+                    <div class="col-md-10">
+                        <div class="card" style="box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 10px;">
+                            <div class="row" style="box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 10px;">
+                                <div class="col-sm" style="margin-bottom: 15px; margin-top: 10px;">Delegatee list</div>
+                            </div>
+                            <br />
+                            <table class="col-sm table-striped table-bordered table-hover table-checkable order-column table">
+                                <thead>
+                                    <tr>
+                                        <th>Profile</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <br />
+                            @foreach (var item in Model.Delegatees)
+                            {
+                                    <tr class="odd gradeX">
+                                        <td>
+                                            <div>
+                                                <img src="data:image/png;base64,@item.thumbnail" class="initial" alt="Thumbnail">
+                                            </div>
+                                        </td>
+                                        <td>@item.fullName</td>
+                                        <td>@item.email</td>
+                                        <td style=" color: @(item.consentStatus == "Pending" ? "rgb(245, 124, 0) !important" : item.consentStatus == "Cancelled" ? "red !important" : item.consentStatus == "Approved" ? "green !important" : "") ;">@item.consentStatus</td>
+
+                                    </tr>
+                            }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div>
+                            @if (Model.DelegationStatus == "Pending" || Model.DelegationStatus == "Scheduled" || Model.DelegationStatus == "Active")
+                            {
+                        <a accessibilitylabel="revoke" class="btn btn-primary" style="float: right; margin-right: 17%;width:100px" onclick="revokeDelegate('@Model.DelegationID')">Revoke</a>
+                            }
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#SignatureDelegationMenu').addClass('active');
+        $('#homeMenu').addClass('breadcrumb-item').append('Delegations > View');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        $('#networkOverlay').hide();
+
+    });
+
+    function revokeDelegate(delegationId) {
+
+        Swal.fire({
+            title: 'Message',
+            icon: 'info', // 'type' is replaced with 'icon' in v2
+            text: "Are you sure to revoke delegation",
+            //icon: "warning",
+            showCancelButton: true,
+            // confirmButtonColor: "#acc43d",
+            // cancelButtonColor: "#d33",x
+            confirmButtonText: "OK"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '@Url.Action("RevokeDelegate", "SignatureDelegation")',
+                    type: 'GET',
+                    data: { delegationId: delegationId },
+                    beforeSend: function () {
+                        $('#overlay').show();
+                    },
+                    complete: function () {
+                        $('#overlay').hide();
+                    },
+                    success: function (response) {
+                        if (response.status == "Failed") {
+                            Swal.fire({
+                                title: 'Server response',
+                                text: response.message,
+                                icon: 'info', // replaced 'type' with 'icon'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '@Url.Action("List", "SignatureDelegation")';
+                                }
+                            });
+                        }
+                        else {
+                            Swal.fire({
+                                title: 'Success',
+                                text: response.message,
+                                icon: 'success',
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '@Url.Action("List", "SignatureDelegation")';
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+    }
+</script>

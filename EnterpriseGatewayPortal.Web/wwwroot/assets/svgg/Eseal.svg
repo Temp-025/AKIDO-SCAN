@@ -1,0 +1,10 @@
+<svg id="Eseal" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15.485" height="17.641" viewBox="0 0 15.485 17.641">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_49758" data-name="Rectangle 49758" width="15.485" height="17.641" transform="translate(0 0)" fill="#080808"/>
+    </clipPath>
+  </defs>
+  <g id="Group_114430" data-name="Group 114430" clip-path="url(#clip-path)">
+    <path id="Path_110367" data-name="Path 110367" d="M10.613,11.049V9.6l1.007-.026.155-.523a17.4,17.4,0,0,0,.775-4.238,4.807,4.807,0,1,0-9.614,0,15.7,15.7,0,0,0,.587,3.565l.093.353,1.392.6v1.723H0v6.592H15.485V11.049Zm-5.73-3.41a13.544,13.544,0,0,1-.447-2.831,3.307,3.307,0,1,1,6.614,0,14.684,14.684,0,0,1-.566,3.29l-1.371.036v2.915H6.508V8.34Z" fill="#080808"/>
+  </g>
+</svg>

@@ -1,0 +1,402 @@
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@*@inject IHttpContextAccessor httpContextAccessor*@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <noscript>Please enable java script in your browser.</noscript>
+    <title>@ViewData["Title"] Enterprise Gateway</title>
+    @*<link rel="icon" type="image/x-icon" href="~/assets/favicon.ico" asp-append-version="true" />*@
+    <link rel="icon" type="image/x-icon" href="~/assets/images/MyTrustNewPNG.png" asp-append-version="true" />
+
+    <!-- Global stylesheets -->
+    <link href="~/assets/css/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    @*<link href="~/assets/css/icomoon/styles.min.css" rel="stylesheet" type="text/css" asp-append-version="true"/>*@
+    <link href="~/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <link href="~/assets/appcss/customAppStyles.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <link href="~/assets/appcss/appStyles.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+
+    <!--Poppins-->
+    @*<link href="~/assets/css/poppins.min.css" rel="stylesheet" type="text/css" asp-append-version="true"/>*@
+    <link href="~/lib/sweetalert/dist/sweetalert.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+
+    <!-- data tables -->
+    <link href="~/assets/plugins/datatables/plugins/bootstrap/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <link href='~/lib/select2/dist/css/select2.min.css' rel='stylesheet' type='text/css'>
+    @*@{
+    var theme = httpContextAccessor.HttpContext.Request.Cookies["theme"];
+    if (theme == "Blue")
+    {
+    <link rel="stylesheet" href="~/assets/externalCss/blue.css" type="text/css" asp-append-version="true" />
+
+    }
+    else if (theme == "Red")
+    {
+
+
+    }
+    else
+    {
+    <link rel="stylesheet" href="~/assets/externalCss/yellow.css" type="text/css" asp-append-version="true" />
+    }
+    }*@
+    <link rel="stylesheet" href="~/assets/externalCss/red.css" type="text/css" asp-append-version="true" />
+    @* <link rel="stylesheet" href="~/assets/externalCss/yellow.css" type="text/css" asp-append-version="true" />*@
+</head>
+
+<body>
+    <div id="overlay">
+        <div class="cv-spinner">
+            <span class="spinner">
+
+            </span>
+        </div>
+    </div>
+    <div id="overlay1">
+        <div class="cv-spinner">
+            <span class="spinner">
+
+            </span>
+        </div>
+    </div>
+    <div id="overlay2">
+        <div class="cv-spinner">
+            <span class="spinner">
+
+            </span>
+        </div>
+    </div>
+    <div id="overlay6">
+        <div class="cv-spinner">
+            <span class="spinner">
+            </span>
+
+        </div>
+        <div class="loadertext" id="loadingText">Please check your UAEID Mobile Application for entering pin...</div>
+    </div>
+
+    <script src="~/global_assets/js/main/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/assets/js/popper.min.js" asp-append-version="true"></script>
+    <script src="~/assets/js/dasboardCardAnimate.js" asp-append-version="true"></script>
+
+    <!-- Core JS files -->
+    <div class="wrapper">
+
+        <!--app-sidebar-->
+        <partial name="_Navigation" />
+        <!--app-sidebar end-->
+
+        <div class="content-wrapper w-100">
+
+            <!--app-navbar-->
+            <partial name="_Header" />
+            <!--app-navbar end-->
+            <!--Main Content Start-->
+            <div class="content content-side background-image">
+                <div class="container-fluid p-0">
+
+                    <!--breadcrumb start-->
+                    <div aria-label="breadcrumb" class="custom-breadcrumb">
+                        <ol class="breadcrumb custom-breadcrumb-down">
+                            <li class="breadcrumb-item" id="homeMenu">
+                                <img src="~/assets/images/Home IocnNew.png" style="width: 16px; height: 16px; margin-right: 5px;" />
+
+                            </li>
+                            @*<li class="breadcrumb-item" id="homeMenu"><i class="fa fa-home"></i>&nbsp;</li>*@
+                            @*<li class="breadcrumb-item" id="homeMenu"><a href=""><i class="fa fa-home"></i>&nbsp;</a></li>*@
+                            <li class="breadcrumb-item" id="mainMenu" aria-current="page"></li>
+                            <li class="breadcrumb-item" id="subMenu" aria-current="page"></li>
+                        </ol>
+                    </div>
+                    <!--breadcrumb end-->
+
+                    <main role="main" class="pb-3">
+                        @RenderBody()
+                    </main>
+                </div>
+            </div>
+            <!--Main Content End-->
+            <!-- Footer -->
+            <partial name="_Footer" />
+            <!-- Footer End -->
+
+        </div>
+    </div>
+
+    @*<div id="modal-placeholder">*@
+    @await Html.PartialAsync("_ModalDialog")
+    @*</div>*@
+
+
+
+    <script src="~/assets/js/bootstrap.min.js" asp-append-version="true"></script>
+    @*<script src="~/assets/javascript/dropdown_collaspse.js" asp-append-version="true"></script>*@
+    <script src="~/assets/javascript/index.js" asp-append-version="true"></script>
+    <script src="~/assets/javascript/sidebar_jquery.js" asp-append-version="true"></script>
+    <script src="~/lib/sweetalert/dist/sweetalert.min.js" asp-append-version="true"></script>
+    <script src='~/lib/select2/dist/js/select2.min.js' type='text/javascript'></script>
+
+    <!-- data tables -->
+    <script src="~/assets/plugins/datatables/jquery.dataTables.min.js" asp-append-version="true"></script>
+    <script src="~/assets/plugins/datatables/plugins/bootstrap/dataTables.bootstrap4.min.js" asp-append-version="true"></script>
+    @* <script src='~/WebViewer/lib/webviewer.min.js'></script> *@
+    <script src='~/WebViewer-10.6.1/lib/webviewer.min.js'></script>
+
+    <script type="text/javascript">
+        var webviwerInstance;
+        var isWebViewerLoaded = false;
+        $(document).ready(function () {
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+            });
+
+            $('.theme-changer').on('click', "a", function () {
+                var item = $(this).attr('name');
+                $.post('@Url.Action("SetTheme", "Home")',
+                    {
+                        data: item
+                    })
+                    .done(function () {
+                        location.reload();
+                    });
+            });
+
+
+
+            var BasePath = @Json.Serialize(@Configuration.GetSection("WebViwerBasePath_10").Value);
+            //var BasePath = @Configuration.GetSection("WebViwerBasePath").Value
+
+            const viewerElement = document.getElementById('Viewer1');
+
+            WebViewer({
+                licenseKey: "DigitalTrust Technologies Pvt Ltd:OEM:Digital Signature Services Portal::B+:AMS(20270629):3CA5587D04B7080AC360B13AC982536160617FD5F900ED4BF50419D44A60189E528AB6F5C7",
+                path: BasePath,
+                //initialDoc: 'https://pdftron.s3.amazonaws.com/downloads/pl/demo-annotated.pdf', // replace with your own PDF file
+                initialDoc: BasePath + '/Doc1.pdf', // replace with your own PDF file
+                preloadWorker: "All",
+                fullAPI: true,
+            }, viewerElement).then((instance) => {
+                webviwerInstance = instance;
+                const { annotationManager, Annotations, documentViewer} = webviwerInstance.Core;
+                isWebViewerLoaded = true;
+
+                webviwerInstance.UI.disableElements([
+                    "menuButton",
+                    "leftPanelButton",
+                    "viewControlsButton",
+                    "panToolButton",
+                    "ribbons",
+                    "toolsHeader",
+                    "signatureFieldToolGroupButton",
+                    // "textFieldToolGroupButton",
+                    // "freeTextToolGroupButton",
+                    "checkBoxFieldToolGroupButton",
+                    "radioButtonFieldToolGroupButton",
+                    "listBoxFieldToolGroupButton",
+                    "comboBoxFieldToolGroupButton",
+                    "toolsOverlay",
+                    "selectToolButton"
+                ]);
+
+            });
+
+
+            $('input[type=text]:not([readonly]),input[type=url]:not([readonly]),input[type=tel]:not([readonly]),input[type=password]:not([readonly]),input[type=radio]:not([readonly]),textarea:not([readonly]),select:not([readonly]),input[type=email]:not([readonly]),input[type=number]:not([readonly])').each(function () {
+                var req = $(this).attr('data-val-required');
+                var exclude = $(this).attr('data-exclude');
+                if (undefined != req && undefined == exclude) {
+                    var label = $('label[for="' + $(this).attr('id') + '"]');
+                    var text = label.text();
+                    if (text.length > 0 && !text.includes("*")) {
+                        label.append(' <span style="color:#ff0000b3;">*</span>');
+                    }
+                }
+            });
+
+            $("input:text,form").attr("autocomplete", "off");
+
+            $(".datepicker").change(function () {
+                var errirdivId = "#" + this.id + "-error";
+                if ($(this).hasClass("input-validation-error") && $(this).val() != "") {
+                    $(this).removeClass("input-validation-error");
+                    $(errirdivId).text("");
+                    $(this).closest("span").addClass("field-validation-valid");
+                }
+            })
+        });
+
+        $(document).on('click', '#sidebar ul li', function () {
+            $('#sidebar ul li').removeClass('active');
+            $(this).addClass("active");
+        });
+
+        $(document).on('click', '#sidebar ul li ul li a', function () {
+            $('#sidebar ul li ul li a').removeClass('active');
+            $(this).addClass("active");
+        });
+
+        $("#sidebar ul li").on("click", function () {
+            $('#sidebar ul li ul li a').removeClass('active');
+        });
+
+        function ajaxErrorHandler(xhr, status, error) {
+            switch (xhr.status) {
+                case 400:
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Cannot process your request"
+                    });
+                    break;
+
+                case 401:
+                    Swal.fire({
+                        icon: "info",
+                        title: "Session Expired",
+                        text: "Click on 'Ok' button to login again!"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '@Url.Action("Index", "Login")';
+                        }
+                    });
+                    break;
+
+                case 403:
+                    Swal.fire({
+                        icon: "error",
+                        title: "Forbidden",
+                        text: "You do not have access to this resource"
+                    });
+                    break;
+
+                case 404:
+                    Swal.fire({
+                        icon: "error",
+                        title: "Not Found",
+                        text: "The resource you requested could not be found"
+                    });
+                    break;
+
+                case 408:
+                    Swal.fire({
+                        icon: "error",
+                        title: "Timeout",
+                        text: "The request is timed out"
+                    });
+                    break;
+
+                case 500:
+                    Swal.fire({
+                        icon: "error",
+                        title: "Server Error",
+                        text: "Something went wrong, please try again later"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            //window.location.reload();
+                        }
+                    });
+                    break;
+
+                case 502:
+                    Swal.fire({
+                        icon: "error",
+                        title: "Bad Gateway",
+                        text: "Invalid response"
+                    });
+                    break;
+
+                case 503:
+                    Swal.fire({
+                        icon: "error",
+                        title: "Service Unavailable",
+                        text: "The Service is currently unavailable, please try after sometime"
+                    });
+                    break;
+
+                case 504:
+                    Swal.fire({
+                        icon: "error",
+                        title: "Gateway Timeout",
+                        text: "Gateway timeout error occurred"
+                    });
+                    break;
+
+                default:
+                    const errors = ["Bad Request", "Bad Gateway", "Not Found", "Internal Server Error", "Forbidden", "Unauthorized", "Service Unavailable"];
+
+                    if (xhr.readyState === 0 && xhr.status === 0 && xhr.responseJSON === undefined) {
+                        if (!errors.includes(error)) {
+                            if (window.navigator.onLine) {
+                                if (error === "") {
+                                    error = "Something went wrong, please try later";
+                                }
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Error",
+                                    text: error
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        //window.location.reload();
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: "info",
+                                    title: "No Internet",
+                                    text: "Check your network connection!"
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.reload();
+                                    }
+                                });
+                            }
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: "Something went wrong, please try later"
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    //window.location.reload();
+                                }
+                            });
+                        }
+                    }
+                    break;
+            }
+
+
+        }
+
+        function getblob(file, fileName) {
+            return new Promise((resolve, reject) => {
+                var reader = new FileReader();
+
+                reader.onload = function () {
+                    // No need to convert to data URL for PDF files, just create a Blob
+                    var blob = new Blob([reader.result], { type: "application/pdf" });
+
+                    // Create a new File from the Blob
+                    var newFile = new File([blob], fileName, {
+                        type: "application/pdf",
+                    });
+                    resolve(newFile);
+                };
+
+                reader.onerror = (error) => reject(error);
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+

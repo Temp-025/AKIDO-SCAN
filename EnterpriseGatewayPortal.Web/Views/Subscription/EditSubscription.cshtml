@@ -1,0 +1,541 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.SubscriptionVerification.EditSubcriptionViewModel
+@using Newtonsoft.Json;
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "EditSubscription";
+}
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+<style>
+
+    .classshide {
+        display: none !important;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .dropzone {
+        border: 2px dashed #ced4da;
+        border-radius: 5px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        margin-bottom: 20px;
+        height: 150px;
+    }
+
+        .dropzone p {
+            margin: 0;
+            font-size: 16px;
+            color: #6c757d;
+            padding: 39px;
+        }
+
+    #thumbnail img {
+        height: 138px;
+        width: 138px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+    }
+
+    #recplist label {
+        font-weight: bold;
+    }
+
+    .recp {
+        margin-bottom: 20px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+    .modal-dialog {
+        max-width: 800px;
+        width: 570px;
+        margin: 1.75rem auto;
+    }
+
+    .modal-content {
+        border-radius: 10px;
+    }
+
+    .modal-footer {
+        border-radius: 0 0 10px 10px;
+    }
+
+    #viewer {
+        margin-top: 20px;
+    }
+
+    .box {
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .fields-heading {
+        color: #007bff;
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+
+    .draggable-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+
+        .draggable-buttons button {
+            flex: 1 1 calc(100% - 20px);
+            margin-right: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+            .draggable-buttons button:hover {
+                background-color: #0056b3;
+            }
+
+    .recipient li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .submit-button.classshide {
+        display: none;
+    }
+
+    .borderBox {
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        height: 252px;
+    }
+
+
+    .preview-container {
+        max-height: 160px;
+        overflow: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+
+        .preview-container img {
+            display: block;
+            margin: 0 auto;
+            max-width: 169px;
+        }
+
+    .form-control {
+        margin-bottom: 10px;
+    }
+
+    .checkbox-box {
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .custom-card {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        max-width: 665px;
+        width: 580px;
+        margin-left: 16px;
+        margin-right: 19px;
+    }
+
+        .custom-card .card-body {
+            padding: 20px;
+        }
+
+    #docDataTable_wrapper .dataTables_filter input {
+        width: 184px;
+    }
+</style>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body" id="create">
+                <form id="createDoc" enctype="multipart/form-data">
+                    @*style="height: 664px;">*@
+                    <div class="row">
+
+
+                        <div class="col-sm-12 col-md-6">
+                            <!-- Dropdown for Select Issuer Name -->
+                            <div class="form-group">
+                                <label style="font-weight: 600; font-size: 13.5px;">Select Issuer Name<span style="color: red;">*</span></label>
+                                <select class="form-control" id="issuerNameDropdown" style="padding: 5px;">
+                                    <option value="">Choose an option</option>
+
+                                </select>
+                            </div>
+
+                            <div id="documentCheckboxes" class="form-group" style="display: none;">
+                                <label class="col-form-label">Select Document Type:<span class="text-danger">*</span></label>
+                                <div class="form-group row">
+                                    <div class="custom-card">
+
+                                        <div class="card-body">
+
+                                            <table id="docDataTable" class="table-striped custom-table table">
+
+                                                <thead>
+                                                    <tr>
+                                                        <th>Document Type</th>
+                                                        <th>Select</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                    <tr>
+                                                        <td></td>
+                                                        <td>
+                                                            <input type="checkbox" class="custom-check-box">
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex justify-content-end" style="padding-top: 31px;">
+                        <button type="button" class="btn btn-primary" id="Save" onclick="SaveSubscription()">Update Subscription</button>
+                    </div>
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@* <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> *@
+<script src="~/assets/js/jquery-3.6.4.min.js"></script>
+<script>
+
+    var issuerOrgNamesDetails = @Html.Raw(JsonConvert.SerializeObject(Model.IssuerOrgNameDetails));
+    var tableBody;
+    var responseMsg;
+    var certValues = [];
+    var selectedDocuments = [];
+    var selectedDocumentsString;
+    var docNames = '@Model.DocumentNames';
+
+
+    $(document).ready(function () {
+        var DocumentVerificationLink = document.getElementById('DocumentVerificationModle').querySelector('.nav-link');
+        DocumentVerificationLink.click();
+        $('#homeMenu').addClass('breadcrumb-item').append('Subscription > Edit Subscription');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        $('#SubscriptionMenu').addClass('active');
+        $('#networkOverlay').hide();
+        $('#docDataTable').DataTable({
+            paging: true,
+
+        });
+        updateIssuerNames();
+
+    });
+
+    $('#issuerNameDropdown').change(function () {
+
+        sendIssuerUidToController();
+    });
+
+   // var docNames = '@Model.DocumentNames';
+
+    function updateDocumentTypes(documentTypes) {
+        if (!tableBody) {
+            tableBody = document.getElementById("docDataTable").getElementsByTagName('tbody')[0];
+        }
+        tableBody.innerHTML = "";
+        documentTypes.forEach(function (documentType) {
+            addTableRow(documentType.documentProperty);
+        });
+    }
+
+    function addTableRow(documentName) {
+        var newRow = tableBody.insertRow(tableBody.rows.length);
+        var cell1 = newRow.insertCell(0);
+        var cell2 = newRow.insertCell(1);
+
+        cell1.innerHTML = documentName;
+
+        // Check if the documentName is in the docNames string
+        var isChecked = docNames.split(',').includes(documentName);
+
+        // Create a checkbox and set its checked attribute
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'custom-check-box';
+        checkbox.checked = isChecked;
+
+        // Append the checkbox to the cell
+        cell2.appendChild(checkbox);
+    }
+
+
+
+    function updateIssuerNames() {
+        var uniqueIssuerNames = [...new Set(issuerOrgNamesDetails.map(item => item.documentProperty))];
+        var issuerNameDropdown = $('#issuerNameDropdown');
+
+        issuerNameDropdown.empty();
+        issuerNameDropdown.append($('<option></option>').attr('value', '').text('Choose an option'));
+
+        $.each(uniqueIssuerNames, function (index, issuerName) {
+            issuerNameDropdown.append($('<option></option>').attr('value', issuerName).text(issuerName));
+        });
+
+        //var issuerOrgName = @Json.Serialize(Model.IssuerOrgName);
+        var issuerOrgName = '@Model.IssuerOrgName';
+
+        if(issuerOrgName){
+            issuerNameDropdown.val(issuerOrgName);
+            sendIssuerUidToController();
+
+        }else{
+            issuerNameDropdown.prepend($('<option></option>').attr('value', '').text('Choose an option'));
+        }
+
+    }
+
+    function sendIssuerUidToController() {
+
+        var selectedIssuerName = $('#issuerNameDropdown').val();
+        if (selectedIssuerName && selectedIssuerName !== "") {
+
+            var selectedIssuer = issuerOrgNamesDetails.find(item => item.documentProperty === selectedIssuerName);
+
+            if (selectedIssuer) {
+                var selectedIssuerUid = selectedIssuer.IssuerUid;
+
+                if (selectedIssuerUid) {
+                    $('#documentCheckboxes').show();
+                } else {
+                    $('#documentCheckboxes').hide();
+                }
+
+                $.ajax({
+                    url: '@Url.Action("GetDocumentType", "Subscription")',
+                    type: 'POST',
+                    data: { issuerUid: selectedIssuerUid },
+                    success: function (response) {
+
+                        if (response.success) {
+
+                            updateDocumentTypes(response.result);
+
+                            console.log(response.message);
+                        } else {
+
+                            console.error(response.message);
+                        }
+                    },
+                    error: function (error) {
+
+                        console.error('Error:', error.statusText);
+                    }
+                });
+
+            }
+        }
+        else {
+            // Hide the documentCheckboxes div if "Choose an option" is selected
+            $('#documentCheckboxes').hide();
+        }
+    }
+
+
+    function validateFields() {
+
+        if ($("#issuerNameDropdown").val() === "") {
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Organization Empty!',
+                text: 'Please Select Issuer Organization.'
+
+            });
+
+            return false;
+        }
+        if ($('.custom-check-box:checked').length === 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Document Empty!',
+                text: 'Please select any Document.'
+
+            });
+
+            return false;
+        }
+
+        return true;
+    }
+
+    function subscribeDoc()
+    {
+        var selectedIssuerName = $('#issuerNameDropdown').val();
+        var selectedIssuer = issuerOrgNamesDetails.find(item => item.documentProperty === selectedIssuerName);
+        var selectedIssuerUid = selectedIssuer.IssuerUid;
+        var issuerOrgName = '@Model.IssuerOrgName';
+
+        var editSubscriptionViewModel = {
+            issuerName: selectedIssuerName,
+            issuerUid: selectedIssuerUid,
+            selectedDocuments: selectedDocumentsString,
+            DocumentNames: docNames,
+            issuerOrgName: issuerOrgName,
+            IssuerOrgNameDetails: issuerOrgNamesDetails,
+        }
+
+
+        $.ajax({
+            url: '@Url.Action("Update", "Subscription")',
+            type: 'POST',
+            data: JSON.stringify(editSubscriptionViewModel),
+            contentType: 'application/json; charset=utf-8',
+            processData: false,
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+
+                $('#overlay').hide();
+            },
+            success: function (response) {
+                if (response.success == true) {
+    //  responseMsg = response.message;
+
+    Swal.fire({
+        title: 'Success!',
+        text: response.message,
+        icon: 'success' // 'type' becomes 'icon'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '@Url.Action("SubscriptionList", "Subscription")';
+        }
+    });
+
+    console.log(response.message);
+} else {
+    Swal.fire({
+        title: 'Error',
+        text: response.message,
+        icon: 'error'
+    });
+    console.error(response.message);
+}
+
+            },
+            error: function (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error while Subscription. Please try again.',
+                });
+                console.error('Error:', error.statusText);
+            }
+        });
+    }
+
+    function SaveSubscription() {
+        for (var i = 0; i < tableBody.rows.length; i++) {
+
+            var checkbox = tableBody.rows[i].cells[1].querySelector('.custom-check-box');
+
+            if (checkbox.checked) {
+                var documentName = tableBody.rows[i].cells[0].innerHTML;
+
+                if (selectedDocuments.indexOf(documentName) === -1) {
+                    // If not, add it to the selectedDocuments array
+                    selectedDocuments.push(documentName);
+                }
+            }
+        }
+        selectedDocumentsString = selectedDocuments.join(',');
+       // updateSelectedDocumentsArray();
+
+        if (validateFields()) {
+
+            var swalText = 'Do you want to Subscribe?\n';
+            //if (typeof certValues === 'object') {
+            //    for (var key in certValues) {
+            //        if (certValues.hasOwnProperty(key)) {
+            //            var value = certValues[key];
+            //            swalText += `${key}: ${value}rs\n`;
+            //        }
+            //    }
+            //}
+            Swal.fire({
+                title: 'Subscription',
+                text: swalText,
+                icon: 'info', // 'type' becomes 'icon'
+                showCancelButton: true,
+                confirmButtonText: 'Confirm'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log("hi");
+                    subscribeDoc();
+                }
+            });
+        }
+
+
+    }
+</script>

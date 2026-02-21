@@ -1,0 +1,47 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.VerificationRequests.DownloadViewModel
+
+    <div hidden> id="fileId" data-fileId="@ViewBag.FileId"></div>
+
+<div style="display: flex; justify-content: flex-end;">
+    <button class="btn btn-primary" id="downloadButton" style="padding-top: 8px; margin-bottom: 12px; margin-top: 3px; font-size: 19px;">
+        <i class="fa fa-caret-left"></i> Back
+    </button>
+</div>
+
+
+
+    @if (Model == null || Model.VerificationReport == null || Model.VerificationReport.Length == 0)
+    {
+        <p>Downloaded document is empty or null.</p>
+    }
+    else
+    {
+
+        <iframe src="data:application/pdf;base64,@(Convert.ToBase64String(Model.VerificationReport))#toolbar=0&navpanes=0&scrollbar=0&disablekb=1" height="600" width="100%" frameborder="0">
+        Your browser does not support PDF embedding. You can <a href="data:application/pdf;base64,@(Convert.ToBase64String(Model.VerificationReport))" download="verification_certificate.pdf">download the PDF file here</a>.
+        </iframe>
+
+    }
+@section scripts {
+    <script>
+        // Access fileId using data attribute
+        var fileId = "@ViewBag.FileId";
+        $(document).ready(function () {
+            var DocumentIssuerLink = document.getElementById('DocumentIssuerModle').querySelector('.nav-link');
+            DocumentIssuerLink.click();
+            $('#homeMenu').addClass('breadcrumb-item').append('Document Issuer > Verification Requests > View > Verification Certificate');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#VerificationRequestsMenu').addClass('active');
+            $('#networkOverlay').hide();
+           
+        });
+       
+        $('#downloadButton').on('click', function () {
+            var url = '@Url.Action("GetSaveDocConfig", "VerificationRequests")' + '?id=' + fileId;
+            window.location.href = url;
+          
+        });
+    </script>
+
+}

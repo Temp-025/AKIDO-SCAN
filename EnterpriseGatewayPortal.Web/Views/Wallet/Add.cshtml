@@ -1,0 +1,1690 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.Wallet.CredentialAddViewModel
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+{
+        new BreadCrumbModel { Title = "Wallet - Credentials",Url = Url.Action("Index","Wallet"), IconKey = "wallet-credentials"},
+        new BreadCrumbModel { Title = "Add",Url = "", IconKey = "add"},
+    };
+}
+
+@{
+    ViewData["Title"] = " Credentials New";
+}
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+<style>
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+        .select2-container .select2-selection--single {
+            height: 35px !important;
+        }
+
+    .selection {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #555555b3;
+        font-size: 14px;
+        font-family: inherit;
+    }
+
+    .custom-check-box {
+        margin-right: 5px;
+        -webkit-print-color-adjust: exact;
+        vertical-align: top;
+        background-repeat: no-repeat;
+        background-position: 50%;
+        background-size: contain;
+        position: relative !important;
+        width: 1.125rem;
+        height: 1.125rem;
+        background-color: #fff;
+        border: .125rem solid rgba(0,0,0,0.3);
+    }
+
+    .popup {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        float: right;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    .popuptext {
+        visibility: hidden;
+        min-width: 200px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 5px;
+        position: relative;
+        z-index: 1111;
+        right: 3%;
+        margin-bottom: 35px;
+        margin-top: -60px;
+    }
+    /* The actual popup */
+    .popup .popuptext {
+        visibility: hidden;
+        min-width: 200px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 5px;
+        position: relative;
+        z-index: 1111;
+        right: 3%;
+        /* top: -43%; */
+        /* bottom: -28%; */
+        margin-bottom: 0px;
+        margin-top: -60px;
+    }
+
+        /* Popup arrow */
+        .popup .popuptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+
+    .popup:hover + .popuptext {
+        visibility: visible;
+        -webkit-animation: fadeIn 1s;
+        animation: fadeIn 1s;
+    }
+
+    .custom-check-box:hover {
+        outline: auto;
+        outline-color: #5d9ceca3;
+    }
+
+    .classshide {
+        display: none !important;
+    }
+
+    .fieldsetdata {
+        display: inline-block;
+        padding: 20px;
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #CCC !important;
+        border-radius: 5px;
+    }
+
+    #recplist {
+        display: flex;
+        flex-direction: column;
+        gap: 2px; /* Adjust spacing between rows */
+    }
+
+    #recplistDefault {
+        display: flex;
+        flex-direction: column;
+        gap: 2px; /* Adjust spacing between rows */
+    }
+
+    #logoPreviewContainer {
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 10px;
+        background: #f9f9f9;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        display: inline-block;
+        width: 146px;
+        height: 135px;
+    }
+
+    .logo-img {
+        max-width: 180px;
+        max-height: 180px;
+        border-radius: 5px;
+        padding-top: 5px;
+        padding-left: 21px;
+        width: 104px;
+    }
+
+    :focus-visible {
+        color: #555553 !important;
+        border-color: #5555 !important;
+    }
+
+    .container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .qwer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 12px;
+    }
+
+
+    .step-label {
+        position: absolute;
+        bottom: -24px; /* Adjust this value to control the space between the circle and label */
+        width: 100px; /* Set the width based on your design */
+        text-align: center;
+        white-space: nowrap; /* Prevent text from wrapping */
+        font-size: 15px;
+    }
+
+    .container .steps {
+        display: flex;
+        width: 76%;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        margin: 8px 30px;
+        height: 0px;
+    }
+
+    .steps .circle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 35px;
+        width: 35px;
+        color: #999;
+        background: #e0e0e0;
+        /* border-radius: 50%; */
+        border: 3px solid #e0e0e0;
+        z-index: 1;
+        transition: all 300ms ease;
+        overflow: hidden;
+    }
+
+        .steps .circle img {
+            height: 56%;
+            width: 47%;
+        }
+
+        .steps .circle.active {
+            border-color: #B68A35;
+            color: white;
+            background-color: #B68A35;
+        }
+
+
+    .steps .progress-bar {
+        position: absolute;
+        top: 0%;
+        left: 3%;
+        transform: translateY(-50%);
+        height: 3px;
+        width: 94%;
+        background: #e0e0e0;
+        z-index: 0;
+    }
+
+    .progress-bar .indicator {
+        position: absolute;
+        height: 100%;
+        width: 0%;
+        background: #B68A35;
+        transition: all 300ms ease;
+    }
+
+    #maincard {
+        /*  height: 74vh !important;
+        max-height: 100vh; */
+        overflow-y: auto; /* Enables scrolling if content overflows */
+        scrollbar-width: thin; /* Firefox */
+        scrollbar-color: transparent transparent; /* Transparent thumb and track */
+    }
+
+        /* Hide scrollbar for Webkit browsers (Chrome, Safari, Edge) */
+        #maincard::-webkit-scrollbar {
+            width: 0px; /* Hide scrollbar */
+            background: transparent; /* Transparent background */
+        }
+
+        /* Optional: Ensure scrolling still works */
+        #maincard::-webkit-scrollbar-thumb {
+            background: transparent; /* Fully transparent scrollbar */
+        }
+
+
+    .custom-file-input-style {
+        border: 1px solid #CBA344;
+        border-radius: 4px;
+        padding: 0 !important;
+        padding-top: 6px !important;
+        height: 40px;
+        box-sizing: border-box;
+        /* color: #C3C6CB; */
+    }
+
+        .custom-file-input-style::file-selector-button {
+            border: none;
+            background-color: transparent;
+            font-weight: 400;
+            padding: 6px 12px;
+            margin: -6px 12px -6px 0; /* removes vertical spacing/gap */
+            border-right: 1px solid #CBA344;
+            cursor: pointer;
+            height: calc(100% + 6px); /* ensure full height including padding */
+            color: #6C4527;
+        }
+
+        .custom-file-input-style:hover::file-selector-button {
+            background-color: rgba(249, 247, 237, 1); /* on hover */
+        }
+
+        /*  .form-control:focus {
+                    border: 1px solid #92722A;
+                    color: #1B1D21;
+                } */
+
+        .custom-file-input-style:focus::file-selector-button {
+            border-right: 1px solid #92722A; /* change to focus color */
+        }
+</style>
+
+@* ------------- Stepper code --------------------------- *@
+<div class="row" id="spacingCss">
+    <div class="col-md-12 plr">
+        <div class="card shadow-lg" id="maincard">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12 container">
+                        <div class="steps">
+                            <span class="circle active">
+                                <span style="font-size: 15px; font-weight: bold; color:white !important;">1</span>
+                            </span>
+                            <span class="circle">
+                                <span style="font-size: 15px; font-weight: bold;color:white !important;">2</span>
+                            </span>
+                            <span class="circle">
+                                <span style="font-size: 15px; font-weight: bold;color:white !important;">3</span>
+                            </span>
+                            @*  <span class="circle">
+                                    <span style="font-size: 15px; font-weight: bold; color:white !important;">4</span>
+                                </span> *@
+                            <div class="progress-bar">
+                                <span class="indicator"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="qwer">
+                            <span class="step-label" style="left: 10%; font-size:13px;">Enter Credential Details</span>
+                            <span class="step-label" style="left: 46.5%; font-size:13px;"> Attributes</span>
+                            <span class="step-label" style="left: 82.5%; font-size:13px;">Save Credential</span>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <br />	<br /><br />
+
+                <div class="form-row" id="WalletCredentialFields">
+
+                    <div class="form-group col-md-6">
+                        <input asp-for="Id" class="form-control" hidden />
+
+                        <div class="form-group">
+                            <label asp-for="CredentialName" class="col-form-label s3"></label>
+                            <input asp-for="CredentialName" class="form-control" />
+
+                            <span asp-validation-for="CredentialName" class="text-danger" style="color:#dc3545 !important"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="DisplayName" class="col-form-label s3"></label>
+                            <input asp-for="DisplayName" class="form-control" />
+
+                            <span asp-validation-for="DisplayName" class="text-danger" style="color:#dc3545 !important"></span>
+                        </div>
+                        @* <div class="form-group">
+                                <label asp-for="VerificationDocType" class="col-form-label s3"></label>
+                                <select asp-for="VerificationDocType" class="form-control">
+                                    <option value="">-- Select ID Document Type --</option>
+                                    @foreach (var value in ViewBag.DropdownValues as List<string>)
+                                    {
+                                        <option value="@value">@value</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="VerificationDocType" class="text-danger"></span>
+                            </div> *@
+                        <div class="form-group" hidden>
+                            <label asp-for="VerificationDocType" class="col-form-label s3"></label>
+                            <input asp-for="VerificationDocType" class="form-control" />
+                            <span asp-validation-for="VerificationDocType" class="text-danger" style="color:#dc3545 !important"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="AuthenticationScheme" class="col-form-label s3"></label>
+                            <select asp-for="AuthenticationScheme" class="form-control" asp-items="Model.AuthSchemeTypesList">
+                                <option value="">-- Select Authentication Scheme --</option>
+                            </select>
+                            <span asp-validation-for="AuthenticationScheme" class="text-danger" style="color:#dc3545 !important"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="CredentialTrustUrl" class="col-form-label s3"></label>
+                            <input asp-for="CredentialTrustUrl" class="form-control" />
+
+                            <span asp-validation-for="CredentialTrustUrl" class="text-danger" style="color:#dc3545 !important"></span>
+                        </div>
+                        <div class="form-group">
+                            <fieldset id="fieldSetId" style="border: 1px solid #E2E8F0; padding: 10px; border-radius: 12px; ">
+                                <legend id="legendId" style=" font-size: 14px; font-weight: 500; color: black;width:165px !important;">Organization Categories&nbsp;<span style="color:#f44336 !important;">*</span></legend>
+
+                                <label style="display: block;font-weight: 500;">
+                                    @*  border-bottom: 1px solid lightgrey; *@
+                                    <input type="checkbox" id="select-all-categories" style="margin-left:5px" class="custom-check-box" />
+                                    Select all
+                                </label>
+
+                                @for (int i = 0; i < Model.OrganizationCategories.Count; i++)
+                                {
+                                    var category = Model.OrganizationCategories[i];
+                                    <label style="display: block;font-size:12px; font-weight:400;">
+                                        <input type="checkbox" name="SelectedCategoryIds" value="@category.id" id="orgCategories" style="margin-left:5px" class="custom-check-box" />
+                                        @category.categoryName
+                                    </label>
+                                }
+                            </fieldset>
+                            <span class="text-danger" id="orgCategoriesErrorSpan" style="color:#dc3545 !important"></span>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <div class="form-group">
+                            <label asp-for="validity" class="col-form-label s3">Validity(Days)<span style="color:#f44336 !important;">*</span></label>
+                            <input asp-for="validity" type="text" id="days" name="days" class="form-control" min="1" pattern="\d{15}" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+
+                            <span asp-validation-for="validity" class="text-danger" style="color:#dc3545 !important"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Category" class="col-form-label s3"></label>
+                            <select asp-for="Category" class="form-control"
+                                    asp-items="Model.CategoryList">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <span asp-validation-for="Category" class="text-danger" style="color:#dc3545 !important"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Logo" class="col-form-label">Logo &nbsp;<span style="color:#f44336 !important;">*</span></label>
+                            <input type="file" asp-for="Logo" class="form-control custom-file-input-style" onchange="FileToBase64Logo(this)" tabindex="1" accept=".jpg, .png, .jpeg" />
+                            <input type="hidden" asp-for="Logo" id="Credential_Logo" />
+                            <span asp-validation-for="Logo" class="text-danger" style="color:#dc3545 !important"></span>
+
+                            <!-- Preview Image -->
+                            <div id="logoPreviewContainer" style="margin-top: 10px; display: none;">
+                                <img id="logoPreview" src="" alt="Logo Preview" class="logo-img" />
+                            </div>
+                        </div>
+
+
+
+
+                    </div>
+
+                </div>
+                <div class="row classshide" id="DataAttributes">
+                    <div class="form-group col-md-12">
+                        <label class="col-form-label" style="display: inline-block;">Data Attributes<span style="color:#f44336 !important;">*</span></label>
+                        <a class="btn btn-other" href="@Url.Action("DownloadAttributesCSV", "Wallet")" style="float:right;margin-left:5px;width: 51px;">
+                            <img src="~/assets/images/FileArrowDown.svg" alt="edit" style="position: relative; bottom: 0px; width: 18px; margin-left: 0px;margin-top: -1px;" />
+                        </a>
+                        <label for="uploadCSV" class="btn btn-other" style="float:right;">
+                            <img src="@Url.Content("~/assets/images/Add_Using_CSV_Icon.svg")" style="height: 20px;" />
+                            Add Attributes using CSV
+                        </label>
+
+                        <button class="btn btn-other" id="autoPopulateAttributes" type="button" onclick="AutoPopulateAttributes()" style="float:right !important; margin-bottom: 16px; margin-right: 7px !important;">
+                            Auto Populate Attributes
+                        </button>
+                        <button class="btn btn-other classshide" id="manualAttibutes" type="button" onclick="ManulFillingAttributes()" style="float:right !important;margin-bottom: 16px; margin-right: 7px !important;">
+                            Manual Filling Attributes
+                        </button>
+
+                        <input type="file" id="uploadCSV" accept=".csv" style="display: none;" />
+
+                        <div class="fieldsetdata" id="ManulaFillingAttributes">
+                            <div id="recplist">
+                                <div class="row recp" id="0">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-3 margin">
+                                                <input class="form-control Attribute" type="text" data-val="true"
+                                                       data-val-required="The Attribute field is required."
+                                                       id="RecpientList_0__Attribute" name="RecpientList[0].Attribute"
+                                                       value="" autocomplete="off" placeholder="Attribute">
+                                                <span id="RecpientList_0__AttributeError" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-3 margin">
+                                                <input class="form-control AttributeDisplayName" type="text" data-val="true"
+                                                       data-val-required="The Attribute DisplayName field is required."
+                                                       id="RecpientList_0__AttributeDisplayName" name="RecpientList[0].AttributeDisplayName"
+                                                       value="" autocomplete="off" placeholder="Display Name">
+                                                <span id="RecpientList_0__AttributeDisplayNameError" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-3 margin">
+                                                <select class="form-control dropdown" id="attributeDropdown_0" style="width:173px; border-radius:5px; margin-right:13px; height:34px;color: #555553 !important;">
+                                                    <option>Choose DataType</option>
+                                                    <option value="1">Binary</option>
+                                                    <option value="2">Boolean</option>
+                                                    <option value="3">Integer</option>
+                                                    <option value="4">String</option>
+                                                    <option value="8">DateTime</option>
+
+                                                </select>
+                                                <span id="attributeDropdownError_0" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-3 margin">
+                                                <button type="button" onclick="deleteRecipient(this)" id="btnRemove_0"
+                                                        class="btn btn-danger uaeid-secondary del classshide" style="font-size: 17px !important; background: rgba(249, 247, 237, 1) !important; width: 38px; border: none !important; height: 37px;">
+                                                    <img src="~/assets/images/Minus.svg" alt="edit" style="position: relative; bottom: 0px; width: 20px; margin-left: -3px;" />
+                                                </button>
+                                                <button type="button" onclick="addRecipient(this)" id="btnadd_0"
+                                                        class="btn btn-primary uaeid-primary org-pluse-button add text-center" style="font-size: 17px !important;width: 40px; height: 39px !important; margin-left: 15px;">
+                                                    <img src="~/assets/images/Plus.svg" alt="edit" style="position: relative; bottom: 0px; width: 18px; margin-left: -6px;margin-top: -3px;" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="fieldsetdata classshide" id="DefaultAutofillAttributes">
+                            <div id="recplistDefault">
+                                @if (Model.DefaultDataAttributes != null && Model.DefaultDataAttributes.Any())
+                                {
+                                    int index = 0;
+                                    int lastIndex = Model.DefaultDataAttributes.Count - 1; // Last row index
+
+                                    @foreach (var item in Model.DefaultDataAttributes)
+                                    {
+                                        <div class="row recpDefault" id="recp_@index">
+                                            <div class="col-md-3 margin">
+                                                <input class="form-control AttributeDefault" type="text" id="RecpientList_0__AttributeDefault" name="RecpientList[0].AttributeDefault"
+                                                       value="@item.Attribute" autocomplete="off" placeholder="Attribute">
+                                                <span id="RecpientList_0__AttributeDefaultError" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-3 margin">
+                                                <input class="form-control AttributeDefaultDisplayName" type="text"
+                                                       id="RecpientList_0__AttributeDefaultDisplayName" name="RecpientList[0].AttributeDefaultDisplayName"
+                                                       value="@item.DisplayName" autocomplete="off" placeholder="Display Name">
+                                                <span id="RecpientList_0__AttributeDefaultDisplayNameError" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-3 margin">
+                                                <select class="form-control dropdownDefault" id="attributeDefaultDropdown_0" name="RecpientList[@index].DataTypeDefault"
+                                                        style="width:173px; border-radius:5px; margin-right:13px; height:34px;color: #555553 !important;">
+                                                    @foreach (var dataType in new[] { 1, 2, 3, 4, 5 })
+                                                    {
+                                                        <option value="@dataType" selected="@(item.DataType == dataType ? "selected" : null)">
+                                                            @(dataType == 1 ? "Binary" :
+                                                                dataType == 2 ? "Boolean" :
+                                                                dataType == 3 ? "Integer" :
+                                                                dataType == 4 ? "String" :
+                                                                "DateTime")
+                                                        </option>
+                                                    }
+                                                </select>
+                                                <span id="attributeDefaultDropdownError_@index" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-3 margin">
+                                                <button type="button" onclick="deleteRecipientDefault(this)" id="btnDefaultRemove_@index"
+                                                        class="btn btn-danger uaeid-secondary delDefault @(index == 0 && lastIndex == 0 ? "classshide" : "")" style="font-size: 17px !important; background: rgba(249, 247, 237, 1) !important; width: 38px; border: none !important; height: 37px;">
+                                                    <img src="~/assets/images/Minus.svg" alt="edit" style="position: relative; bottom: 0px; width: 20px; margin-left: -3px;" />
+                                                </button>
+
+
+                                                <button type="button" onclick="addRecipientDefault(this)" id="btnDefaultadd_@index"
+                                                        class="btn btn-primary uaeid-primary addDefault text-center" style="font-size: 17px !important;width: 40px; height: 39px !important; margin-left: 15px;">
+                                                    <img src="~/assets/images/Plus.svg" alt="edit" style="position: relative; bottom: 0px; width: 18px; margin-left: -6px;margin-top: -3px;" />
+                                                </button>
+
+                                            </div>
+                                        </div>
+                                        index++;
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+
+                    <!-- Left Side -->
+
+                    <div style="float: left;margin-top: 40px;padding-left: 22px;">
+                        <b>NOTE: </b>(*) Mark fields are mandatory.
+                    </div>
+
+                    <!-- Right Side -->
+                    <div>
+                        <div id="WalletCredentialFieldsNext">
+                            <button type="button" id="backButton1" class="btn btn-other classshide" style="margin-left: 10px;">
+                                Back
+                            </button>
+                            <button type="button" id="nextButton" class="btn btn-primary uaeid-primary greenButton" style="margin-left: 10px; margin-top: 25px; height: 36px; width: 79px; font-size: 13px;">
+                                Next
+                            </button>
+                        </div>
+
+                        <div class="classshide" id="DataAttributeNext" style="padding-top: 22px;">
+                            <button type="button" id="backButton2" class="btn btn-other" style="margin-left: 10px; height: 36px; font-size: 13px; float:left;">
+                                Back
+                            </button>
+                            <button class="btn btn-primary uaeid-primary greenButton" style="margin-left: 10px; height: 36px; font-size: 13px;" type="button" onclick="CreateCredentials()">
+                                Save Credential
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+@section Scripts {
+
+
+    <script>
+        var allowedCSVFileTypes = ['.csv'];
+        var credentialNameRegex = /^[a-zA-Z0-9]+$/;
+        var attributeNospaceRegex = /^\S*$/;
+        var dataAttributesList = [];
+        var dataAttributesNewList = [];
+        var dataAttributesDefaultNewList = [];
+        var dataAttributesCsvList = [];
+        var dataAttributesFinalList = [];
+        var steps = document.querySelectorAll('.steps .circle');
+        var line = document.querySelector('.progress-bar .indicator');
+        $(document).ready(function () {
+
+            $('#networkOverlay').hide();
+            document.getElementById("navigationNetworkOverlay").style.display = "none";
+
+            $("#Wallet-Manager > a")
+                .attr("aria-expanded", "true")
+                .addClass("active");
+
+            $("#Wallet-Manager")
+                .addClass("submenu-active show");
+
+            $("#Wallet-Manager .submenu")
+                .addClass("show");
+
+            $('#Wallet-Credentials').addClass('active');
+
+            $('#homeMenu').addClass('breadcrumb-item').append('Wallet > Wallet Credential > Add');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#CredentialsMenu').addClass('active');
+
+            updateIndexes();
+            var allRows = $(".recpDefault");
+            var lastRow = allRows.last();
+            var lastIndex = lastRow.attr("id") ? lastRow.attr("id").split("_")[1] : null;
+
+            // Ensure the last row has a "+" button and all others only have "-"
+                allRows.each(function (index) {
+                    var rowId = $(this).attr("id").split("_")[1];
+                    var addButton = $(`#btnDefaultadd_${rowId}`);
+                    var removeButton = $(`#btnDefaultRemove_${rowId}`);
+
+                    if (index === allRows.length - 1) {
+                        addButton.removeClass("classshide");  // Show "+" button only for last row
+                    } else {
+                        addButton.addClass("classshide"); // Hide "+" button for all other rows
+                    }
+
+                    if (allRows.length === 1) {
+                        removeButton.addClass("classshide"); // Hide "-" button if only one row exists
+                    } else {
+                        removeButton.removeClass("classshide");
+                    }
+                });
+        });
+
+            function updateProgressBar(step, color) {
+
+                steps.forEach((stepElement, index) => {
+                    stepElement.classList[index < step ? 'add' : 'remove']('active');
+                });
+
+                var width = ((step - 1) / (steps.length - 1)) * 100;
+                line.style.width = width + '%';
+                line.style.background = color;
+            }
+
+            function updateCircleColors(step, color) {
+                steps.forEach((stepElement, index) => {
+                    stepElement.style.borderColor = index < step ? color : '#e0e0e0';
+                    stepElement.style.color = index < step ? color : '#e0e0e0';
+                });
+            }
+
+            $("#nextButton").on("click", function (e) {
+                e.preventDefault(); // Prevent default action
+                var validDetails = true;
+                var selectedOrgCategoryIds = [];
+                var CredentialName = $('#CredentialName').val();
+                var VerificationDocType = null;
+                var AuthenticationScheme = $('#AuthenticationScheme').val();
+                var Category = $('#Category').val();
+                var crdentialLogo = $('#Credential_Logo').val();
+                var CrdentialDisplayName = $('#DisplayName').val();
+                var CredentialTrustUrl = $('#CredentialTrustUrl').val();
+                var validity = $('#days').val();
+                document.querySelectorAll("#orgCategories:checked").forEach(function (checkbox) {
+                    selectedOrgCategoryIds.push(parseInt(checkbox.value));
+                });
+                if (selectedOrgCategoryIds.length == 0) {
+                    $("#orgCategoriesErrorSpan").text("Please select at least one Organization Category.");
+
+                    validDetails = false;
+                }
+                else {
+                    $("#orgCategoriesErrorSpan").text("");
+
+                }
+                if (CredentialName == null || CredentialName.trim() === '') {
+                    $('#CredentialName').siblings(".text-danger").text("Credential Name is required.");
+                    //swal({ type: 'error', title: "Validation Error", text: "Credential Name is required." });
+                        validDetails = false;
+                }
+                else if (CredentialName != null && !credentialNameRegex.test(CredentialName))
+                {
+                    //swal({ type: 'error', title: "Validation Error", text: "Spaces and Special Characters are not acceptable in credential Name." });
+                    $('#CredentialName').siblings(".text-danger").text("Spaces and Special Characters are not acceptable.");
+                        validDetails = false;
+                }
+                else {
+                    $('#CredentialName').siblings(".text-danger").text(""); // Clear the validation message if no error
+                }
+
+                if (CrdentialDisplayName == null || CrdentialDisplayName.trim() === '') {
+                    //swal({ type: 'error', title: "Validation Error", text: "Credential DisplayName is required." });
+                    $('#DisplayName').siblings(".text-danger").text("Credential DisplayName is required.");
+                        validDetails = false;
+                }
+                else {
+                    $('#DisplayName').siblings(".text-danger").text(""); // Clear the validation message if no error
+                }
+                if (CredentialTrustUrl == null || CredentialTrustUrl.trim() === '') {
+                    // swal({ type: 'error', title: "Validation Error", text: "Trust Gateway Credential Url is required." });
+                       $('#CredentialTrustUrl').siblings(".text-danger").text("Trust Gateway Credential Url is required.");
+                         validDetails = false;
+                }
+                else {
+                     $('#CredentialTrustUrl').siblings(".text-danger").text(""); // Clear the validation message if no error
+                }
+                // if (VerificationDocType == null || VerificationDocType.trim() === '') {
+                //     swal({ type: 'error', title: "Validation Error", text: "Verification DocType is required." });
+                //     //$('#VerificationDocType').siblings(".text-danger").text("Verification DocType is required.");
+                    //     validDetails = false;
+                // }
+                // else {
+                //     $('#VerificationDocType').siblings(".text-danger").text(""); // Clear the validation message if no error
+                // }
+
+                if (AuthenticationScheme == null || AuthenticationScheme.trim() === '') {
+                    //swal({ type: 'error', title: "Validation Error", text: "Authentication Scheme is required." });
+                    $('#AuthenticationScheme').siblings(".text-danger").text("Authentication Scheme is required.");
+                        validDetails = false;
+                }
+                else {
+                    $('#AuthenticationScheme').siblings(".text-danger").text(""); // Clear the validation message if no error
+                }
+
+                if (validity == null || validity.trim() === '') {
+                    $('#days').siblings(".text-danger").text("Please enter no.of days.");
+                    validDetails = false;
+                }
+                else {
+                    $('#days').siblings(".text-danger").text("");
+                }
+
+                if (Category == null || Category.trim() === '') {
+                    //swal({ type: 'error', title: "Validation Error", text: "Category is required." });
+                    $('#Category').siblings(".text-danger").text("Category is required.");
+                        validDetails = false;
+                }
+                else {
+                    $('#Category').siblings(".text-danger").text(""); // Clear the validation message if no error
+                }
+
+                if (crdentialLogo == null || crdentialLogo.trim() === '') {
+                    //swal({ type: 'error', title: "Validation Error", text: "Logo is required." });
+                    $('#Logo').siblings(".text-danger").text("Logo is required.");
+                        validDetails = false;
+                }
+                else {
+                    $('#Logo').siblings(".text-danger").text(""); // Clear the validation message if no error
+                }
+
+                     if(validDetails == true){
+                         // Scroll smoothly to the top first, then update the progress bar
+                        $('#maincard').animate({ scrollTop: 0 }, 300, function () {
+                            // Once scrolling completes, update UI elements
+                            $('#DataAttributeNext').removeClass("classshide");
+                            $('#DataAttributes').removeClass("classshide");
+                            $('#WalletCredentialFields').addClass("classshide");
+                            $('#WalletCredentialFieldsNext').addClass("classshide");
+                            updateProgressBar(2, "#B68A35");
+                            updateCircleColors(2, "#B68A35");
+                    });
+                    }
+            });
+
+
+            $("#backButton2").on("click", function (e) {
+                e.preventDefault(); // Prevent default action (if any)
+
+                $('#maincard').animate({ scrollTop: 0 }, 300, function () {
+                    $('#DataAttributeNext').addClass("classshide");
+                    $('#DataAttributes').addClass("classshide");
+                    $('#WalletCredentialFields').removeClass("classshide");
+                    $('#WalletCredentialFieldsNext').removeClass("classshide");
+                    updateProgressBar(1, "#B68A35");
+                    updateCircleColors(1, "#B68A35");
+                });
+            });
+
+        function updateIndexes() {
+            $(".recpDefault").each(function (index) {
+                $(this).attr("id", `recp_${index}`);
+
+                $(this).find(".AttributeDefault").attr("id", `RecpientList_${index}__AttributeDefault`).attr("name", `RecpientList[${index}].AttributeDefault`);
+                $(this).find(".AttributeDefaultDisplayName").attr("id", `RecpientList_${index}__AttributeDefaultDisplayName`).attr("name", `RecpientList[${index}].AttributeDefaultDisplayName`);
+                $(this).find(".dropdownDefault").attr("id", `attributeDefaultDropdown_${index}`).attr("name", `RecpientList[${index}].DataTypeDefault`);
+
+                $(this).find(".delDefault").attr("id", `btnDefaultRemove_${index}`).attr("onclick", `deleteRecipientDefault(this)`);
+                $(this).find(".addDefault").attr("id", `btnDefaultadd_${index}`).attr("onclick", `addRecipientDefault(this)`);
+
+                // Update error span ids
+                $(this).find("#RecpientList_0__AttributeDefaultError").attr("id", `RecpientList_${index}__AttributeDefaultError`);
+                $(this).find("#RecpientList_0__AttributeDefaultDisplayNameError").attr("id", `RecpientList_${index}__AttributeDefaultDisplayNameError`);
+                $(this).find("#attributeDefaultDropdownError_0").attr("id", `attributeDefaultDropdownError_${index}`);
+            });
+        }
+
+        function addRecipientDefault(event) {
+        var validData = true;
+        var previd = parseInt($(event).attr("id").split("_")[1]);
+        var id = previd + 1;
+
+         const index = event.id.replace('btnDefaultadd_', '');
+            // Get the values of the inputs for the current recipient
+            const attributeValue = document.getElementById(`RecpientList_${index}__AttributeDefault`).value;
+            const attributeErrorSpan = document.getElementById(`RecpientList_${index}__AttributeDefaultError`);
+            const dataTypeValue = document.getElementById(`attributeDefaultDropdown_${index}`).value;
+            const dataTypeErrorSpan = document.getElementById(`attributeDefaultDropdownError_${index}`);
+            const attributeDisplayNane = document.getElementById(`RecpientList_${index}__AttributeDefaultDisplayName`).value;
+            const attributeDisplayNameErrorSpan = document.getElementById(`RecpientList_${index}__AttributeDefaultDisplayNameError`);
+
+            const dataAttribute = {
+                Attribute: attributeValue,
+                DataType: parseInt(dataTypeValue), // Ensure the DataType is an integer
+                DisplayName: attributeDisplayNane
+            };
+
+            dataAttributesList[index] = dataAttribute;
+            const count = dataAttributesList.filter(item => item.Attribute === attributeValue).length;
+
+            if (attributeValue == null || attributeValue.trim() === '') {
+                attributeErrorSpan.textContent = "Please enter Attribute.";
+                validData = false;
+            }
+            else if (attributeValue != null && !attributeNospaceRegex.test(attributeValue)) {
+                attributeErrorSpan.textContent = "Spaces are not acceptable.";
+                validData = false;
+            }
+
+            else if (attributeValue != null && count > 1) {
+                attributeErrorSpan.textContent = "Attribute Name should be Unique.";
+                validData = false;
+            }
+            else {
+                attributeErrorSpan.textContent = ""; // Clear the validation message if no error
+            }
+
+            if (attributeDisplayNane == null || attributeDisplayNane.trim() === '') {
+                attributeDisplayNameErrorSpan.textContent = "Please enter Display Name.";
+                validData = false;
+            }
+            else {
+                attributeDisplayNameErrorSpan.textContent = ""; // Clear the validation message if no error
+            }
+
+            if (dataTypeValue == null || dataTypeValue.trim() === '' || dataTypeValue == "Choose DataType") {
+                dataTypeErrorSpan.textContent = "Please select datatype.";
+                validData = false;
+            } else {
+                dataTypeErrorSpan.textContent = ""; // Clear the validation message if no error
+            }
+            if (!validData) {
+                return;
+            }
+
+        var dropdownHTML = `
+            <div class='col-md-3 margin'>
+                <select class='form-control dropdownDefault' id='attributeDefaultDropdown_${id}' name='RecpientList[${id}].DataTypeDefault'
+                        style='width:173px;border-radius:5px;margin-right:13px;height:34px;color: #555553 !important;'>
+                    <option>Choose DataType</option>
+                    <option value="1">Binary</option>
+                    <option value="2">Boolean</option>
+                    <option value="3">Integer</option>
+                    <option value="4">String</option>
+                    <option value="5">DateTime</option>
+                </select>
+                <span id="attributeDefaultDropdownError_${id}" class="text-danger"></span>
+            </div>`;
+
+            $("#recplistDefault").append(`
+                    <div class='row recpDefault' id='recp_${id}'>
+                <div class='col-md-3 margin'>
+                     <input placeholder='Attribute' class='form-control AttributeDefault' type='text' id='RecpientList_${id}__AttributeDefault' name='RecpientList[${id}].AttributeDefault' value=''>
+                     <span id="RecpientList_${id}__AttributeDefaultError" class="text-danger"></span>
+                </div>
+                <div class="col-md-3 margin">
+                     <input class="form-control AttributeDefaultDisplayName" type="text" id="RecpientList_${id}__AttributeDefaultDisplayName" name="RecpientList[${id}].AttributeDefaultDisplayName" value="" autocomplete="off" placeholder="Display Name">
+                     <span id="RecpientList_${id}__AttributeDefaultDisplayNameError" class="text-danger"></span>
+                </div>
+                ${dropdownHTML}
+                <div class='col-md-3 margin'>
+                                  <button type='button' id='btnDefaultRemove_${id}' class='btn btn-danger uaeid-secondary delDefault' onclick='deleteRecipientDefault(this)' style='font-size: 17px !important; background: rgba(249, 247, 237, 1) !important; width: 38px; border: none !important; height: 37px;'>
+                                            <img src='@Url.Content("~/assets/images/Minus.svg")' alt='edit' style='position: relative; bottom: 0px; width: 20px; margin-left: -3px;' />
+                                  </button>
+                                         <button type='button' id='btnDefaultadd_${id}' class='btn btn-primary uaeid-primary addDefault' style='font-size: 17px !important;width: 40px; height: 39px !important; margin-left: 15px;'onclick='addRecipientDefault(this)'>
+                                <img src='@Url.Content("~/assets/images/Plus.svg")' alt='add' style='position: relative; bottom: 0px; width: 18px; margin-left: -6px;margin-top: -3px;' />
+                    </button>
+                </div>
+            </div>
+        `);
+
+        // Ensure the previous row gets a "-" button
+        $(`#btnDefaultRemove_${previd}`).removeClass("classshide");
+
+        // Hide the "+" button from the previous row
+        $(`#btnDefaultadd_${previd}`).addClass("classshide");
+    }
+
+
+    function deleteRecipientDefault(event) {
+        var currid = parseInt($(event).attr("id").split("_")[1]);
+        var currRow = $(`#recp_${currid}`);
+
+        currRow.remove(); // Remove the selected row
+
+            var allRows = $(".recpDefault");
+        var lastRow = allRows.last();
+        var lastIndex = lastRow.attr("id") ? lastRow.attr("id").split("_")[1] : null;
+
+        if (lastIndex !== null) {
+            // Show both "+" and "-" buttons on the new last row
+            $(`#btnDefaultadd_${lastIndex}`).removeClass("classshide");
+            $(`#btnDefaultRemove_${lastIndex}`).removeClass("classshide");
+        }
+
+        // If only one row remains, hide the "-" button
+        if (allRows.length === 1) {
+                $(".delDefault").addClass("classshide");
+        }
+    }
+
+
+    //.................for Manual entering.......................//
+        function addRecipient(event)
+        {
+            var validData = true;
+            var previd = parseInt($(event).attr("id").split("_")[1]);
+            var id = previd + 1;
+
+            const index = event.id.replace('btnadd_', '');
+            // Get the values of the inputs for the current recipient
+            const attributeValue = document.getElementById(`RecpientList_${index}__Attribute`).value;
+            const attributeErrorSpan = document.getElementById(`RecpientList_${index}__AttributeError`);
+            const dataTypeValue = document.getElementById(`attributeDropdown_${index}`).value;
+            const dataTypeErrorSpan = document.getElementById(`attributeDropdownError_${index}`);
+            const attributeDisplayNane = document.getElementById(`RecpientList_${index}__AttributeDisplayName`).value;
+            const attributeDisplayNameErrorSpan = document.getElementById(`RecpientList_${index}__AttributeDisplayNameError`);
+
+            const dataAttribute = {
+                Attribute: attributeValue,
+                DataType: parseInt(dataTypeValue), // Ensure the DataType is an integer
+                DisplayName: attributeDisplayNane
+            };
+
+            dataAttributesList[index] = dataAttribute;
+            const count = dataAttributesList.filter(item => item.Attribute === attributeValue).length;
+
+            if (attributeValue == null || attributeValue.trim() === '') {
+                attributeErrorSpan.textContent = "Please enter Attribute.";
+                validData = false;
+            }
+            else if (attributeValue != null && !attributeNospaceRegex.test(attributeValue)) {
+                attributeErrorSpan.textContent = "Spaces are not acceptable.";
+                validData = false;
+            }
+
+            else if (attributeValue != null && count > 1) {
+                attributeErrorSpan.textContent = "Attribute Name should be Unique.";
+                validData = false;
+            }
+            else {
+                attributeErrorSpan.textContent = ""; // Clear the validation message if no error
+            }
+
+            if (attributeDisplayNane == null || attributeDisplayNane.trim() === '') {
+                attributeDisplayNameErrorSpan.textContent = "Please enter Display Name.";
+                validData = false;
+            }
+            else {
+                attributeDisplayNameErrorSpan.textContent = ""; // Clear the validation message if no error
+            }
+
+            if (dataTypeValue == null || dataTypeValue.trim() === '' || dataTypeValue == "Choose DataType") {
+                dataTypeErrorSpan.textContent = "Please select datatype.";
+                validData = false;
+            } else {
+                dataTypeErrorSpan.textContent = ""; // Clear the validation message if no error
+            }
+            if (!validData) {
+                return;
+            }
+            var dropdownHTML = `
+                <div class='col-md-3 margin'>
+                         <select class='form-control dropdown' id='attributeDropdown_${id}' style='width:173px;border-radius:5px;margin-right:13px;height: 34px;color: #555553 !important;'>
+                        <option>Choose DataType</option>
+                        <option value="1">Binary</option>
+                        <option value="2">Boolean</option>
+                        <option value="3">Integer</option>
+                        <option value="4">String</option>
+                        <option value="8">DateTime</option>
+                    </select>
+                    <span id="attributeDropdownError_${id}" class="text-danger"></span>
+                </div>`;
+
+            $("#recplist").append(`
+                <div class='row recp' id='${id}'>
+                    <div class='col-md-12'>
+                        <div class='row'>
+                            <div class='col-md-3 margin'>
+                                <input placeholder='Attribute' class='form-control Attribute' type='text' data-val='true' data-val-required='The Attribute field is required.' id='RecpientList_${id}__Attribute' name='RecpientList[${id}].Attribute' value=''>
+                                <span id="RecpientList_${id}__AttributeError" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-3 margin">
+                                 <input class="form-control AttributeDisplayName" type="text" data-val="true"
+                                     data-val-required="The Attribute DisplayName field is required."
+                                     id="RecpientList_${id}__AttributeDisplayName" name="RecpientList[${id}].AttributeDisplayName"
+                                     value="" autocomplete="off" placeholder="Display Name">
+                                 <span id="RecpientList_${id}__AttributeDisplayNameError" class="text-danger"></span>
+                            </div>
+                            ${dropdownHTML}
+                            <div class='col-md-3 margin'>
+                               <button type='button' id='btnRemove_${id}' class='btn btn-danger uaeid-secondary del' onclick='deleteRecipient(this)' style='font-size: 17px !important; background: rgba(249, 247, 237, 1) !important; width: 38px; border: none !important; height: 37px;'>
+                               <img src='@Url.Content("~/assets/images/Minus.svg")' alt='edit' style='position: relative; bottom: 0px; width: 20px; margin-left: -3px;' />
+                             </button>
+
+                              <button type='button' id='btnadd_${id}' class='btn btn-primary uaeid-primary add text-center' onclick='addRecipient(this)' style='font-size: 17px !important;width: 40px; height: 39px !important; margin-left: 15px;'>
+                                      <img src='@Url.Content("~/assets/images/Plus.svg")' alt='add' style='position: relative; bottom: 0px; width: 18px; margin-left: -6px;margin-top: -3px;' />
+                             </button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 `);
+
+            // Show the "Remove" button for the previous row and hide the "Add" button
+            $(`#btnRemove_${previd}`).removeClass("classshide");
+            $(`#btnadd_${previd}`).addClass("classshide");
+        }
+        function deleteRecipient(event)
+        {
+            var currid = parseInt($(event).attr("id").split("_")[1]);
+            var previd = currid - 1;
+            $("#" + currid).remove();
+
+
+            // Recalculate the IDs and orders for all remaining recipients
+            $(".recp").each(function (index) {
+                var id = parseInt($(this).attr("id"));
+
+                if (id > currid) {
+                    var newId = id - 1;
+
+                    // Update the recipient row ID
+                    $(this).attr("id", newId);
+
+                    // Update input ID and name
+                    $("#RecpientList_" + id + "__Attribute").attr("id", "RecpientList_" + newId + "__Attribute").attr("name", "RecpientList[" + newId + "].Attribute");
+
+                    $("#RecpientList_" + id + "__AttributeDisplayName").attr("id", "RecpientList_" + newId + "__AttributeDisplayName").attr("name", "RecpientList[" + newId + "].AttributeDisplayName");
+
+                    // Update dropdown ID
+                    $("#attributeDropdown_" + id).attr("id", "attributeDropdown_" + newId);
+
+                    // Update input ID and name, datatype error span
+                    $("#RecpientList_" + id + "__AttributeError").attr("id", "RecpientList_" + newId + "__AttributeError");
+
+                    $("#RecpientList_" + id + "__AttributeDisplayNameError").attr("id", "RecpientList_" + newId + "__AttributeDisplayNameError");
+
+                    $("#attributeDropdownError_" + id).attr("id", "attributeDropdownError_" + newId);
+                    // Update button IDs and events
+                    $("#btnRemove_" + id).attr("id", "btnRemove_" + newId).attr("onclick", "deleteRecipient(this)");
+                    $("#btnadd_" + id).attr("id", "btnadd_" + newId).attr("onclick", "addRecipient(this)");
+                }
+            });
+
+            var listCount = $(".recp").length;
+            if (listCount == 1) {
+                if (previd == -1) {
+                    $("#btnadd_0").removeClass("classshide");
+                    $("#btnRemove_0").addClass("classshide");
+                } else {
+                    $("#btnadd_" + previd).removeClass("classshide");
+                    $("#btnRemove_" + previd).addClass("classshide");
+                }
+            }
+            if (listCount == currid) {
+                $("#btnadd_" + previd).removeClass("classshide");
+            }
+        }
+
+        function FileToBase64Logo(element) {
+            var file = element.files[0];
+
+            var maxSizeKB = 20;
+            var maxSize = maxSizeKB * 1024;
+            if (file.size > maxSize) {
+                return Swal.fire({ icon: 'error', title: "Max size exceeded", text: "File must be less than 20 KB" });
+            }
+
+            var reader = new FileReader();
+
+            reader.onloadend = function () {
+                var base64String = reader.result.split(',')[1]; // Extract base64 string from data URL
+                $("#Credential_Logo").val(base64String);
+
+                // Set preview image source
+                $("#logoPreview").attr("src", reader.result);
+                $("#logoPreviewContainer").show();
+            }
+
+            reader.readAsDataURL(file);
+        }
+        
+
+        function AutoPopulateAttributes() {
+            
+               $("#manualAttibutes").removeClass("classshide");
+               $("#autoPopulateAttributes").addClass("classshide");
+             var CredentialName = $('#CredentialName').val();
+             $.ajax({
+                 url: '@Url.Action("GetDefaultAttributes", "Wallet")',
+                 type: 'GET',
+                 data: { CredentialName: CredentialName },
+                 beforeSend: function () {
+                     $('#overlay').show();
+                 },
+                 complete: function () {
+                     $('#overlay').hide();
+                 },
+                 success: function (response) {
+                     if (response.success && response.result && response.result.dataAttributes) {
+                         const data = response.result.dataAttributes;
+                         $("#ManulaFillingAttributes").addClass("classshide");
+                         $("#DefaultAutofillAttributes").removeClass("classshide");
+                         $('#recplistDefault').empty();
+
+                         // Clear existing lists
+                         dataAttributesDefaultNewList = [];
+                         dataAttributesNewList = [];
+                         dataAttributesCsvList = [];
+
+                         data.forEach((item, index) => {
+                             const row = `
+                                 <div class="row recpDefault" id="recp_${index}">
+                                     <div class="col-md-3 margin">
+                                         <input class="form-control AttributeDefault" type="text"
+                                             id="RecpientList_${index}__AttributeDefault"
+                                             name="RecpientList[${index}].AttributeDefault"
+                                             value="${item.attribute}" autocomplete="off" placeholder="Attribute">
+                                         <span id="RecpientList_${index}__AttributeDefaultError" class="text-danger"></span>
+                                     </div>
+
+                                     <div class="col-md-3 margin">
+                                         <input class="form-control AttributeDefaultDisplayName" type="text"
+                                             id="RecpientList_${index}__AttributeDefaultDisplayName"
+                                             name="RecpientList[${index}].AttributeDefaultDisplayName"
+                                             value="${item.displayName}" autocomplete="off" placeholder="Display Name">
+                                         <span id="RecpientList_${index}__AttributeDefaultDisplayNameError" class="text-danger"></span>
+                                     </div>
+
+                                     <div class="col-md-3 margin">
+                                         <select class="dropdownDefault"
+                                             id="attributeDefaultDropdown_${index}"
+                                             name="RecpientList[${index}].DataTypeDefault"
+                                             style="width:173px; padding:2px; border-radius:5px; margin-right:13px; height:34px;color: #555553 !important;border-color: #5555 !important;">
+                                             ${generateOptions(item.dataType)}
+                                         </select>
+                                         <span id="attributeDefaultDropdownError_${index}" class="text-danger"></span>
+                                     </div>
+
+                                     <div class="col-md-3 margin">
+                                             <button type="button" onclick="deleteRecipientDefault(this)" id="btnDefaultRemove_${index}"
+                                                class="btn btn-secondary uaeid-secondary delDefault ${(index === 0 && data.length === 1) ? 'classshide' : ''}"
+                                                style="font-size: 17px !important; background: rgba(249, 247, 237, 1) !important; width: 38px; border: none !important; height: 37px;">
+                                                <img src="@Url.Content("~/assets/images/Minus.svg")" alt="edit"
+                                                    style="position: relative; bottom: 0px; width: 20px; margin-left: -3px;" />
+                                            </button>
+
+
+                                             <button type="button" onclick="addRecipientDefault(this)" id="btnDefaultadd_${index}"
+                                                  class="btn btn-primary uaeid-primary addDefault ${(index !== data.length - 1) ? 'classshide' : ''}" style='17px 40px; 39px !important; 15px; font-size: !important;width: height: margin-left:'>
+                                                  <img src='@Url.Content("~/assets/images/Plus.svg")' alt='add' style='position: relative; bottom: 0px; width: 18px; margin-left: -6px;margin-top: -3px;' />
+                                         </button>
+                                     </div>
+                                 </div>`;
+                             $('#recplistDefault').append(row);
+                         });
+
+                         // ✅ Now iterate the populated fields
+                         $('.AttributeDefault').each(function () {
+                             var attribute = this.value;
+                             var $this = $(this);
+                             var orderId = parseInt($this.closest('.recpDefault').find('input[name^="RecpientList["]').attr('name').match(/\d+/)[0]);
+                             var attributeDisplayName = document.getElementById(`RecpientList_${orderId}__AttributeDefaultDisplayName`).value;
+                             var selectedDataTypeID = document.getElementById(`attributeDefaultDropdown_${orderId}`).value;
+
+                             if (
+                                 attribute.trim() !== "" &&
+                                 attributeDisplayName.trim() !== "" &&
+                                 selectedDataTypeID.trim() !== "" &&
+                                 selectedDataTypeID !== "Choose DataType"
+                             ) {
+                                 dataAttributesDefaultNewList.push({
+                                     Attribute: attribute,
+                                     DataType: selectedDataTypeID,
+                                     DisplayName: attributeDisplayName
+                                 });
+                             }
+                         });
+
+                     } else {
+                         return Swal.fire({ icon: 'info', title: "Info", text: response.message });
+                     }
+                 },
+                 error: ajaxErrorHandler
+             });
+         }
+
+        function generateOptions(selectedValue) {
+            const types = [
+                { value: 1, text: 'Binary' },
+                { value: 2, text: 'Boolean' },
+                { value: 3, text: 'Integer' },
+                { value: 4, text: 'String' },
+                { value: 5, text: 'DateTime' }
+            ];
+
+            return types.map(t => `<option value="${t.value}" ${t.value === selectedValue ? 'selected' : ''}>${t.text}</option>`).join('');
+        }
+        function ManulFillingAttributes() {
+            $("#ManulaFillingAttributes").removeClass("classshide");
+            $("#DefaultAutofillAttributes").addClass("classshide");
+            $("#manualAttibutes").addClass("classshide");
+            $("#autoPopulateAttributes").removeClass("classshide");
+               dataAttributesDefaultNewList = [];
+               dataAttributesNewList = [];
+               dataAttributesCsvList = [];
+            $('.Attribute').each(function () {
+                var selectedList = [];  // This can be removed as it's not used
+                attribute = this.value;
+                var $this = $(this);  // Store reference to the current element
+
+                // Extract orderId using a more precise method
+                var orderId = parseInt($this.closest('.recp').find('input[name^="RecpientList["]').attr('name').match(/\d+/)[0]);
+
+                var attributeDisplayNane = document.getElementById(`RecpientList_${orderId}__AttributeDisplayName`).value;
+                // Get the selected DataTypeID for each .Attribute
+                var selectedDataTypeID = document.getElementById(`attributeDropdown_${orderId}`).value;
+
+                // Ensure the dataAttribute is properly assigned
+                if (
+                    attribute.trim() !== "" &&
+                    attributeDisplayNane.trim() !== "" &&
+                    selectedDataTypeID.trim() !== "" &&
+                    selectedDataTypeID !== "Choose DataType"
+                ) {
+                    const dataAttribute = {
+                        Attribute: attribute,
+                        DataType: selectedDataTypeID, // Use selectedDataTypeID here
+                        DisplayName: attributeDisplayNane
+                    };
+
+                    // Push the data to the new list only if valid
+                    dataAttributesNewList.push(dataAttribute);
+                }
+            });
+
+        }
+
+            function CsvFillingAttributes() {
+                $("#ManulaFillingAttributes").removeClass("classshide");
+                $("#DefaultAutofillAttributes").addClass("classshide");
+                $("#manualAttibutes").addClass("classshide");
+                $("#autoPopulateAttributes").removeClass("classshide");
+                dataAttributesDefaultNewList = [];
+                dataAttributesNewList = [];
+                dataAttributesCsvList = [];
+                $('.Attribute').each(function () {
+                    var selectedList = [];  // This can be removed as it's not used
+                    attribute = this.value;
+                    var $this = $(this);  // Store reference to the current element
+
+                    // Extract orderId using a more precise method
+                    var orderId = parseInt($this.closest('.recp').find('input[name^="RecpientList["]').attr('name').match(/\d+/)[0]);
+
+                    var attributeDisplayNane = document.getElementById(`RecpientList_${orderId}__AttributeDisplayName`).value;
+                    // Get the selected DataTypeID for each .Attribute
+                    var selectedDataTypeID = document.getElementById(`attributeDropdown_${orderId}`).value;
+
+                    // Ensure the dataAttribute is properly assigned
+                    if (
+                        attribute.trim() !== "" &&
+                        attributeDisplayNane.trim() !== "" &&
+                        selectedDataTypeID.trim() !== "" &&
+                        selectedDataTypeID !== "Choose DataType"
+                    ) {
+                        const dataAttribute = {
+                            Attribute: attribute,
+                            DataType: selectedDataTypeID, // Use selectedDataTypeID here
+                            DisplayName: attributeDisplayNane
+                        };
+
+                        // Push the data to the new list only if valid
+                        dataAttributesCsvList.push(dataAttribute);
+                    }
+                });
+
+            }
+
+        function getExtension(filename) {
+            return '.' + filename.split('.').pop().toLowerCase();
+        }
+
+        function getDataTypeValue(text) {
+                switch (text.toLowerCase().trim()) {
+                case 'binary': return "1";
+                case 'boolean': return "2";
+                case 'integer': return "3";
+                case 'string': return "4";
+                case 'datetime': return "8";
+                default: return "";
+            }
+        }
+
+        //------- Uploading attributes through CSV file -----------------
+        $(document).on("change", '#uploadCSV', function () {
+            $("#ManulaFillingAttributes").removeClass("classshide");
+            var file = $(this).get(0).files[0];
+
+            if (file == undefined) {
+                fileName = "Choose File...";
+            }
+            else {
+                fileName = file.name;
+                var fileExtension = getExtension(file.name);
+                if (allowedCSVFileTypes.includes(fileExtension)) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var rows = e.target.result.split("\n");
+                        var rawObject;
+                        var CsvData = [];
+                        var existingAttributes = [];
+
+                        for (var i = 1; i < rows.length; i++) {
+                            if (rows[i].trim() !== "") {
+                                var cells = rows[i].split(",");
+
+                                var attribute = cells[0];
+                                var attribute_DisplayName = cells[1];
+                                var attribute_DataType = cells[2]?.trim();;
+
+                               if(attribute == null || attribute == ""){
+                                    $('#uploadCSV').val('');
+                                      return Swal.fire({ icon: 'error', title: "Mandatory", text: "Please enter Attribute." });
+
+                               }
+                               if(attribute_DisplayName == null || attribute_DisplayName.trim() == ""){
+                                    $('#uploadCSV').val('');
+                                      return Swal.fire({ icon: 'error', title: "Mandatory", text: "Please enter Attribute Display name." });
+
+                               }
+                               if (attribute != null && !attributeNospaceRegex.test(attribute)) {
+                                    $('#uploadCSV').val('');
+                                    return Swal.fire({ icon: 'error', title: "Mandatory", text: "Spaces are not acceptable in Attribute name." });
+                               }
+                               if(attribute_DataType == null || attribute_DataType.trim() == ""){
+                                    $('#uploadCSV').val('');
+                                      return Swal.fire({ icon: 'error', title: "Mandatory", text: "Please enter Attribute DataType." });
+
+                               }
+                               if (existingAttributes.includes(attribute)) {
+                                   $('#uploadCSV').val('');
+                                   return Swal.fire({ icon: 'error', title: "Duplicate Data", text: "Attribute Name should be Unique." });
+
+                               }
+
+                               // attributes which are alredy present cannot be present again.
+                                if (attribute.trim() != "") {
+                                     existingAttributes.push(attribute);
+                                }
+
+                                rawObject = {
+                                        attribute: cells[0],
+                                        attribute_DisplayName: cells[1],
+                                        attribute_DataType: cells[2],
+
+                                };
+
+                                CsvData.push(rawObject);
+                            }
+
+                        }
+
+                       // Clear existing recipient rows except the first one
+                        $('#recplist .recp:not(:first)').remove();
+
+                        // Fill the first row and add new ones as needed
+                        for (var i = 0; i < CsvData.length; i++) {
+                            if (i > 0) {
+                                $('#btnadd_' + (i - 1)).click();
+                            }
+
+                            $('#RecpientList_' + i + '__Attribute').val(CsvData[i].attribute);
+                            $('#RecpientList_' + i + '__AttributeDisplayName').val(CsvData[i].attribute_DisplayName);
+                            $('#attributeDropdown_' + i).val(getDataTypeValue(CsvData[i].attribute_DataType));
+                        }
+                         CsvFillingAttributes();
+                         $('#uploadCSV').val('');
+                  };
+                       reader.readAsText(file);
+
+                }
+            }
+        });
+
+        function CreateCredentials() {
+            var validData = true;
+            const seenAttributes = new Set();
+            var attribute;
+            dataAttributesNewList = [];
+            dataAttributesFinalList = [];
+            var selectedOrgCategoryIds2 = [];
+            if (dataAttributesNewList.length > 0) { // Manual filled attributes list
+                dataAttributesFinalList = dataAttributesNewList;
+            } else if (dataAttributesDefaultNewList.length > 0) { // Auto populated attributes list
+
+                //dataAttributesFinalList = dataAttributesDefaultNewList;
+                $('.AttributeDefault').each(function () {
+                    var selectedList = [];  // This can be removed as it's not used
+                    attribute = this.value;
+                    var $this = $(this);  // Store reference to the current element
+
+                    // Extract orderId using a more precise method
+                    var orderId = parseInt($this.closest('.recpDefault').find('input[name^="RecpientList["]').attr('name').match(/\d+/)[0]);
+
+                    var attributeDisplayNane = document.getElementById(`RecpientList_${orderId}__AttributeDefaultDisplayName`).value;
+                    // Get the selected DataTypeID for each .Attribute
+                    var selectedDataTypeID = document.getElementById(`attributeDefaultDropdown_${orderId}`).value;
+
+                    // Ensure the dataAttribute is properly assigned
+                    if (
+                        attribute.trim() !== "" &&
+                        attributeDisplayNane.trim() !== "" &&
+                        selectedDataTypeID.trim() !== "" &&
+                        selectedDataTypeID !== "Choose DataType"
+                    ) {
+                        const dataAttribute = {
+                            Attribute: attribute,
+                            DataType: selectedDataTypeID, // Use selectedDataTypeID here
+                            DisplayName: attributeDisplayNane
+                        };
+
+                        // Push the data to Final list
+                          dataAttributesFinalList.push(dataAttribute);
+                    }
+                });
+
+            } else if (dataAttributesCsvList.length > 0) { // CSV attributes list
+
+                //dataAttributesFinalList = dataAttributesCsvList;
+                    $('.Attribute').each(function () {
+                        var selectedList = [];  // This can be removed as it's not used
+                        attribute = this.value;
+                        var $this = $(this);  // Store reference to the current element
+
+                        // Extract orderId using a more precise method
+                        var orderId = parseInt($this.closest('.recp').find('input[name^="RecpientList["]').attr('name').match(/\d+/)[0]);
+
+                        var attributeDisplayNane = document.getElementById(`RecpientList_${orderId}__AttributeDisplayName`).value;
+                        // Get the selected DataTypeID for each .Attribute
+                        var selectedDataTypeID = document.getElementById(`attributeDropdown_${orderId}`).value;
+
+                        // Ensure the dataAttribute is properly assigned
+                        if (
+                            attribute.trim() !== "" &&
+                            attributeDisplayNane.trim() !== "" &&
+                            selectedDataTypeID.trim() !== "" &&
+                            selectedDataTypeID !== "Choose DataType"
+                        ) {
+                            const dataAttribute = {
+                                Attribute: attribute,
+                                DataType: selectedDataTypeID, // Use selectedDataTypeID here
+                                DisplayName: attributeDisplayNane
+                            };
+
+                            // Push the data to Final list
+                             dataAttributesFinalList.push(dataAttribute);
+                        }
+                    });
+
+            } else { //will excute for Manual also
+                // Both lists are empty, so populate dataAttributesNewList from the DOM
+                $('.Attribute').each(function () {
+                    let attribute = this.value;
+                    let $this = $(this);
+                    let orderIdMatch = $this.closest('.recp').find('input[name^="RecpientList["]').attr('name').match(/\d+/);
+                    if (!orderIdMatch) return; // skip if no orderId
+
+                    let orderId = parseInt(orderIdMatch[0]);
+                    let attributeDisplayName = document.getElementById(`RecpientList_${orderId}__AttributeDisplayName`).value;
+                    let selectedDataTypeID = document.getElementById(`attributeDropdown_${orderId}`).value;
+
+                    if (
+                        attribute.trim() !== "" &&
+                        attributeDisplayName.trim() !== "" &&
+                        selectedDataTypeID.trim() !== "" &&
+                        selectedDataTypeID !== "Choose DataType"
+                    ) {
+                        const dataAttribute = {
+                            Attribute: attribute,
+                            DataType: selectedDataTypeID,
+                            DisplayName: attributeDisplayName
+                        };
+                        dataAttributesNewList.push(dataAttribute);
+                    }
+                });
+
+                // After extracting, assign to final list
+                if (dataAttributesNewList.length > 0) {
+                    dataAttributesFinalList = dataAttributesNewList;
+                }
+            } //else close
+            const count = dataAttributesNewList.filter(item => item.Attribute === attribute).length;
+
+            // if ((!dataAttributesNewList || dataAttributesNewList.length === 0) && count > 1) {
+
+            //     swal({ type: 'error', title: "Validation Error", text: "Attribute Name Should be unique." });
+            //     validData = false;
+            // }
+
+            // dataAttributesNewList.forEach(item => {
+            //     if (!attributeNospaceRegex.test(item.Attribute)) {
+            //         swal({ type: 'error', title: "Validation Error", text: "Spaces are not allowed in attribute names." });
+            //         validData = false;
+            //     }
+            // });
+
+                if (!dataAttributesFinalList || dataAttributesFinalList.length === 0) {
+
+                    Swal.fire({ icon: 'error', title: "Validation Error", text: "At least one data attribute is mandatory." });
+                    validData = false;
+                }
+
+            dataAttributesFinalList.forEach(item => {
+                if (!attributeNospaceRegex.test(item.Attribute)) {
+                    Swal.fire({ icon: 'error', title: "Validation Error", text: "Spaces are not allowed in attribute names." });
+                    validData = false;
+                }
+
+                if (seenAttributes.has(item.Attribute)) {
+                    Swal.fire({ icon: 'error', title: "Validation Error", text: "Duplicate attribute names are not allowed." });
+                    validData = false;
+                } else {
+                    seenAttributes.add(item.Attribute);
+                }
+            });
+            if (!validData) {
+                return;
+            }
+            document.querySelectorAll("#orgCategories:checked").forEach(function (checkbox) {
+                selectedOrgCategoryIds2.push(parseInt(checkbox.value));
+            });
+            var credentialAddViewModel = {
+
+                CredentialName: $('#CredentialName').val(),
+                DisplayName: $('#DisplayName').val(),
+                VerificationDocType: $('#VerificationDocType').val(),
+                AuthenticationScheme: $('#AuthenticationScheme').val(),
+                Category: $('#Category').val(),
+                Logo: $('#Credential_Logo').val(),
+                CredentialTrustUrl : $('#CredentialTrustUrl').val(),
+                DataAttributes: dataAttributesFinalList,
+                validity: $('#days').val(),
+                SelectedOrgCategoryIds: selectedOrgCategoryIds2,
+            };
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AddCategoryList", "Wallet")',
+                data: JSON.stringify(credentialAddViewModel),
+                contentType: "application/json",
+                beforeSend: function () {
+                    $('#overlay').show();
+                },
+                complete: function () {
+
+                    $('#overlay').hide();
+                },
+                success: function (data) {
+
+                    if (data.success == true) {
+                         $('#WalletCredentialFields, #WalletCredentialFieldsNext').addClass("classshide");
+                         $('#DataAttributes, #DataAttributeNext').removeClass("classshide");
+                         updateProgressBar(3, "#B68A35");
+                         updateCircleColors(3, "#B68A35");
+                            Swal.fire({
+                                icon: 'success',
+                                title: "Success",
+                                text: data.message,
+                                showCancelButton: false
+                            }).then((result) => {
+                                if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer || result.dismiss === Swal.DismissReason.backdrop) {
+                                    window.location.href = "@Url.Action("TestCredential", "Wallet", new { CredentialUid = "__id__" })".replace("__id__", data.result);
+                                }
+                            });
+                        };
+
+                    if (data.success == false) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Error",
+                            text: data.message,
+                            showCancelButton: false
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = "@Url.Action("Index", "Wallet")";
+                            }
+                        });
+
+                    }
+
+                },
+                error: ajaxErrorHandler
+            });
+
+        }
+
+        $("#select-all-categories").on("change", function () {
+            var isAllChecked = $("#select-all-categories").prop("checked");
+            if (isAllChecked) {
+                $("input[name='SelectedCategoryIds']").prop("checked", isAllChecked);
+            }
+            else {
+                $("input[name='SelectedCategoryIds']").prop("checked", false);
+            }
+        });
+
+        $("input[name='SelectedCategoryIds']").on("change", function () {
+            var checkboxes = document.querySelectorAll("#orgCategories");
+
+            var allChecked = Array.from(checkboxes).every(function (checkbox) {
+
+                return checkbox.checked;
+
+            });
+
+            if (allChecked) {
+
+                $("#select-all-categories").prop("checked", true);
+
+            } else {
+
+                $("#select-all-categories").prop("checked", false);
+
+            }
+
+        });
+
+    </script>
+}

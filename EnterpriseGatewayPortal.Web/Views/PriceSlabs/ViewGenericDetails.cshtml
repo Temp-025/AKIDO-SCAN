@@ -1,0 +1,150 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.Priceslabs.GenericPriceSlabDetailsViewModel
+
+@using EnterpriseGatewayPortal.Web.Enums
+
+@using EnterpriseGatewayPortal.Core.DTOs
+@using EnterpriseGatewayPortal.Web.Models
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+    {
+        new BreadCrumbModel { Title = "Price slabs" , Url = Url.Action("ViewGenericDetails","PriceSlabs"), IconKey = "payments-priceSlabs"},
+        new BreadCrumbModel { Title = "View General Price slabs" , Url = "", IconKey = "view"}
+    };
+}
+@{
+    var layoutType = Context.Request.Cookies["HeaderNavigationLayout"];
+}
+<style>
+    #note {
+        padding-right: 10px;
+        display: flex;
+        justify-content: flex-end;
+        padding-bottom: 15px;
+    }
+
+    .classshide {
+        display: none !important;
+    }
+</style>
+
+@{
+    ViewData["Title"] = "Edit";
+    ViewData["ServiceId"] = Model.ServiceId;
+}
+@{
+    string myViewDataValue = ViewBag.viewData;
+}
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" id="spacingCss">
+    <div class="col-md-12 plr">
+        <div class="card-custom">
+            <div class="card-body">
+ 
+                    <div class="form-row">
+                        <div class="form-group col-md-6" style="float:left;">
+                            <input id="serviceId" asp-for="ServiceId" hidden />
+                            <div class="form-group col-md-12">
+                                <label asp-for="ServiceDisplayName" class="col-form-label"></label>
+                                <input asp-for="ServiceDisplayName" class="form-control" readonly />
+                                <span asp-validation-for="ServiceDisplayName" class="text-danger"></span>
+                            </div>
+                           @* <div class="form-group col-md-12">
+                                <label asp-for="Stakeholder" class="col-form-label"></label>
+                                <input asp-for="Stakeholder" class="form-control" readonly />
+                                <span asp-validation-for="Stakeholder" class="text-danger"></span>
+                            </div>*@
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-7">
+                            <partial name="_DiscountVolumeRange" for="DiscountVolumeRanges" onchange=serviceId(@Model.ServiceId)></partial>
+
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                    <a type="button" asp-action="List1" class="btn btn-other">
+                        Cancel
+                    </a>
+                    </div>
+               
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        var index;
+        $(document).ready(function () {
+            document.getElementById("navigationNetworkOverlay").style.display = "none";
+                    var layoutType = '@(layoutType ?? "")';
+            if (layoutType == "Vertical") {
+
+                $("#Payments > a")
+                    .attr("aria-expanded", "true")
+                    .addClass("active");
+
+                $("#Payments")
+                    .addClass("submenu-active show");
+
+                $("#Payments .submenu")
+                    .addClass("show");
+
+                $('#Price-Slabs').addClass('active');
+
+            $('#homeMenu').addClass('breadcrumb-item').append('Payments > Price Slabs > View');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#PriceSlabsMenu').addClass('active');
+        }
+            $('#networkOverlay').hide();
+           // index = $("#discountVolumeRangetbody").children("tr").length;
+
+            var serviceId = $("#serviceId").val();
+
+            $("#discountVolumeRangetbody tr").each(function () {
+               
+                var volumeRangeFromInput = $("input[name='DiscountVolumeRanges[0].VolumeRangeFrom']");
+                var volumeRangeToInput = $("input[name='DiscountVolumeRanges[0].VolumeRangeTo']");
+                var discountInput = $("input[name='DiscountVolumeRanges[0].Discount']");
+
+                if (serviceId == 6) {
+                    discountInput.attr("min", 0);
+                    discountInput.attr("max", 100);
+                    volumeRangeToInput.attr("value", 1);
+                    volumeRangeFromInput.attr("value", 1)
+                    volumeRangeFromInput.prop("readonly", true);
+                    volumeRangeToInput.prop("readonly", true);
+                    discountInput.prop("readonly", true);
+                    // $('.add-range').css("display", "none");
+                }
+                else {
+                    discountInput.attr("min", 1);
+                    discountInput.attr("max", 99);
+                    volumeRangeFromInput.prop("readonly", true);
+                    volumeRangeToInput.prop("readonly", true);
+                    discountInput.prop("readonly", true);
+                    //if (index == 1) {
+                    //    $('.add-range').css("display", "block");
+                    //}
+                }
+            });
+        });
+
+        
+
+       
+
+    </script>
+}
+
+

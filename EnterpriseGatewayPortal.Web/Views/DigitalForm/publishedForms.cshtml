@@ -1,0 +1,296 @@
+﻿@model List<EnterpriseGatewayPortal.Core.DTOs.DocTemplateResponseDTO>
+
+@{
+    Layout = "~/Views/Shared/_LayoutDigitalForms.cshtml";
+}
+@{
+    var publishDigitalForm = ViewBag.PublishForm;
+}
+
+<style>
+    .tooltip{
+        z-index:10052 !important;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body">
+                <div class="row p-b-20">
+                    <div class="col-md-12 col-sm-6 col-6">
+                        <div class="btn-group">
+                            <a id="addRow1" asp-action="Index" class="btn btn-primary">MY FORMS</a>
+                        </div>
+                        &nbsp;
+                        <div class="btn-group">
+                            <a id="addRow1" asp-action="publishedForms" class="btn btn-secondary">PUBLISHED FORMS</a>
+                        </div>
+                        &nbsp;
+                        <div class="btn-group">
+                            <a id="addRow1" asp-action="standardForms" class="btn btn-primary">STANDARD FORMS</a>
+                        </div>
+                    </div>
+
+                </div>
+                <table id="publishedForms" class="table-striped table-bordered table-hover table-checkable order-column full-width table">
+                    <thead>
+                        <tr>
+                            <th>FORM NAME</th>
+                            <th>CREATED DATE</th>
+                            <th>DOCUMENT NAME</th>
+                            <th>STATUS</th>
+                            <th style="text-align:center">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || Model.Count() == 0)
+                        {
+                            <tr>
+                                <td style="text-align:center" valign="top" colspan="7" class="dataTables_empty">No record found</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr class="odd gradeX">
+                                    <td>@(string.IsNullOrWhiteSpace(item.Template.TemplateName) ? "N/A" : item.Template.TemplateName)</td>
+                                    <td>@item.Template.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.Template.DocumentName) ? "N/A" : item.Template.DocumentName)</td>
+
+                                   @if(@item.FormResponse == null )
+                                   {
+                                        <td style="color:green">New</td>
+                                        <td class="valigntop" style="text-align:center">
+                                            <div class="btn-group">
+                                                <button class="btn btn-xs deepPink-bgcolor no-margin" type="button" data-toggle="dropdown"
+                                                        aria-expanded="false">
+                                                    Actions
+                                                    <i class="fa fa-angle-down"></i>
+                                                </button>
+                                                <ul class="dropdown-menu pull-left" role="menu">
+                                                    <li>
+                                                        <a asp-action="previewform" asp-route-edmsId="@item.Template.EdmsId">
+                                                            <i class="icon-pencil"></i>Preview
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a asp-action="FormFillData" asp-route-suid="@item.Template.Suid" asp-route-templateId="@item.Template._id" asp-route-edmsId="@item.Template.EdmsId" asp-route-digitalName="@publishDigitalForm">
+                                                            <i class="icon-pencil"></i>Fill Form
+                                                        </a>
+                                                    </li>                                                    
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                   }else{
+                                        <td style="color:green">@item.FormResponse.Status</td>
+                                        <td class="valigntop" style="text-align:center">
+                                            <div class="btn-group" onclick="modalForm('@item.FormResponse.EdmsId', '@item.FormResponse.SignerName')">
+                                                <a href="#">
+                                                    <img src="~/assets/images/eyeicon.png" alt="View" />
+                                                </a>
+                                            </div>
+                                        </td>
+                                   }                                                                       
+                                </tr>
+
+                            }
+                        }
+                    </tbody>
+                </table>               
+            </div>
+
+            <div class="modal fade" id="digitalFormModal" tabindex="-1" role="dialog" aria-labelledby="digitalFormModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content" style="width:120%;max-width:600px">
+                        <div class="modal-header" style="justify-content:end" onclick="DownloadForm()">
+                            <img data-toggle="tooltip" data-placement="left" title="Download PDF" style="text-align:left" src="~/assets/svgg/SaveDownload.svg" />
+                        </div>
+                        <div class="modal-body">
+                            <div id='Viewer1' style='width: 550px; height: 550px; margin: 0 auto;'></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var hasInProgressStatus = '@Model.Any(m => m.FormResponse != null && m.FormResponse.Status == "In Progress")';
+
+    function base64ToBlob(base64) {
+
+        const binaryString = window.atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+
+
+        for (let i = 0; i < len; ++i) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return new Blob([bytes], { type: 'application/pdf' });
+    }
+
+    $(document).ready(function () {
+
+        $('#digitalFormsMenu').addClass('active');
+
+        $('#homeMenu').removeClass('breadcrumb-item');
+        $('#homeMenu').addClass('breadcrumb-item').append('Digital Forms > Published Forms');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+
+        $('[data-toggle="tooltip"]').tooltip();
+
+        var table1 = $("#publishedForms").DataTable({
+            "bLengthChange": false,
+            "searching": true,
+            "ordering": false,
+            "sort": false
+        });
+
+        if (hasInProgressStatus == "True") {
+            setTimeout(function () {
+                window.location.reload();
+            }, 3000);
+        }
+        //$("#digitalFormModal").modal('show');
+    });
+
+    var Documentbase64 = "";
+    var FileName = "";
+
+    function modalForm(EdmsId, SignerName) {
+
+        var intervalId = "";
+        intervalId = setInterval(function () {
+            if (isWebViewerLoaded) {
+                clearInterval(intervalId);
+            }
+        }, 3000);
+
+        $("#digitalFormModal").modal('show');
+        FileName = SignerName + "_signed";
+        const url = `@Url.Action("GetPreviewConfig", "DigitalForm")`;
+
+        $.ajax({
+            url: `${url}/${EdmsId}`,
+            type: 'GET',
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+                $('#overlay').hide();
+            },
+            success: function (resp) {
+                if (resp.success) {
+                    Documentbase64 = resp.resource;
+
+                    webviwerInstance.UI.loadDocument(base64ToBlob(Documentbase64), { filename: FileName });
+                    const { Annotations, documentViewer, PDFNet, Tools, annotationManager } = webviwerInstance.Core
+
+                    documentViewer.addEventListener('documentLoaded', () => {
+
+                        webviwerInstance.UI.setZoomLevel("90%");
+                        const zoom = webviwerInstance.UI.getZoomLevel("90%");
+                    });
+
+                    documentViewer.addEventListener('annotationsLoaded', () => {
+                        annotationManager.getAnnotationsList().forEach(annot => {
+                            annot.ReadOnly = true;
+                        });
+                    });
+                } else {
+                   Swal.fire({
+                      title: 'Error',
+                      text: resp.message,
+                      icon: 'error',
+                      confirmButtonText: 'OK'
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        window.location.href = '@Url.Action("Index", "DigitalForm")';
+                      }
+                    });
+
+                }
+            },
+            error: function (xhr, status, error) {
+              Swal.fire({
+                  title: 'Error',
+                  text: 'Something went wrong!',
+                  icon: 'error',
+                  confirmButtonText: 'OK'
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("Index", "DigitalForm")';
+                  }
+                });
+
+            }
+        });
+    }
+
+    // function modalForm(EdmsId , DocumnetName) {
+    //     $("#digitalFormModal").modal('show');
+    //     FileName = DocumnetName;
+    //     var url = "@Url.Action("GetPreviewConfig", "DigitalForm")";
+
+    //     $.ajax({
+    //         url: url + '/' + EdmsId,
+    //         type: 'GET',
+    //         success: function (resp) {
+    //             if (resp.success) {
+    //                 Documentbase64 = resp.resource;
+
+    //                 webviwerInstance.UI.loadDocument(base64ToBlob(Documentbase64), { filename: DocumnetName });
+    //                 webviwerInstance.UI.disableElements(['annotationDeleteButton', 'annotationCommentButton', 'annotationStyleEditButton', 'linkButton',]);
+    //             } else {
+    //                 swal({
+    //                     title: 'Error',
+    //                     text: resp.message,
+    //                     type: 'error',
+    //                 }, function (isConfirm) {
+    //                     if (isConfirm) {
+    //                         window.location.href = '@Url.Action("Index", "DigitalForm")';
+    //                     }
+    //                 });
+    //             }
+    //         },
+    //         error: function (e) {
+    //             console.log(e);
+    //             swal({
+    //                 title: 'Error',
+    //                 text: 'Something went wrong!',
+    //                 type: 'error',
+    //             }, function (isConfirm) {
+    //                 if (isConfirm) {
+    //                     window.location.href = '@Url.Action("Index", "DigitalForm")';
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
+
+    function downloadBlobAsFile(blob, filename) {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function DownloadForm() {
+
+        const base64Data = Documentbase64;
+        const blob = base64ToBlob(base64Data);
+        const filename = FileName;
+        downloadBlobAsFile(blob, filename);
+    }
+
+</script>

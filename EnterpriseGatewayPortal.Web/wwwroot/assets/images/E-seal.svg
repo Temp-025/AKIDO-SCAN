@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <g id="E-seal" transform="translate(-28.144 -570.144)">
+    <g id="Ellipse_46" data-name="Ellipse 46" transform="translate(28.144 570.144)" fill="none" stroke="#f9f9f9" stroke-width="5">
+      <circle cx="16" cy="16" r="16" stroke="none"/>
+      <circle cx="16" cy="16" r="13.5" fill="none"/>
+    </g>
+    <rect id="Rectangle_2623" data-name="Rectangle 2623" width="26.873" height="6.718" transform="matrix(0.875, -0.485, 0.485, 0.875, 30.764, 590.392)" fill="#fff"/>
+    <text id="E-seal-2" data-name="E-seal" transform="translate(37.317 592.808) rotate(-31)" fill="#15294b" font-size="6.2" font-family="Montserrat-ExtraBold, Montserrat" font-weight="800"><tspan x="0" y="0">E-seal</tspan></text>
+  </g>
+</svg>

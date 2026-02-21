@@ -1,0 +1,133 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.DocumentVerification.DocumentVerificationListViewModelcs
+@using EnterpriseGatewayPortal.Core.Constants;
+@{
+    ViewData["Title"] = "Index";
+}
+<style>
+    .classshide {
+        display: none !important;
+    }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card ">
+            <div class="card-body ">
+                <div class="row p-b-20">
+                    <div class="col-md-6 col-sm-6 col-6">
+
+                        <div class="btn-group">
+                            <a class="btn btn-primary" asp-controller="DocumentVerification" asp-action="Create">
+                                <i class="fa fa-plus"></i>New Verification
+                            </a>
+
+                        </div>
+                    </div>
+
+                </div>
+                <table id="DocVerificationTable" class="table table-striped table-bordered table-hover table-checkable order-column full-width">
+                    <thead>
+                        <tr>
+                            
+                            <th>Issuer Organization Name</th>
+                            <th>Document Type</th>
+                            <th>Verification Method</th>
+                            <th>Created At</th>
+                            <th>Status</th>
+                            <th>ACTION</th>
+                        </tr>
+                       </thead>
+                    <tbody>
+                        @if (Model.DocumentVerifyLists == null || Model.DocumentVerifyLists.Count() == 0)
+                        {
+                            <tr>
+                                <td style="text-align:center" valign="top" colspan="6" class="dataTables_empty">No record found</td>
+                            </tr>
+                        }else{
+                        @foreach (var item in Model.DocumentVerifyLists)
+                        {
+                            <tr class="odd gradeX">
+                                <td>@item.IssuerOrgName</td>
+                                <td>@item.DocumentType</td>
+                                <td>@item.VerificationType</td>
+                                <td>@item.CreatedAt</td>                            
+                                <td>@item.Status</td>
+                                
+                                <td class="valigntop" align="center">
+                                    <div class="btn-group">
+                                        <button class="btn btn-xs deepPink-bgcolor no-margin" type="button" data-toggle="dropdown"
+                                                aria-expanded="false">
+                                            Actions
+                                            <i class="fa fa-angle-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-left" role="menu">
+                                            <li>
+                                                <a asp-action="ViewDetails" asp-route-id="@item.Id">
+                                                    <i class="icon-pencil"></i>View
+                                                </a>
+                                            </li>
+                                            @if (item.VerificationType == "Technical" && item.Status == "Completed")
+                                            {
+                                                <li>
+                                                    <a asp-action="DownloadReport" asp-route-fileId="@item.FileId">
+                                                        <i class="icon-pencil"></i>Download Report
+                                                    </a>
+                                                </li>
+                                            }
+                                            @if (item.VerificationType == "TrueCopy" && item.Status == "Completed")
+                                            {
+                                                <li>
+                                                    <a asp-action="DownloadCertificatesForTrueCopy" asp-route-fileId="@item.FileId">
+                                                        <i class="icon-pencil"></i>Download Report
+                                                    </a>
+                                                </li>
+                                            }
+                                                @if (item.VerificationType == VerificationTypeConstants.Qr && item.Status == "Completed")
+                                                {
+                                                    <li>
+                                                        <a asp-action="DownloadReport" asp-route-fileId="@item.FileId">
+                                                            <i class="icon-pencil"></i>Download Report
+                                                        </a>
+                                                    </li>
+                                                }
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        }
+                    </tbody>
+                   </table>
+             </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+
+    <script>
+
+
+        $(document).ready(function () {
+            
+            var DocumentVerificationLink = document.getElementById('DocumentVerificationModle').querySelector('.nav-link');
+            DocumentVerificationLink.click();
+            $('#homeMenu').addClass('breadcrumb-item').append('Document Verification > Document Verification List');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#VerificationMenu').addClass('active');
+            $('#networkOverlay').hide();
+            var table1 = $("#DocVerificationTable").DataTable({
+
+                "bLengthChange": false,
+                "searching": true
+
+            });
+
+
+        });
+
+    </script>
+
+}

@@ -1,0 +1,97 @@
+﻿@model IList<EnterpriseGatewayPortal.Core.DTOs.DiscountVolumeRangeDTO>
+
+<style>
+    .inputWidth {
+        width: 95%;
+        padding-left: 0px;
+        border:none;
+    }
+
+    input[type="number"]{
+        border: none !important;
+        padding: 0 !important;
+        color: #333 !important;
+    }
+
+    .table tr:last-child td:first-child {
+        border-bottom-left-radius: 12px !important;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        border-bottom-left-radius: 12px !important;
+    }
+   
+    .table-bordered {
+        border: 1px solid #dee2e6 !important;
+    }
+
+</style>
+
+<div class="form-row" style="margin-left:17px;">
+    <label class="col-form-label">Discount Volume Range</label>
+    <table class="table-striped table-bordered table-hover table-checkable order-column full-width table" style="border-collapse:separate !important">
+          
+        <thead style="background:#f3f3f3;">
+            <tr>
+                <th width="22%" class="form-group">Volume Range From</th>
+                <th width="22%" class="form-group">Volume Range To</th>
+                <th width="20%" class="form-group">Discount (%)</th>
+                
+            </tr>
+        </thead>
+        <tbody id="discountVolumeRangetbody">
+            @if (Model != null && Model.Count > 0)
+            {
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var range = Model[i];
+                    <tr class="success" style="pointer-events: none; opacity:0.9; line-height: 0;">
+                        @* <td style='display: none;'><input name='DiscountVolumeRanges.Index' value='@i' /></td> *@
+                        @* <td style='display: none;'><input name='DiscountVolumeRanges[@i].Id' type='text' value='@range.Id'></td>  *@
+                        <td>
+                            <input type='number' min='1' class="required inputWidth" name='DiscountVolumeRanges[@i].VolumeRangeFrom' value='@range.VolumeRangeFrom' readonly>
+                            <span class='text-danger field-validation-valid' data-valmsg-for='DiscountVolumeRanges[@i].VolumeRangeFrom' data-valmsg-replace='true'></span>
+                        </td>
+                        <td>
+                            <input type='number' min='1' class="required inputWidth" name='DiscountVolumeRanges[@i].VolumeRangeTo' value='@range.VolumeRangeTo' readonly>
+                            <span class='text-danger field-validation-valid' data-valmsg-for='DiscountVolumeRanges[@i].VolumeRangeTo' data-valmsg-replace='true'></span>
+                        </td>
+                        <td>
+                            <input style='width:30%' type='number' class="required inputWidth" name='DiscountVolumeRanges[@i].Discount' value='@range.Discount' readonly>
+                            <span class='text-danger field-validation-valid' data-valmsg-for='DiscountVolumeRanges[@i].Discount' data-valmsg-replace='true'></span>
+                        </td>
+                       
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr class="success" style="pointer-events: none; opacity:0.9; line-height: 0;">
+                    @* <td style='display: none;'><input name='DiscountVolumeRanges.Index' value='0' /></td> *@
+                    @* <td style='display: none;'><input name='DiscountVolumeRanges[0].Id' type='text' value='0'></td> *@
+                    <td>
+                        <input type='number' min='1' class="required inputWidth" name='DiscountVolumeRanges[0].VolumeRangeFrom' value='1' readonly>
+                        <span class='text-danger field-validation-valid' data-valmsg-for='DiscountVolumeRanges[0].VolumeRangeFrom' data-valmsg-replace='true'></span>
+                    </td>
+                    <td>
+                        <input type='number' min='1' class="required inputWidth" name='DiscountVolumeRanges[0].VolumeRangeTo' value='100' readonly>
+                        <span class='text-danger field-validation-valid' data-valmsg-for='DiscountVolumeRanges[0].VolumeRangeTo' data-valmsg-replace='true'></span>
+                    </td>
+                    <td>
+                        <input style='width:30%' type='number' class="required inputWidth" name='DiscountVolumeRanges[0].Discount' value='10' readonly>
+                        <span class='text-danger field-validation-valid' data-valmsg-for='DiscountVolumeRanges[0].Discount' data-valmsg-replace='true'></span>
+                    </td>
+                    
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<script>
+    $(document).ready(function () {
+
+        $('#networkOverlay').hide();
+
+    });
+</script>
+

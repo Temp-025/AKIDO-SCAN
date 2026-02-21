@@ -1,0 +1,88 @@
+﻿@{
+    var message = TempData["Alert.Message"] as string;
+    var type = TempData["Alert.Type"] as string ?? "Success";
+    var alertClass = type switch
+    {
+        "Success" => "alert-success",
+        "Error" => "alert-danger",
+        "Warning" => "alert-warning",
+        _ => "alert-info"
+    };
+
+    var iconName = type switch
+    {
+        "Success" => "Alert_Success_Icon.svg",
+        "Error" => "Alert_Error_Icon.svg",
+        "Warning" => "Alert_Warning_Icon.svg",
+        _ => "Alert_Info_Icon.svg"
+    };
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert-container position-fixed top-0" style="z-index: 9999;">
+        <div class="alert @alertClass d-flex align-items-center shadow-sm" role="alert">
+            <img src="~/assets/images/@iconName" height="20" style="margin-right:8px;" />
+            <div class="d-flex justify-content-between align-items-center w-100 flex-row">
+                <span>@message</span>
+                <img src="~/assets/images/Alert_Success_Close_Icon.svg" style="cursor:pointer;" onclick="this.closest('.alert-container').style.display='none';" />
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .alert {
+        width: 100%;
+        font-size: 16px;
+        height: 56px;
+        padding: 16px 24px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+
+    .alert.alert-success {
+        background-color: #f3f9f5 !important;
+        color: #2f5c2f;
+        border-color: #2f5c2f30;
+    }
+
+    .alert.alert-danger {
+        background-color: #fcebea !important;
+        color: #a94442;
+        border-color: #a9444230;
+    }
+
+    .alert.alert-warning {
+        background-color: #fff8e1 !important;
+        color: #8a6d3b;
+        border-color: #8a6d3b30;
+    }
+
+    .alert.alert-info {
+        background-color: #e3f2fd !important;
+        color: #31708f;
+        border-color: #31708f30;
+    }
+
+    .alert-container {
+        max-width: 600px;
+        width: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 10px;
+    }
+
+    @@media (max-width: 768px) {
+        .alert-container {
+            left: 0;
+            right: 0;
+            transform: none !important;
+            max-width: 100%;
+        }
+
+        .alert {
+            border-radius: 0px !important;
+        }
+    }
+</style>

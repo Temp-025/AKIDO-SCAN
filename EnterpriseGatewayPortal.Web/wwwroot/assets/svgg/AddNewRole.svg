@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="130" height="30" viewBox="0 0 130 30">
+  <g id="Group_114517" data-name="Group 114517" transform="translate(-3016.7 -3246.708)">
+    <g id="Rectangle_49810" data-name="Rectangle 49810" transform="translate(3016.7 3246.708)" fill="#fff" stroke="#bebaba" stroke-width="0.5">
+      <rect width="130" height="30" rx="2" stroke="none"/>
+      <rect x="0.25" y="0.25" width="129.5" height="29.5" rx="1.75" fill="none"/>
+    </g>
+    <g id="Group_114514" data-name="Group 114514" transform="translate(3024.018 3254.573)">
+      <g id="Group_114515" data-name="Group 114515" transform="translate(0 0)">
+        <path id="Path_111037" data-name="Path 111037" d="M6.692,8.588c-1.772,0-3.544.036-5.313-.011C.05,8.541-.16,8.227.093,6.962A5.161,5.161,0,0,1,5.206,2.553a20.436,20.436,0,0,1,4.069.261A5.232,5.232,0,0,1,13.3,7.327c.082.943-.514,1.218-1.293,1.233-1.772.029-3.541.011-5.313.011v.018" transform="translate(0 6.533)" fill="#080808"/>
+        <path id="Path_111038" data-name="Path 111038" d="M.808,3.91C.854,1.934,2.615-.06,4.27,0A4,4,0,0,1,8.332,4.138c-.054,1.643-1.979,3.319-3.8,3.308A3.628,3.628,0,0,1,.808,3.91" transform="translate(2.076 0)" fill="#080808"/>
+        <path id="Path_111039" data-name="Path 111039" d="M6.908.344v2.58h2.48v.658H6.908v2.6h-.7v-2.6H3.725V2.924h2.48V.344Z" transform="translate(8.858 4.182)" fill="#080808"/>
+      </g>
+    </g>
+    <text id="Add_New_Role" data-name="Add New Role" transform="translate(3048.7 3266.708)" fill="#080909" font-size="13" font-family="Montserrat-Medium, Montserrat" font-weight="500"><tspan x="0" y="0">Add New Role</tspan></text>
+  </g>
+</svg>

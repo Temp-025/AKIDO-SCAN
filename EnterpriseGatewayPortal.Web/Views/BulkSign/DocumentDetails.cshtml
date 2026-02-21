@@ -1,0 +1,576 @@
+﻿@model EnterpriseGatewayPortal.Core.DTOs.DocumentDetailsDTO
+@using Microsoft.AspNetCore.Html
+@using Newtonsoft.Json
+@{
+    var totalFileCount = Model.result.totalFileCount;
+    var failedFileCount = Model.result.failedFileCount;
+    var successFileCount = Model.result.successFileCount;
+    var pendingCount = totalFileCount - failedFileCount - successFileCount;
+    var filesCount = Model.result.fileArray.Count;
+    var correlationId = Model.corelationId;
+    var destination = Model.signedPath;
+    var source = Model.sourcePath;
+    var Status = Model.status;
+}
+<style>
+    .circle {
+        height: 40px;
+        width: 40px;
+        border-radius: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        /* top: 40px; */
+        right: 150px;
+        /* bottom:10px; */
+        /* border: 10px solid #E7F6FB; */
+        color: #333;
+        font-size: 20px;
+        font-weight: 500;
+        /* line-height: 60px; */
+    }
+
+    .Details-box {
+        /* height: 150px; */
+        /* width: 350px; */
+        /* background-color: #11A3D2; */
+        margin-bottom: 10px;
+        position: relative;
+        border-radius: 24px;
+        /* padding: 6px 12px; */
+        display: flex;
+        /* align-items: center; */
+        /* box-shadow: inset 0 100vw #11A3D2;
+                    border: 5px solid transparent; */
+    }
+
+    .small-box {
+        padding-top: 6px;
+        padding-left: 68px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    #myChart {
+        width: 100%;
+        max-width: 600px;
+        height: 400px;
+    }
+
+    .classshide {
+        display: none !important;
+    }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" id="spacingCss">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-4" style="float:left;">
+                        <div class="Details-box">
+                            <div class="small-box" style="padding-left: 56px !important;">Pending</div>
+                            <div class="circle" id="pendingcount" style="background-color:#FFFBEB; color:#F29F0E;">@pendingCount</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4" style="float:right">
+                        <div class="Details-box">
+                            <div class="small-box">Signed</div>
+                            <div class="circle" id="Signedcount" style="background-color:#F3FAF4; color:#4A9D5C;">@Model.result.successFileCount</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4" style="float:left;">
+                        <div class="Details-box">
+                            <div class="small-box">Failed</div>
+                            <div class="circle" id="FailedCount" style="background-color:#FEF2F2; color:#EA4F49;">@Model.result.failedFileCount</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row" style="background-color:white">
+    <div class="col-md-7">
+        <div class="card" style="margin-top: 15px;">
+            <div class="card-body">
+                <div class="row align-items-center justify-content-between plr" style="padding-right: 15px;">
+                   
+                    <div class="col-md-6 col-sm-12 d-flex align-items-center" id="custom-search-container"></div>
+                </div>
+                <table id="scopesTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table">
+                    <thead>
+                        <tr>
+                            <th>FileName</th>
+                            <th>Status</th>
+                            <th>Download</th> @* commented for path functionality *@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || Model.result.fileArray.Count == 0)
+                        {
+                            <tr>
+                                <td style="text-align:center" valign="top" colspan="5" class="dataTables_empty">No record found</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.result.fileArray)
+                            {
+                                <tr class="odd gradeX">
+
+                                    <td>@item.fileName</td>
+                                    <td>@item.status</td>
+                                    @{
+                                        if (item.status == "success")
+                                        {
+                                            <td>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16" onclick="redirectToPage('@item.fileName','@Model.signedPath')">
+                                                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
+                                                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
+                                                </svg>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td>----</td>
+                                        }
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card" style="margin-top: 15px;">
+            <h5>Pictoral Representation</h5>
+            <div class="card-body" style="align-items: center; justify-content: center; display: flex;">
+                <canvas id="myChart" width="350" height="350"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+@* <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script> *@
+<script src="~/assets/js/Chart.js"></script>
+<script>
+    var myChart;
+    var intervalId;
+    var totalFileCount1 = @pendingCount;
+    var failedFileCount1 = @failedFileCount;
+    var successFileCount1 = @successFileCount;
+    var CorelationId = '@correlationId';
+    var SignedPath = '@destination';
+    var SourcePath = '@source';
+    var status = '@Status';
+    var filesCount = @filesCount;
+    var yValues = [successFileCount1, totalFileCount1, failedFileCount1];
+    var xValues = ["Signed", "Pending", "Failed"];
+    // var barColors = [
+    //     "rgb(211, 252, 188)", // success color
+    //     "#7DD0D7",  // pending color
+    //     "#FFB2B2"   // failed color
+    // ];
+
+    var barColors = [
+        "#CAE8CF", // success color
+        "#FBE68C",  // pending color
+        "#F9CFAF"   // failed color
+    ];
+
+    var totalFileCountFromResponse;
+
+    $(document).ready(function () {
+        // $('#scopesTable').DataTable();
+        loadpiechart();
+        if (status == "In Progress") {
+            //intervalId = setInterval(checkstatus, 3000);
+            //updatestatus();
+
+            intervalId = setInterval(checkFileStatus, 3000);
+            updateFileStatus();
+           //  var signCount = Number($('#Signedcount').val());
+           // var failCount = Number($('#FailedCount').val());
+           // var totalFileCountFromResponse = Number(totalFileCountFromResponse);
+
+           //  if (totalFileCountFromResponse === signCount + failCount) {
+           //      console.log("status: completed");
+           //  }
+        }
+        else if(status == "Pending" || status == "Draft"){
+            getFilesFromSourcePath(SourcePath);
+        }
+        else {
+            UpdateDetails();
+        }
+
+
+        $('#homeMenu').addClass('breadcrumb-item').append('Transaction Details');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        $('#TransactionMenuItem').addClass('active');
+        $('#networkOverlay').hide();
+        document.getElementById("navigationNetworkOverlay").style.display = "none";
+    });
+    function loadpiechart() {
+        if (myChart) {
+            myChart.destroy();
+        }
+        myChart = new Chart("myChart", {
+            type: "pie",
+            data: {
+                labels: xValues,
+                datasets: [{
+                    backgroundColor: barColors,
+                    data: yValues
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                },
+                responsive: false,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    // function loadpiechart() {
+    //     if (myChart) {
+    //         myChart.destroy();
+    //     }
+
+    //     get canvas context
+    //     var ctx = document.getElementById("myChart").getContext("2d");
+
+    //     define gradients
+    //     var goldGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    //     goldGradient.addColorStop(0, "#D4AF37"); // metallic gold
+    //     goldGradient.addColorStop(1, "#92722A"); // darker gold
+
+    //     var beigeGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    //     beigeGradient.addColorStop(0, "#F2E6D8"); light beige
+    //     beigeGradient.addColorStop(1, "#E1C16E"); sandy gold
+
+    //     var greyGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    //     greyGradient.addColorStop(0, "#D3D6DA"); // light gray (top)
+    //     greyGradient.addColorStop(0.5, "#9EA2A9"); // your mid-tone
+    //     greyGradient.addColorStop(1, "#4A4F55"); // dark gray (bottom)
+
+
+    //     var successGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    //     successGradient.addColorStop(0, "rgba(146, 114, 42, 0.3)");   top
+    //     successGradient.addColorStop(1, "rgba(146, 114, 42, 0.25)");  bottom
+
+    //     var failedGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    //     failedGradient.addColorStop(0, "rgba(158, 162, 169, 0.3)");   top
+    //     failedGradient.addColorStop(1, "rgba(158, 162, 169, 0.25)");  bottom
+
+
+    //     assign gradients instead of flat colors
+    //     var barColors = [successGradient, successGradient, failedGradient];
+
+    //     myChart = new Chart("myChart", {
+    //         type: "pie",
+    //         data: {
+    //             labels: xValues,
+    //             datasets: [{
+    //                 backgroundColor: barColors,
+    //                 data: yValues
+    //             }]
+    //         },
+    //         options: {
+    //             title: {
+    //                 display: true,
+    //             },
+    //             responsive: false,
+    //             maintainAspectRatio: false
+    //         }
+    //     });
+    // }
+
+
+    function redirectToPage(fileName, destinationPath) {
+
+        var data = {
+            fileName: fileName,
+            destinationPath: destinationPath
+        };
+        $.ajax({
+            url: '@Url.Action("Download", "BulkSign")',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+                $('#overlay').hide();
+            },
+            success: function (blob) {
+                // Create a temporary link element
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+
+                // Append the link to the body
+                document.body.appendChild(a);
+
+                // Trigger a click on the link to start the download
+                a.click();
+
+                // Remove the link from the body
+                document.body.removeChild(a);
+
+                // Release the object URL
+                window.URL.revokeObjectURL(url);
+            },
+            error: function (error) {
+                // Handle errors
+                console.error('Error downloading file:', error);
+                Swal.fire({
+                    icon: 'info',
+                    title: "Download file",
+                    text: "Failed to download file",
+                    showCancelButton: false,
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                    }
+                });
+
+            }
+        });
+    }
+
+
+
+    function updatestatus() {
+        var corelationid = CorelationId;
+        $.ajax({
+            url: '@Url.Action("UpdateDocumentDetails1", "BulkSign")',
+            method: 'GET',
+            data: { correlationId: corelationid },
+            success: function (data) {
+                var fileArray = data.fileArray;
+                if (fileArray.length == 0) {
+                    return;
+                }
+                failedFileCount1 = data.failedFileCount;
+                successFileCount1 = data.successFileCount;
+                totalFileCount1 = data.totalFileCount - successFileCount1 - failedFileCount1;
+                yValues = [successFileCount1, totalFileCount1, failedFileCount1];
+                updateTable(fileArray);
+                loadpiechart();
+            },
+            error: function (error) {
+                console.error('Error calling UpdateDocumentDetails:', error);
+            }
+        });
+    }
+
+    function updateFileStatus() {
+        var corelationid = CorelationId;
+        $.ajax({
+            url: '@Url.Action("UpdateDocumentDetailsOfAllFiles", "BulkSign")',
+            method: 'GET',
+            data: { correlationId: corelationid },
+            success: function (data) {
+                //var fileArray = data.fileSigningStatus;
+                var fileArray = data.fileArray;
+                totalFileCountFromResponse = data.totalFileCount;
+                if (fileArray.length == 0) {
+                    return;
+                }
+                failedFileCount1 = data.failedFileCount;
+                successFileCount1 = data.successFileCount;
+                totalFileCount1 = data.totalFileCount - successFileCount1 - failedFileCount1;
+                yValues = [successFileCount1, totalFileCount1, failedFileCount1];
+
+                 if (totalFileCountFromResponse === data.successFileCount + data.failedFileCount)
+                 {
+                    clearInterval(intervalId); // Stop the interval if completed
+                    bulkSignFilesStatusUpdate(corelationid);
+
+                 }
+                updateTable(fileArray);
+                loadpiechart();
+            },
+            error: function (error) {
+                console.error('Error calling UpdateDocumentDetails:', error);
+            }
+        });
+    }
+
+    function bulkSignFilesStatusUpdate(corelationid){
+        $.ajax({
+            url: '@Url.Action("UpdateBulkSignStatusToCompleted", "BulkSign")',
+                        method: 'GET',
+                        data: { correlationId: corelationid },
+                        success: function (data) {
+
+                        },
+                        error: function (error) {
+                            console.error('Error calling UpdateDocumentDetails:', error);
+                        }
+                    });
+    }
+
+    function updateTable(fileArray) {
+        $('#pendingcount').text(totalFileCount1);
+        $('#Signedcount').text(successFileCount1);
+        $('#FailedCount').text(failedFileCount1);
+        if ($.fn.DataTable.isDataTable('#scopesTable')) {
+            $('#scopesTable').DataTable().destroy();
+        }
+        var tableBody = document.getElementById('scopesTable').getElementsByTagName('tbody')[0];
+        tableBody.innerHTML = "";
+        // if ($.fn.DataTable.isDataTable('#scopesTable')) {
+        //     $('#scopesTable').DataTable().destroy();
+        // }
+        if (fileArray.length === 0) {
+            var emptyRow = document.createElement('tr');
+            emptyRow.innerHTML = '<td style="text-align:center" valign="top" colspan="5" class="dataTables_empty">No record found</td>';
+            tableBody.appendChild(emptyRow);
+        } for (var i = 0; i < fileArray.length; i++) {
+            var row = document.createElement('tr');
+            var fileNameCell = document.createElement('td');
+            var statusCell = document.createElement('td');
+            var downloadCell = document.createElement('td');
+
+            fileNameCell.textContent = fileArray[i].fileName;
+            statusCell.textContent = fileArray[i].status;
+
+            if (fileArray[i].status === 'success') {
+                var downloadIconHtml = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16" onclick=\'redirectToPage("' + fileArray[i].fileName + '","' + SignedPath + '")\'>' +
+                    '<path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"></path>' +
+                    '<path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"></path>' +
+                    '</svg>';
+                downloadCell.innerHTML = downloadIconHtml;
+            } else {
+                downloadCell.textContent = '---';
+            }  //commented for path functionality
+
+            row.appendChild(fileNameCell);
+            row.appendChild(statusCell);
+            row.appendChild(downloadCell); //commented for path functionality
+
+            tableBody.appendChild(row);
+        }
+        $('#scopesTable').DataTable({
+            ordering: false,
+            searching: true,
+            paging: true,
+            lengthChange: false,
+             "initComplete": function () {
+                // Move the search bar into our custom container
+                $(".dataTables_filter").appendTo("#custom-search-container");
+                $('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+                $('.dataTables_filter label').contents().filter(function () {
+                    return this.nodeType === 3;
+                }).remove();
+
+            }
+        });
+
+    }
+
+
+    function UpdateDetails() {
+        var corelationid = CorelationId;
+        $.ajax({
+            url: '@Url.Action("DocumentResultDetails", "BulkSign")',
+            method: 'GET',
+            data: { correlationId: corelationid },
+            success: function (data) {
+                if (data.totalFileCount > 0) {
+                    failedFileCount1 = data.failedFileCount;
+                    successFileCount1 = data.successFileCount;
+                    totalFileCount1 = data.totalFileCount - successFileCount1 - failedFileCount1;
+                    yValues = [successFileCount1, totalFileCount1, failedFileCount1]
+                    var fileArray = data.fileArray;
+                    updateTable(fileArray);
+                    loadpiechart();
+                }
+            },
+            error: function (error) {
+                console.error('Error calling UpdateDocumentDetails:', error);
+            }
+        });
+    }
+
+    function checkstatus() {
+        var corelationid = CorelationId;
+        $.ajax({
+            url: '@Url.Action("DocumentStatusDetails", "BulkSign")',
+            method: 'GET',
+            data: { correlationId: corelationid },
+            success: function (data) {
+                if (data != "Completed") {
+                    updatestatus();
+                }
+                else {
+                    clearInterval(intervalId);
+                    UpdateDetails();
+                }
+            },
+            error: function (error) {
+                console.error('Error calling UpdateDocumentDetails:', error);
+            }
+        });
+    }
+
+     function checkFileStatus() {
+        var corelationid = CorelationId;
+        $.ajax({
+            url: '@Url.Action("DocumentStatusDetails", "BulkSign")',
+            method: 'GET',
+            data: { correlationId: corelationid },
+            success: function (data) {
+                if (data != "Completed") {
+                    updateFileStatus();
+                }
+                else {
+                    clearInterval(intervalId);
+                    UpdateDetails();
+                }
+            },
+            error: function (error) {
+                console.error('Error calling UpdateDocumentDetails:', error);
+            }
+        });
+    }
+
+    function getFilesFromSourcePath(sourcePath){
+         $.ajax({
+            url: '@Url.Action("GetFilesFromSourcePath", "BulkSign")',
+            method: 'GET',
+            data: { sourcePath: sourcePath },
+            success: function (data) {
+                var fileArray = data.fileArray;
+
+                if (fileArray.length == 0) {
+                    return;
+                }
+                failedFileCount1 = data.failedFileCount;
+                successFileCount1 = data.successFileCount;
+                totalFileCount1 = data.totalFileCount - successFileCount1 - failedFileCount1;
+                yValues = [successFileCount1, totalFileCount1, failedFileCount1];
+                updateTable(fileArray);
+                loadpiechart();
+            },
+           error: ajaxErrorHandler,
+        });
+    }
+</script>

@@ -1,0 +1,551 @@
+﻿@using EnterpriseGatewayPortal.Web.Models
+@model EnterpriseGatewayPortal.Web.ViewModel.KYCMethods.KycMethodViewModel
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+{
+        new BreadCrumbModel { Title = "Verification Methods", Url = "", IconKey = "payments-rateCards" }
+    };
+
+    var defaultMethods = Model?.Methods;
+    var additionalMethods = Model?.Methods;
+}
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .stat-container {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    @@media (width <= 780px) {
+        .stat-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        justify-content: space-between;
+        background: #fff;
+        border-radius: 8px;
+        height: 100px !important;
+        padding: 1.2rem 1.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        transition: all 0.25s ease;
+        width: -webkit-fill-available;
+        font-family: 'Inter';
+    }
+
+    .stat-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-label {
+        font-size: 1rem;
+        color: #4b5563;
+        margin-bottom: 4px;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .icon-blue {
+        background: linear-gradient(45deg,#2563eb,#3b82f6);
+    }
+
+    .icon-green {
+        background: linear-gradient(45deg,#22c55e,#059669);
+    }
+
+    .icon-yellow {
+        background: linear-gradient(45deg,#eab308,#f97316);
+    }
+
+    .icon-red {
+        background: linear-gradient(45deg,#ef4444,#ff4c6f);
+    }
+
+    .kyc-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #e5e7eb;
+        transition: all 0.25s ease;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0px 6px 12px -7px #ccc;
+    }
+
+    .kyc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .kyc-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #111827;
+        word-wrap: break-word;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .status-badge {
+        display: flex;
+        align-items: center;
+        padding: 0px 6px;
+        height: 25px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 1rem;
+        border: 1px solid transparent;
+    }
+
+    .status-approved {
+        background-color: #e8f7ef;
+        color: #107c41;
+        border: 1px solid #b2e2c2;
+    }
+
+    .status-pending {
+        background-color: #fff5e5;
+        color: #a15c00;
+        border: 1px solid #f3d7a6;
+    }
+
+    .status-rejected {
+        background-color: #fdeaea;
+        color: #b91c1c;
+        border: 1px solid #f5bebe;
+    }
+
+    .status-default {
+        background-color: #f5f6f8;
+        color: #555b61;
+        border: 1px solid #d4d7dc;
+    }
+
+    .kyc-method-type {
+        font-size: 1rem;
+        color: black;
+        font-weight: 500;
+    }
+
+    .kyc-search {
+        width: 100%;
+        max-width: 400px;
+        margin-bottom: 1.5rem;
+        padding: 0.65rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #ccc;
+        font-size: 0.95rem;
+        outline: none;
+        transition: border 0.2s ease;
+    }
+
+        .kyc-search:focus {
+            border-color: #0078d4;
+        }
+
+    .no-results {
+        text-align: center;
+        color: #777;
+        font-size: 0.95rem;
+        margin-top: 2rem;
+    }
+
+    .methods-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.2rem;
+        justify-content: center;
+    }
+
+    button {
+        font-family: "Inter";
+        height: 35px !important;
+    }
+
+    hr {
+        border: none;
+        border-top: 1px solid #e5e7eb;
+        margin: 1rem 0;
+    }
+
+    .tabs-container {
+        display: flex;
+        flex-direction: row;
+        gap: 2rem;
+        border-bottom: 2px solid #e5e7eb;
+        margin-bottom: 1.5rem;
+        position: sticky;
+        top: -10px;
+        z-index: 10;
+        background-color: #fff;
+    }
+
+    .tab-item {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #4b5563;
+        padding: 0.75rem 0.5rem;
+        cursor: pointer;
+        background-color: transparent;
+        white-space: nowrap;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+        transition: color 0.3s ease, border-color 0.3s ease;
+    }
+
+        .tab-item:not(.active):hover {
+            color: #111827;
+        }
+
+        .tab-item.active {
+            color: #92722A;
+            border-bottom-color: #92722A;
+        }
+
+    .tab-content-panel {
+        display: none;
+        padding-top: 1rem;
+    }
+
+        .tab-content-panel.active {
+            display: block;
+        }
+
+    .shimmer-wrapper {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .shimmer-card {
+        width: 50%;
+        height: 140px;
+        border-radius: 8px;
+        background: #f6f7f8;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .shimmer-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient( to right, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100% );
+            animation: shimmerMove 2.0s infinite;
+        }
+
+    @@keyframes shimmerMove {
+        0% {
+            left: -150%;
+        }
+
+        100% {
+            left: 150%;
+        }
+    }
+
+
+    .tab-loader {
+        min-height: 160px;
+        position: relative;
+        animation: fadeIn 0.4s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="p-4" style="padding-top:0px !important;">
+    <div class="stat-container">
+        <a class="stat-card" href="@Url.Action("VerificationMethods","KYCMethods",new {status = "all"})">
+            <div class="stat-info"><div class="stat-label">Total Methods</div><div class="stat-value">@Model.Stats.Total</div></div>
+            <div class="stat-icon icon-blue"><i class="ph ph-shield-check" style="font-size:22px;"></i></div>
+        </a>
+        <a class="stat-card" href="@Url.Action("VerificationMethods","KYCMethods",new {status = "approved"})">
+            <div class="stat-info"><div class="stat-label">Approved Methods</div><div class="stat-value">@Model.Stats.Active</div></div>
+            <div class="stat-icon icon-green"><i class="ph ph-check-circle" style="font-size:22px;"></i></div>
+        </a>
+        <a class="stat-card" href="@Url.Action("VerificationMethods","KYCMethods",new {status = "pending"})">
+            <div class="stat-info"><div class="stat-label">Pending Requests</div><div class="stat-value">@Model.Stats.Pending</div></div>
+            <div class="stat-icon icon-yellow"><i class="ph ph-clock" style="font-size:22px;"></i></div>
+        </a>
+        <a class="stat-card" href="@Url.Action("VerificationMethods","KYCMethods",new {status = "rejected"})">
+            <div class="stat-info"><div class="stat-label">Rejected Requests</div><div class="stat-value">@Model.Stats.Rejected</div></div>
+            <div class="stat-icon icon-red"><i class="ph ph-x-circle" style="font-size:22px;"></i></div>
+        </a>
+    </div>
+
+    <div class="tabs-container">
+        <div class="tab-item active" data-tab="default">Active Methods</div>
+        <div class="tab-item" data-tab="additional">Request New Methods</div>
+        <div class="tab-item" data-tab="allrequests">All Requests</div>
+        @*<div class="tab-item" data-tab="analytics">Analytics</div>*@
+    </div>
+
+    <input type="text" id="kycSearch" class="kyc-search" placeholder="Search Methods..." />
+
+    <!-- ✅ TAB CONTENT PLACEHOLDERS -->
+    <div class="tab-content">
+        <div class="tab-content-panel active" id="default-methods-content">
+            <div id="ActiveMethodsContainer" class="tab-loader">
+                <div class="shimmer-wrapper">
+                    <div class="shimmer-card animate"></div>
+                    <div class="shimmer-card animate"></div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-content-panel" id="additional-methods-content">
+            <div id="RequestedMethodsContainer" class="tab-loader">
+                <div class="shimmer-wrapper">
+                    <div class="shimmer-card animate"></div>
+                    <div class="shimmer-card animate"></div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-content-panel" id="allrequests-methods-content">
+            <div id="AllRequestedMethodsContainer" class="tab-loader">
+                <div class="shimmer-wrapper">
+                    <div class="shimmer-card animate"></div>
+                    <div class="shimmer-card animate"></div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-content-panel" id="analytics-methods-content">
+            <div id="AnalyticsContainer" class="tab-loader">
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <!-- Global Chart.js -->
+    <script>
+    $(document).ready(function () {
+        $('#networkOverlay').hide();
+        $("#Kyc-Methods").addClass("active");
+
+        const $tabsContainer = $('.tabs-container');
+        const $contentContainer = $('.tab-content');
+
+        $tabsContainer.on('click', '.tab-item', function () {
+            const $clickedTab = $(this);
+            const tabToActivate = $clickedTab.data('tab');
+
+            $tabsContainer.find('.tab-item').removeClass('active');
+            $clickedTab.addClass('active');
+
+            $contentContainer.find('.tab-content-panel').removeClass('active');
+            $contentContainer.find(`#${tabToActivate}-methods-content`).addClass('active');
+
+            applyFilters();
+        });
+
+        $("#kycSearch").on("input", applyFilters);
+
+        function applyFilters() {
+            const searchQuery = $("#kycSearch").val().toLowerCase().trim();
+            const $activePanel = $('.tab-content-panel.active');
+            const $cards = $activePanel.find(".kyc-card");
+            let visibleCount = 0;
+
+            $cards.each(function () {
+                const name = $(this).data("name").toLowerCase();
+                if (name.includes(searchQuery)) {
+                    $(this).show();
+                    visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            $activePanel.find(".no-results-message").remove();
+            if (visibleCount === 0 && $cards.length > 0) {
+                $activePanel.append("<div class='no-results no-results-message'>No matching methods found.</div>");
+            }
+        }
+
+        loadPartial('@Url.Action("GetActiveMethods", "KYCMethods")', '#ActiveMethodsContainer');
+
+        $('.tab-item').click(function () {
+            const tab = $(this).data('tab');
+
+            if (tab === 'default')
+                loadPartial('@Url.Action("GetActiveMethods", "KYCMethods")', '#ActiveMethodsContainer');
+            else if (tab === 'additional')
+                loadPartial('@Url.Action("RequestNewMethods", "KYCMethods")', '#RequestedMethodsContainer');
+            else if (tab === 'allrequests')
+                loadPartial('@Url.Action("AllRequestedMethods", "KYCMethods")', '#AllRequestedMethodsContainer');
+            else if (tab === 'analytics')
+                loadPartial('@Url.Action("GetAnalyticsData","KYCMethods")', '#AnalyticsContainer');
+        }); 
+    });
+
+        function loadPartial(url, targetSelector) {
+            $(targetSelector).html(`
+                <div class="shimmer-wrapper">
+                    <div class="shimmer-card"></div>
+                    <div class="shimmer-card"></div>
+                </div>
+            `);
+
+            $.ajax({
+                url: url,
+                success: function (data) {
+                    $(targetSelector).html(data);
+
+                    if ($(targetSelector).find("#kycLineChart").length > 0) {
+
+                        setTimeout(() => {
+                            if (typeof initKycAnalyticsCharts === "function") {
+                                initKycAnalyticsCharts();
+                            } else {
+                                console.warn("initKycAnalyticsCharts() not found");
+                            }
+                        }, 100);
+                    }
+
+                },
+                error: function () {
+                    $(targetSelector).html('<div class="error-message">Failed to load content.</div>');
+                }
+            });
+        }
+
+
+    $(document).on("click", ".view-details-btn", function () {
+        const parseJsonSafely = (dataAttr) => {
+            try { return JSON.parse(dataAttr); } catch { return []; }
+        };
+
+        const data = {
+            MethodUid: $(this).data("methoduid"),
+            MethodName: $(this).data("methodname"),
+            MethodType: $(this).data("methodtype"),
+            Status: $(this).data("status"),
+            Pricing: $(this).data("pricing"),
+            Description: $(this).data("description"),
+            ProcessingTime: $(this).data("processingtime"),
+            ConfidenceThreshold: $(this).data("confidencethreshold"),
+            RequestStatus: $(this).data("requeststatus"),
+            IsRequested: $(this).data("isrequested").toString(),
+            TargetSegments: parseJsonSafely($(this).attr("data-targetsegments")),
+            MandatoryAttributes: parseJsonSafely($(this).attr("data-mandatory")),
+            OptionalAttributes: parseJsonSafely($(this).attr("data-optional"))
+        };
+        showMethodDetails(data);
+    });
+
+    function showMethodDetails(method) {
+        $("#method-uid").val(method.MethodUid || "—");
+        $("#method-name").val(method.MethodName || "—");
+        $("#method-type").val(method.MethodType || "—");
+        $("#method-pricing").val(method.Pricing || "—");
+        $("#method-processingtime").val(method.ProcessingTime || "—");
+        $("#method-confidence").val(method.ConfidenceThreshold || "—");
+        $("#method-description").text(method.Description || "—");
+
+        const displayStatus = method.Status ? method.Status.charAt(0).toUpperCase() + method.Status.slice(1).toLowerCase() : "—";
+        $("#method-status").text(displayStatus).removeClass("badge-success badge-secondary").addClass(displayStatus.toLowerCase() === "active" ? "badge-success" : "badge-secondary");
+
+        $("#method-requeststatus").text(method.RequestStatus || "—").removeClass("badge-info badge-secondary").addClass(method.RequestStatus?.toUpperCase() === "APPROVED" ? "badge-info" : "badge-secondary");
+
+        const renderList = (elId, items) => {
+            const $el = $("#" + elId);
+            $el.empty();
+            if (Array.isArray(items) && items.length) {
+                items.forEach(i => $el.append(`<li class="kyc-modal-tag">${i}</li>`));
+            } else {
+                $el.append(`<li class='text-muted'>—</li>`);
+            }
+        };
+
+        if (method.IsRequested.toLowerCase() === 'true') {
+            $("#viewMethodModal #method-status-btn").show();
+            $("#viewMethodModal #method-send-request-btn").hide();
+        } else {
+            $("#viewMethodModal #method-status-btn").hide();
+            $("#viewMethodModal #method-send-request-btn").show();
+        }
+
+        renderList("method-targetsegments", method.TargetSegments);
+        renderList("method-mandatory", method.MandatoryAttributes);
+        renderList("method-optional", method.OptionalAttributes);
+        $("#viewMethodModal").modal("show");
+    }
+
+    function sendRequest(methodUid) {
+        $('#networkOverlay').show();
+        $.ajax({
+            url: '@Url.Action("SubmitKYCMethodRequest", "KYCMethods")',
+            type: 'POST',
+            data: { methodUid: methodUid },
+            cache: false,
+            dataType: 'json',
+            success: function (response) {
+                Swal.fire({
+                    title: 'Request Sent',
+                    text: 'Verification Method request has been sent successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.reload();
+                    }
+                });
+                $('#networkOverlay').hide();
+            },
+            error: function (xhr, status, error) {
+                Swal.fire({ title: 'Error', text: 'An error occurred while sending the request. Please try again.', icon: 'error', confirmButtonText: 'OK' });
+                $('#networkOverlay').hide();
+            }
+        });
+    }
+    </script>
+}
+
+@await Html.PartialAsync("VerificationMethodDetailsModal")

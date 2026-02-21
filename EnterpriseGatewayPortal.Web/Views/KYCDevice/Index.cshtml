@@ -1,0 +1,230 @@
+﻿@using EnterpriseGatewayPortal.Web.Models
+@model EnterpriseGatewayPortal.Web.ViewModel.KYCDevices.KYCDevicesViewModel
+@{
+	ViewBag.Breadcrumb = new List<BreadCrumbModel>
+	{
+		new BreadCrumbModel { Title = "KYC Devices",Url = "",IconKey = "devices"}
+	};
+}
+@{
+	ViewData["Title"] = "Users";
+}
+
+@{
+	await Html.RenderPartialAsync("_AlertBox");
+}
+<style>
+	.classshide {
+		display: none !important;
+	}
+
+</style>
+@if (Model == null || Model.Devices.Count() == 0)
+{
+	<style>
+		table {
+			height: 70% !important;
+		}
+
+		.table-hover > tbody > tr:hover > td {
+			background: none !important;
+		}
+
+		body {
+			overflow: hidden;
+		}
+
+		/* Apply 100% height to all DataTables wrappers */
+		.dataTables_wrapper {
+			height: 100% !important;
+		}
+
+			/* Apply 100% height only to the second .row inside any DataTables wrapper */
+			.dataTables_wrapper > .row:nth-of-type(2) {
+				height: 100% !important;
+			}
+
+		td:not([style*="display: none"]) {
+			border-bottom-right-radius: 12px !important;
+			border-bottom-left-radius: 12px !important;
+		}
+
+	</style>
+}
+<div class="classshide">
+	<div id='viewer'></div>
+</div>
+<div class="row" style="height:100%;">
+	<div class="col-md-12 plr">
+		
+		<div class="card-body">
+
+			<div class="row align-items-center justify-content-between plr" style="padding-left: 15px; padding-right: 15px;">
+				<!-- Left: Search bar (will be injected by DataTables) -->
+				<div class="col-md-6 col-sm-12 d-flex align-items-center" id="custom-search-container"></div>
+
+				<!-- Right: Buttons -->
+				<div class="col-md-6 col-sm-12 text-right">
+					<div class="btn-group">
+
+						<a class="btn btn-other" asp-action="Index">
+							<img src="~/assets/images/refresh.png"
+								 alt="refresh Icon"
+								 width="17" height="17"
+								 style=" margin-right: 7px; opacity: 1; position: relative; bottom: -2px;">Refresh
+						</a>
+					</div>
+					
+				</div>
+			</div>
+			<table id="DevicesTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table @(Model == null || Model.Devices.Count() == 0 ? "empty-table" : "")">
+				<thead>
+					<tr>
+						<th>S.No</th>
+						<th>Device</th>
+						<th>Action</th>
+
+					</tr>
+				</thead>
+				<tbody>
+					@if (!Model.Devices.Any())
+					{
+						<tr>
+							<td style="display: none;"></td>
+							<td style="text-align:center" valign="top" colspan="6" class="dataTables_empty">
+								<img class="NoRecordsCls" src="~/assets/images/No-Records-icon.svg" alt="No records" style=" display:block; margin:0 auto 8px;">
+								<p class="NoRecordFound-paragarph">No records found</p>
+
+							</td>
+
+							<td style="display: none;"></td>
+							
+						</tr>
+					}
+					else
+					{
+						@for (int i = 0; i < Model.Devices.Count; i++)
+						{
+							<tr class="odd gradeX">
+								<td>@(i + 1)</td>
+								<td>@Model.Devices[i]</td>
+								<td>
+									<button class="btn btn-xs deepPink-bgcolor no-margin uaeid-secondary Actions_btn" style="width: 102px !important;" onclick="blockDevice('@Model.Devices[i]')">
+										<img src="~/assets/images/Weight=Regular.svg" style="height: 15px !important;" /> Block Device
+                                    </button>
+								</td>
+							</tr>
+						}
+					}
+				</tbody>
+
+			</table>
+		</div>
+
+	</div>
+</div>
+@section scripts {
+
+	<!-- JavaScript: Breadcrumb Setup + Action -->
+	<script>
+		$(document).ready(function () {
+
+            $("#IdValidation > a")
+                .attr("aria-expanded", "true")
+                .addClass("active");
+
+            $("#IdValidation")
+                .addClass("submenu-active show");
+
+            $("#IdValidation .submenu")
+                .addClass("show");
+
+            $("#Kyc-Devices").addClass("active");
+
+			$('#networkOverlay').hide();
+			document.getElementById("navigationNetworkOverlay").style.display = "none";
+			$('#homeMenu').addClass('breadcrumb-item').append('ID Validation Service');
+			$('#mainMenu').addClass('breadcrumb-item').append('Registered Devices');
+			$('#subMenu').removeClass('breadcrumb-item');
+
+
+			var table = $("#DevicesTable").DataTable({
+				"bLengthChange": false,
+				"searching": true,
+				"initComplete": function () {
+					// Move the search bar into our custom container
+					$(".dataTables_filter").appendTo("#custom-search-container");
+					$('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+					$('.dataTables_filter label').contents().filter(function () {
+						return this.nodeType === 3;
+					}).remove();
+
+				}
+			});
+
+
+
+
+		});
+
+		function blockDevice(deviceId) {
+
+
+			Swal.fire({
+				icon: 'info',
+				title: "Info",
+				text: "Are you sure you want to block this device?",
+				showCancelButton: true,
+				confirmButtonText: "Yes",
+				cancelButtonText: "No"
+			}).then((result) => {
+				if (result.isConfirmed) {
+
+					$.ajax({
+						type: "POST",
+						url: '@Url.Action("BlockDevice", "KYCDevice")',
+						data: { deviceId: deviceId },
+						beforeSend: function () {
+							$('#overlay').show();
+						},
+						complete: function () {
+							$('#overlay').hide();
+						},
+						success: function (data) {
+							if (data.success) {
+								Swal.fire({
+									icon: 'success',
+									title: "Success",
+									text: data.message
+								}).then((res) => {
+									if (res.isConfirmed) {
+										window.location.href = '@Url.Action("Index", "KYCDevice")';
+									}
+								});
+							} else {
+								Swal.fire({
+									icon: 'error',
+									title: "Error",
+									text: data.message
+								}).then((res) => {
+									if (res.isConfirmed) {
+										window.location.href = '@Url.Action("Index", "KYCDevice")';
+									}
+								});
+							}
+						},
+						error: ajaxErrorHandler
+					});
+				}
+			});
+
+
+
+
+
+
+		}
+	</script>
+}
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">

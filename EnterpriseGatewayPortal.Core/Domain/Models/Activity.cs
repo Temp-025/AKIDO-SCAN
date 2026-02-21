@@ -1,0 +1,29 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace EnterpriseGatewayPortal.Core.Domain.Models;
+
+public partial class Activity
+{
+    public int Id { get; set; }
+
+    public string Category { get; set; } = null!;
+
+    public string Name { get; set; } = null!;
+
+    public string? DisplayName { get; set; }
+
+    public int? ParentId { get; set; }
+
+    public bool McEnabled { get; set; }
+
+    public bool Enabled { get; set; }
+
+    public string? Hash { get; set; }
+
+    public bool McSupported { get; set; }
+
+    public virtual ICollection<MakerChecker> MakerCheckers { get; set; } = new List<MakerChecker>();
+
+    public virtual ICollection<RoleActivity> RoleActivities { get; set; } = new List<RoleActivity>();
+}

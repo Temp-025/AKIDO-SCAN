@@ -1,0 +1,454 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.SignatureDelegation.AddDelegationViewModel;
+@using System.Security.Claims;
+@using Newtonsoft.Json
+
+@{
+    // Get the current date and time in the format "yyyy-MM-ddTHH:mm"
+    string minDateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+}
+
+<style>
+    #custom-alert {
+        position: absolute;
+        top: 10%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        border: 1px solid #ccc;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+        max-width: 650px;
+        border-radius: 5px;
+    }
+
+        #custom-alert #alert-message {
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        #custom-alert #ok-button {
+            background-color: #acc33e;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+            #custom-alert #ok-button:hover {
+                background-color: #99b32c;
+            }
+
+    .classshide {
+        display: none !important;
+    }
+
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Create Delegations</h3>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Start Date:</label>
+                            <div class="col-sm-6">
+                                <input asp-for="StartDateTime" autocomplete="off" class="datetimepicker form-control" required min="@minDateTime" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">End Date:</label>
+                            <div class="col-sm-6">
+                                <input asp-for="EndDateTime" class="datetimepicker form-control" autocomplete="off" required min="@minDateTime" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <label class="col-sm-2 col-form-label">Delegate:</label>
+                    <div id="delegateContainer" class="col-sm-9">
+                        <div id="formElementsContainer" >
+                            <ul style="list-style:none; padding-bottom: 2px;">
+                                <li class="row align-items-center" style="padding-bottom:6px">
+
+                                    <div class="col-sm-7">
+                                        <input class="delgateeEmail form-control" id="delgateeEmail1" type="email" placeholder="MyTrust E-Mail" style="margin-left:-50px">
+                                    </div>
+
+                                    @* <a class="btn btn-danger sub-form-elements" id="minus" style="background-color: #15294B; display:none; margin-right:3px">
+                                        <i class="fa fa-minus"></i>
+                                    </a>
+
+                                    <a class="btn btn-primary add-form-elements" id="plus" style="background-color: #15294B;">
+                                        <i class="fa fa-plus"></i>
+                                    </a> *@
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <br />                
+                    <div class="d-flex justify-content-end" style="padding-top: 31px;">
+                        <button class="btn btn-primary" id="submitButton" >Submit</button>
+                        &nbsp;&nbsp;
+                        <a class="btn btn-danger" asp-action="List" >Cancel</a>
+                    </div>                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+@section Scripts {
+
+    <script>
+
+        var userEmail = '@User.FindFirst(ClaimTypes.Email).Value';
+        var viewmodel = @Html.Raw(Json.Serialize(Model));
+        var emailInputValue = [];
+        var delegateEmails = [];
+        var index = 0;
+        var emailIsValid = false;
+        var emailsList = @Html.Raw(JsonConvert.SerializeObject(Model.Emails));
+
+        $(document).ready(function () {
+
+
+            $('#SignatureDelegationMenu').addClass('active');
+            $('#homeMenu').addClass('breadcrumb-item').append('Delegations > New');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#networkOverlay').hide();
+            var startDateTime = document.getElementsByName('StartDateTime')[0].value = 'yyyy-MM-ddThh:mm';
+            var endDateTime = document.getElementsByName('EndDateTime')[0].value = 'DD/MM/YY HH:MM';
+        });
+
+
+        $('#delegateContainer').on('blur', '.delgateeEmail', function (e) {
+
+            emailInputValue = $(this).val();
+            const emailRegex = /^\w+([\.-]?\w+)*@@\w+([\.-]?\w+)*(\.\w{2,6})+$/;
+
+            if (emailInputValue == "") {
+                Swal.fire({ icon: 'error', title: "Error", text: "Please enter an Email" });
+                return;
+            }
+            if (!emailRegex.test(emailInputValue)) {
+                // showCustomAlert('Please enter a valid Email');
+                Swal.fire({ icon: 'error', title: "Error", text: "Please enter a valid Email" });
+                return; // Exit the function if email format is invalid
+            }
+            if (userEmail === emailInputValue) {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "You cannot assign yourself as Delegatee" });
+                return; // Exit the function if user tries to assign their own email
+            }
+            if (!emailsList.includes(emailInputValue)) {
+                Swal.fire({ icon: 'error', title: "Error", text: "Sorry, this email does not belong to logged-in organization subscribers" });
+                return; // Exit the function if the email is not in the Emails list
+            }
+            delegateEmails.push(emailInputValue);
+
+        });
+
+        $("#delegateContainer").on("click", ".add-form-elements", function () {
+
+
+            var emailInputValue = $(this).closest('.row').find('.delgateeEmail').val();
+            var $li = $(this).closest('li');
+            var indexToRemove = $li.index();
+            const emailRegex = /^\w+([\.-]?\w+)*@@\w+([\.-]?\w+)*(\.\w{2,6})+$/;
+
+            if (emailInputValue.trim() === "") {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "Please enter an Email" });
+                return; // Exit the function if email input is empty
+            }
+
+            if (!emailRegex.test(emailInputValue)) {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "Please enter a valid Email" });
+                return; // Exit the function if email format is invalid
+            }
+
+            if (userEmail === emailInputValue) {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "You cannot assign yourself as Delegatee" });
+
+                return; // Exit the function if user tries to assign their own email
+            }
+
+            if (indexToRemove == 1) {
+                if (delegateEmails[0] == emailInputValue) {
+                    Swal.fire({ icon: 'error', title: "Error", text: "Email already used" });
+                    delegateEmails = delegateEmails.filter((email, index) => index !== indexToRemove);
+                    return; // Exit the function if email is already in use
+                }
+            }
+
+            if (Array.isArray(viewmodel.emails) && viewmodel.emails.some(email => email === emailInputValue) && index <= 1) {
+
+                if (index < 1) {
+
+                    var $ul = $("#delegateContainer ul");
+                    var newLi = $("<li class='row align-items-center'>").html(`
+                                    <div class="col-sm-7">
+                                        <input class="delgateeEmail form-control" id="delgateeEmail1_${index}" type="email" placeholder="E-Mail" style="margin-left:-50px">
+                                    </div>
+                                    <a class="btn btn-danger sub-form-elements" id="minus" style="background-color: #15294B;margin-right:3px">
+                                            <i class="fa fa-minus"></i>
+                                      </a>
+
+                                     <a class="btn btn-primary add-form-elements" id="plus" style="background-color: #15294B;">
+                                            <i class="fa fa-plus"></i>
+                                     </a>
+                                    <br />
+                            `);
+
+                    $ul.append(newLi);
+                    $(this).hide(); // Hide the plus button of the clicked item
+                    $(this).prev('.sub-form-elements').show(); // Show the minus button of the clicked item
+
+                    index++;
+                } else {
+
+                    Swal.fire({ icon: 'error', title: "Error", text: "Sorry you cannot add more than 2 subscribers as delegatee" });
+                    return;
+                }
+            } else if (Array.isArray(viewmodel.emails) && viewmodel.emails.some(email => email === emailInputValue) && delegateEmails.length < 3) {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "Sorry you cannot add more than 2 subscribers as delegatee" });
+                return;
+            }
+            else {
+                Swal.fire({ icon: 'error', title: "Error", text: "Sorry, this email does not belong to logged-in organization subscribers" });
+
+                return;
+            }
+
+        });
+
+
+
+
+        $("#delegateContainer").on("click", ".sub-form-elements", function () {
+
+            index--;
+            var $li = $(this).closest('li');
+            var isLastItem = $li.is(":last-child");
+            var isFirstItem = $li.is(":first-child");
+            var isListLengthTwo = $("#delegateContainer ul li").length === 2;
+            var indexToRemove = $li.index();
+            delegateEmails = delegateEmails.filter((email, index) => index !== indexToRemove);
+
+            if (isFirstItem && isListLengthTwo) {
+                var $nextLi = $li.next('li');
+                $nextLi.find('.sub-form-elements').hide();
+                $li.remove();
+            }
+            else if (isFirstItem) {
+                $li.remove();
+            }
+            else if (isLastItem) {
+                var $prevLi = $li.prev('li');
+
+
+                $prevLi.find('.sub-form-elements').hide();
+
+
+                $prevLi.find('.add-form-elements').show();
+                $li.remove();
+            }
+            else {
+                $li.remove();
+            }
+        });
+
+
+
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+
+            function validateDateTime() {
+                var startDateTime = document.getElementsByName('StartDateTime')[0].value;
+                var endDateTime = document.getElementsByName('EndDateTime')[0].value;
+
+                if (startDateTime == endDateTime) {
+
+                    Swal.fire({ icon: 'error', title: "Error", text: "Delegation start date time and end date time cannot be same." });
+
+                    return false;
+                }
+                return true;
+            }
+            document.getElementsByName('EndDateTime')[0].addEventListener('change', validateDateTime);
+        });
+
+
+        $('#submitButton').click(function () {
+
+            var startDateTime = $('#StartDateTime').val();
+            var endDateTime = $('#EndDateTime').val();
+            var EmailInputValue1 = $('#delgateeEmail1_0').val();
+            var EmailInputValue = $('#delgateeEmail1').val();
+            var now = new Date();
+            var startDate = new Date(startDateTime);
+            var endDate = new Date(endDateTime);
+            const emailRegex = /^\w+([\.-]?\w+)*@@\w+([\.-]?\w+)*(\.\w{2,6})+$/;
+
+            if (startDateTime == "") {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "Please Enter Start date" });
+                return;
+            }
+
+            if (endDateTime == "") {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "Please Enter End date" });
+                return;
+            }
+
+            if (startDate >= endDate) {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "Please Enter correct End Date" });
+                return;
+            }
+
+            if (startDateTime == endDateTime) {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "Delegation start date time and end date time cannot be same." });
+                return;
+            }
+
+            if (startDate.getDate() === now.getDate() && startDate.getHours() <= now.getHours() && startDate.getMinutes() <= now.getMinutes()) {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "Please select correct start time for Delegation" });
+                return;
+            }
+
+
+
+            if (emailInputValue.length == 0) {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "Please enter an email" });
+                return;
+            }
+
+            if (!emailRegex.test(EmailInputValue)) {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "Please enter a valid Email" });
+                return;
+            }
+
+            if (EmailInputValue1 != undefined) {
+                if (!emailRegex.test(EmailInputValue1)) {
+
+                    Swal.fire({ icon: 'error', title: "Error", text: "Please enter a valid Email" });
+                    return; // Exit the function if email format is invalid
+                }
+                if (!emailsList.includes(EmailInputValue1)) {
+                    Swal.fire({ icon: 'error', title: "Error", text: "Sorry, this email does not belong to logged-in organization subscribers" });
+                    return; // Exit the function if the email is not in the Emails list
+                }
+            }
+            if (!emailsList.includes(EmailInputValue)) {
+                Swal.fire({ icon: 'error', title: "Error", text: "Sorry, this email does not belong to logged-in organization subscribers" });
+                return; // Exit the function if the email is not in the Emails list
+            }
+
+            if (userEmail === EmailInputValue) {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "You cannot assign yourself as Delegatee" });
+
+                return;
+            }
+            if (userEmail === EmailInputValue1) {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "You cannot assign yourself as Delegatee" });
+
+                return;
+            }
+
+            if (delegateEmails[0] == delegateEmails[1]) {
+
+                Swal.fire({ icon: 'error', title: "Error", text: "Please ensure your email is unique duplicates are not accepted" });
+                return;
+            }
+
+
+                var model = {
+                    StartDateTime: startDateTime,
+                    EndDateTime: endDateTime,
+                    Emails: delegateEmails.length == 0 ? [EmailInputValue] : delegateEmails
+                }
+
+                $.ajax({
+                url: '@Url.Action("AddDelegation", "SignatureDelegation")',
+                type: 'POST',
+                data: JSON.stringify(model),
+                contentType: 'application/json',
+                beforeSend: function () {
+                    $('#overlay').show();
+                },
+                complete: function () {
+                    $('#overlay').hide();
+                },
+                success: function (response) {
+                    if (response.status == "Failed") {
+                        Swal.fire({
+                            title: 'Server response',
+                            text: response.message,
+                            icon: 'info'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '@Url.Action("CreateDelegation", "SignatureDelegation")';
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Success',
+                            text: response.message,
+                            icon: 'success'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '@Url.Action("List", "SignatureDelegation")';
+                            }
+                        });
+                    }
+                },
+                error: function (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Delegation Failed",
+                        text: "Error Performing verification"
+                    }).then(() => {
+                    });
+                    console.error('Error Performing verification', error);
+                }
+            });
+
+
+
+
+        });
+
+    </script>
+}
+

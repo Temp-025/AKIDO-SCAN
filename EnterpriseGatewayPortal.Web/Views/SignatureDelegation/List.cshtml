@@ -1,0 +1,203 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.SignatureDelegation.ListViewModel
+
+<style>
+
+    /* Style for the dropdown button */
+    .btn-dropdown-toggle {
+        /* / Default button color / / Default text color /  */
+        border: none;
+    }
+
+
+
+    /* Style for the dropdown menu */
+    .dropdown-menu {
+        background-color: #fff;
+        /* Background color of the dropdown menu */
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        /* Box shadow for the dropdown menu */
+        height: fit-content;
+        min-width: auto;
+        padding: inherit;
+    }
+
+    /* Style for the dropdown items */
+    .dropdown-item {
+        color: rgba(64, 74, 90, 1);
+        /*  / Text color of dropdown items / */
+    }
+
+        /* Style for the dropdown items on hover */
+        .dropdown-item:hover {
+            background-color: rgba(0,0,0,0.3);
+            /* / Background color of dropdown items on hover / */
+        }
+
+    .classshide {
+        display: none !important;
+    }
+
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                
+                <div class="row p-b-20">
+                    <div class="col-md-8 col-sm-8 col-8">
+                        <div class="btn-group">
+                            <a class="btn btn-primary" asp-controller="SignatureDelegation" asp-action="CreateDelegation" style="background-color: #15294B;">
+                                <i class="fa fa-plus"></i>Create Delegation
+                            </a>
+                        </div>
+                        <div class="btn-group">
+                            <a class="btn btn-primary" asp-controller="SignatureDelegation" asp-action="List">
+                                <i class="fa fa-refresh"></i>Refresh
+                            </a>
+                        </div>                        
+                    </div>
+                </div>
+
+                <table class="table-striped table-bordered table-hover table-checkable order-column table">
+                    <thead>
+                        <tr>
+                            <th>Delegatee</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                       @if (Model.DelegationList != null && Model.DelegationList.Count > 0)
+                        {
+                            @foreach (var item in Model.DelegationList)
+                            {
+                                <tr class="odd gradeX">
+                                    <td>
+                                        @foreach (var delegatee in item.delegatees)
+                                        {
+                                            @delegatee.delegateeEmail
+
+                                            <br />
+                                        }
+                                    </td>
+                                    <td>@item.startDateTime</td>
+                                    <td>@item.endDateTime</td>
+                                    <td style="color: @(item.delegationStatus == "Pending" ? "rgb(245, 124, 0) !important" :item.delegationStatus == "Scheduled" ? "green !important": item.delegationStatus == "Cancelled" ? "red !important" : "")">@item.delegationStatus</td>
+                                    <td class="valigntop" align="center">
+                                        <div class="btn-group">
+                                            <button class="btn btn-xs deepPink-bgcolor no-margin" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                Actions
+                                                <i class="fa fa-angle-down"></i>
+                                            </button>
+                                            <ul class="dropdown-menu pull-left" role="menu" style="margin-left:80px">
+                                                @if (item.delegationStatus == "Pending" || item.delegationStatus == "Scheduled" || item.delegationStatus == "Active")
+                                                {
+                                                    <li>
+                                                        <a asp-action="Preview" asp-route-DelegationId="@item._id">
+                                                            <i class="icon-docs"></i>View
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" onclick="revokeDelegate('@item._id')">
+                                                            <i class="icon-docs"></i>Revoke
+                                                        </a>
+                                                    </li>
+                                                }
+                                                else
+                                                {
+                                                    <li>
+                                                        <a asp-action="Preview" asp-route-DelegationId="@item._id">
+                                                            <i class="icon-docs"></i>View
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td align="center" colspan="5">No delegations found.</td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--TABLE CONTENT END-->
+@section scripts {
+    <script>
+
+
+        $(document).ready(function () {
+
+            $('#SignatureDelegationMenu').addClass('active');
+
+
+
+            /*For Beadcrum Start*/
+            $('#homeMenu').addClass('breadcrumb-item').append('Delegations');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            // var actWidth = $(".nav-tabs").find(".active").parent("li").width();
+            // var actPosition = $(".nav-tabs .active").position();
+            // $(".slider").css({ "left": 0, /* + actPosition.left, */ "width": $(".nav-tabs .active").parent("li").width() });
+            $('#networkOverlay').hide();
+            var table = $(".table").DataTable({
+                searching: true,
+                paging: true,
+                lengthChange: false,
+                pageLength: 10,
+                orderClasses: false,
+                stripeClasses: [],
+                info: false,
+                "ordering": false,
+                "sort": false
+            });
+        });
+
+        function revokeDelegate(delegationId) {
+            // Send an AJAX request to the controller
+            $.ajax({
+                url: '@Url.Action("RevokeDelegate", "SignatureDelegation")',
+                type: 'POST',
+                data: { delegationId: delegationId },
+                beforeSend: function () {
+                    $('#overlay').show();
+                },
+                complete: function () {
+                    $('#overlay').hide();
+                },
+                success: function (response) {
+                    var alertType = response.status == "Failed" ? "info" : "success";
+                    var alertTitle = response.status == "Failed" ? "Server response" : "Success";
+
+                    Swal.fire({
+                        title: alertTitle,
+                        text: response.message,
+                        icon: alertType
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '@Url.Action("List", "SignatureDelegation")';
+                        }
+                    });
+
+                }
+            });
+        }
+
+    </script>
+}

@@ -1,0 +1,1073 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.BusinessUser.BusinessUserAddViewModel
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+    {
+        new BreadCrumbModel { Title = "Business - Business Users",Url = Url.Action("List","BussinessUser"), IconKey = "business-users"},
+        new BreadCrumbModel { Title = "Add User" , Url = "", IconKey = "add"}
+    };
+}
+
+@{
+    ViewData["Title"] = "Add";
+}
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+<style>
+    /* Container style */
+    .checkbox-primary {
+        display: inline-flex !important;
+        align-items: center; /* Align vertically center */
+        gap: 16px; /* Item spacing = 16px */
+        cursor: pointer;
+        position: relative;
+        color: #232528;
+        margin-top: 0.5rem;
+    }
+
+    /* Checkbox itself */
+    .custom-check-box {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 20px;
+        height: 20px;
+        border: 1px solid #CBA344;
+        border-radius: 4px;
+        background-color: #fff;
+        cursor: pointer;
+        position: relative;
+        z-index: 2;
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+
+        /* Checkmark style */
+        .custom-check-box:checked {
+            background-color: #CBA344;
+            border-color: #92722A;
+        }
+
+            .custom-check-box:checked::after {
+                content: "✔";
+                color: white;
+                font-size: 14px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -55%);
+            }
+
+    /* Hover effect (circle background) */
+    .checkbox-primary::before {
+        content: "";
+        position: absolute;
+        left: -7px;
+        top: -9px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: transparent;
+        z-index: 1;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    .checkbox-primary:hover::before {
+        background-color: #F9F7ED;
+    }
+
+    .checkbox-primary input[type="checkbox"]:checked {
+        background-color: #CBA344;
+        border-color: #CBA344;
+    }
+
+    /*  .checkbox-primary input[type="checkbox"]:checked::after {
+                                content: "";
+                                position: absolute;
+                                top: -4px;
+                                left: -4px;
+                                width: 28px;
+                                height: 28px;
+                                border-radius: 6px;
+                                border: 2px solid #E6D7A2;
+                                z-index: 1;
+                            } */
+    .classshide {
+        display: none !important;
+    }
+
+    #legendId {
+        font-size: 1rem;
+        font-weight: bold;
+        width: auto;
+        display: inline-block;
+        padding-right: 2.5px;
+        padding-left: 2.5px;
+    }
+
+    .custom-file-input-style {
+        // border: 1px solid #CBA344;
+        border: 2px solid #E1E3E5;
+        border-radius: 8px;
+        padding: 0;
+        padding-top: 6px;
+        height: 40px;
+        box-sizing: border-box;
+        /* color: #C3C6CB; */
+    }
+
+        .custom-file-input-style::file-selector-button {
+            border: none;
+            background-color: transparent;
+            font-weight: 400;
+            padding: 6px 12px;
+            margin: -6px 12px -6px 0; /* removes vertical spacing/gap */
+            border-right: 1px solid #CBA344;
+            cursor: pointer;
+            height: calc(100% + 6px); /* ensure full height including padding */
+            color: #6C4527;
+        }
+
+        .custom-file-input-style:hover::file-selector-button {
+            background-color: rgba(249, 247, 237, 1); /* on hover */
+        }
+
+        /*   .form-control:focus {
+                    border: 1px solid #92722A;
+                    color: #1B1D21;
+                } */
+
+        .custom-file-input-style:focus::file-selector-button {
+            border-right: 1px solid #92722A; /* change to focus color */
+        }
+
+
+    .form-label {
+        color: #232528;
+        margin-bottom: 4px;
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.5rem;
+    }
+
+    .custom-file-input-style2 {
+        // border: 1px solid #CBA344;
+        border: 2px solid #E1E3E5;
+        border-radius: 8px;
+        box-sizing: border-box;
+        color: #C3C6CB;
+        height: 40px;
+    }
+
+
+    /* ------- mobileNumber css ------------------------- */
+    .styled-input-group {
+        display: flex;
+        align-items: center;
+        
+        border: 1px solid #E2E8F0 !IMPORTANT;
+        
+        border-radius: 8px;
+        padding: 6px 10px;
+        background-color: #fff;
+        height: 40px;
+    }
+
+    .country-code-dropdown {
+        appearance: none;
+        border: none;
+        margin-left: -4px;
+        background: transparent;
+        color: #CBA344;
+        font-weight: 500;
+        font-size: 14px;
+        padding-right: 34px;
+        margin-right: 0;
+        position: relative;
+        z-index: 2;
+        background-image: url('@Url.Content("~/assets/images/imgDropDownBrown.png")');
+        background-repeat: no-repeat;
+        background-size: 18px 18px; /* ↓ decreased size */
+        background-position: right 8px center; /* keeps it aligned nicely */
+    }
+
+        .country-code-dropdown:focus {
+            outline: none;
+        }
+
+    .mobile-input {
+        border: none;
+        flex: 1;
+        font-size: 16px;
+        color: #3E4046 !important;
+        padding: 4px 0;
+        background-color: transparent;
+    }
+
+        .mobile-input::placeholder {
+            color: #999;
+        }
+
+        .mobile-input:focus {
+            outline: none;
+        }
+
+    .country-code-dropdown::-ms-expand {
+        display: none;
+    }
+
+    .country-code-dropdown::after {
+        content: "\F282";
+        position: absolute;
+        right: 10px;
+        width: 12px;
+        height: 12px;
+        background-image: url('@Url.Content("~/assets/images/imgDropDownBrown.png")');
+        background-size: 12px 12px;
+        background-repeat: no-repeat;
+        background-size: contain;
+        pointer-events: none;
+    }
+
+    .country-code-dropdown::before {
+        margin-left: 3px;
+    }
+
+    option {
+        color: rgba(0, 0, 0, 0.87);
+    }
+
+    /* dropzone image */
+    .dropzone {
+        border: 1px dashed #CBA344;
+        border-radius: 5px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        margin-bottom: 23px;
+        height: 135px;
+    }
+
+        .dropzone p {
+            margin: 0;
+            padding: 5px 0;
+            color: #444;
+        }
+
+
+
+    /*------ Input Error -------*/
+    .error_Input {
+        background: #FEF2F2;
+        border: 1px solid #F47A75;
+    }
+
+    .error_Label {
+        color: #dc3545 !important;
+    }
+
+    /* ------- mobileNumber css ------------------------- */
+    .styled-input-group {
+        display: flex;
+        align-items: center;
+        border: 1px solid #E2E8F0 !IMPORTANT;
+        border-radius: 8px;
+        padding: 6px 10px;
+        background-color: #fff;
+        height: 40px;
+    }
+
+    .country-code-dropdown {
+        appearance: none;
+        border: none;
+        margin-left: -4px;
+        background: transparent;
+        color: #CBA344;
+        font-weight: 500;
+        font-size: 14px;
+        padding-right: 34px;
+        margin-right: 0;
+        position: relative;
+        z-index: 2;
+        background-image: url('@Url.Content("~/assets/images/imgDropDownBrown.png")');
+        background-repeat: no-repeat;
+        background-size: 18px 18px; /* ↓ decreased size */
+        background-position: right 8px center; /* keeps it aligned nicely */
+    }
+
+        .country-code-dropdown:focus {
+            outline: none;
+        }
+
+    .mobile-input {
+        border: none;
+        flex: 1;
+        font-size: 16px;
+        color: #3E4046 !important;
+        padding: 4px 0;
+        background-color: transparent;
+    }
+
+        .mobile-input::placeholder {
+            color: #999;
+        }
+
+        .mobile-input:focus {
+            outline: none;
+        }
+
+    .country-code-dropdown::-ms-expand {
+        display: none;
+    }
+
+    .country-code-dropdown::after {
+        content: "\F282";
+        position: absolute;
+        right: 10px;
+        width: 12px;
+        height: 12px;
+        background-image: url('@Url.Content("~/assets/images/imgDropDownBrown.png")');
+        background-size: 12px 12px;
+        background-repeat: no-repeat;
+        background-size: contain;
+        pointer-events: none;
+    }
+
+    .country-code-dropdown::before {
+        margin-left: 3px;
+    }
+
+    option {
+        color: rgba(0, 0, 0, 0.87);
+    }
+
+    .c-radio span {
+        width: 24px !important;
+        height: 24px !important;
+        bottom: 2px !important;
+    }
+
+    .c-radio input[type=radio]:checked + span {
+        border-color: #92722A !important;
+        width: 24px;
+        height: 24px;
+        bottom: 2px;
+    }
+
+        .c-checkbox input[type=radio]:checked + span:before, .c-radio input[type=radio]:checked + span:before {
+            color: #92722A !important;
+            padding: 2px;
+        }
+
+    .c-radio:hover span {
+        border-color: #92722A !important;
+    }
+
+    /* ----------- Select dropdown css -------------*/
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+        .select2-container .select2-selection--single {
+            border-radius: 8px;
+            align-items: center;
+            box-sizing: border-box;
+            justify-content: center;
+            height: 40px !important;
+            border: 1px solid #E2E8F0 !IMPORTANT;
+            color: #3E4046 !important;
+        }
+
+    .selection {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #3E4046 !important;
+        font-size: 14px;
+        font-family: inherit;
+        padding: 5px 10px;
+    }
+
+
+    /* Remove default arrow */
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border: none !important; /* removes default triangle */
+    }
+
+    /* Add your custom arrow */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        // background: url('@Url.Content("~/assets/images/dropDown-icon-brown.svg")'); /*previously used*/
+        //background: url('@Url.Content("~/assets/images/imgDropDownBrown.png")');
+        background: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M27.0613 13.0612L17.0613 23.0612C16.9219 23.2011 16.7563 23.312 16.574 23.3877C16.3917 23.4634 16.1962 23.5024 15.9988 23.5024C15.8013 23.5024 15.6059 23.4634 15.4235 23.3877C15.2412 23.312 15.0756 23.2011 14.9363 23.0612L4.93626 13.0612C4.65446 12.7794 4.49615 12.3972 4.49615 11.9987C4.49615 11.6002 4.65446 11.218 4.93626 10.9362C5.21805 10.6544 5.60024 10.4961 5.99876 10.4961C6.39727 10.4961 6.77946 10.6544 7.06126 10.9362L16 19.875L24.9388 10.935C25.2205 10.6532 25.6027 10.4949 26.0013 10.4949C26.3998 10.4949 26.782 10.6532 27.0638 10.935C27.3455 11.2168 27.5039 11.599 27.5039 11.9975C27.5039 12.396 27.3455 12.7782 27.0638 13.06L27.0613 13.0612Z' fill='%2392722A'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-size: 16px 16px;
+        width: 19px;
+        top: 11px;
+        vertical-align: middle;
+        height: 100%;
+    }
+
+    .select2-search__field {
+        display: none !important;
+    }
+
+    // .select2-search select2-search--dropdown {
+        // display: none !important;
+        //
+    }
+
+    .select2-container .select2-dropdown.select2-dropdown--below {
+        top: -5px !important;
+        border-radius: 8px !important;
+        border: 1px solid #C3C6CB;
+        box-shadow: 0px 1px 2px 0px #0000001A;
+    }
+
+    .select2-container .select2-search.select2-search--dropdown {
+        padding: 0 !important;
+    }
+
+
+    /*---------------------------------------------------------------------*/
+
+
+    .select2-results__options {
+        border-radius: 8px !important;
+    }
+
+    /* ----------- Select dropdown css -------------*/
+
+    /* Selection box */
+    .country-code-dropdown + .select2-container--default .select2-selection--single {
+        border: none;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        padding: 6px 10px;
+        position: relative;
+        padding-left: 0px;
+        top: 0px;
+        font-size: 14px;
+        font-weight: 500;
+        height: 28px !important;
+        box-shadow: none !important;
+        color: #92722A !important;
+        border: none !important;
+    }
+
+    #countryCode + .select2-container {
+        width: unset !important;
+    }
+
+    /* Rendered text */
+    .country-code-dropdown + .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #92722A !important;
+        padding-left: 0;
+        padding-right: 34px;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    /* Remove default arrow */
+    .country-code-dropdown + .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border: none !important;
+    }
+
+    /* Custom arrow */
+    .country-code-dropdown + .select2-container--default .select2-selection--single .select2-selection__arrow {
+        // background: url('@Url.Content("~/assets/images/imgDropDownBrown.png")') no-repeat center; /*previously used*/
+
+        background: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M27.0613 13.0612L17.0613 23.0612C16.9219 23.2011 16.7563 23.312 16.574 23.3877C16.3917 23.4634 16.1962 23.5024 15.9988 23.5024C15.8013 23.5024 15.6059 23.4634 15.4235 23.3877C15.2412 23.312 15.0756 23.2011 14.9363 23.0612L4.93626 13.0612C4.65446 12.7794 4.49615 12.3972 4.49615 11.9987C4.49615 11.6002 4.65446 11.218 4.93626 10.9362C5.21805 10.6544 5.60024 10.4961 5.99876 10.4961C6.39727 10.4961 6.77946 10.6544 7.06126 10.9362L16 19.875L24.9388 10.935C25.2205 10.6532 25.6027 10.4949 26.0013 10.4949C26.3998 10.4949 26.782 10.6532 27.0638 10.935C27.3455 11.2168 27.5039 11.599 27.5039 11.9975C27.5039 12.396 27.3455 12.7782 27.0638 13.06L27.0613 13.0612Z' fill='%2392722A'/%3E%3C/svg%3E");
+        background-size: 18px 18px;
+        width: 18px;
+        height: 18px;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    /* Hide search box inside dropdown */
+    .country-code-dropdown + .select2-container .select2-search__field {
+        display: none !important;
+    }
+
+    /* Dropdown menu */
+    .country-code-dropdown + .select2-container .select2-dropdown {
+        border-radius: 8px !important;
+        border: 1px solid #C3C6CB;
+        box-shadow: 0px 1px 2px 0px #0000001A;
+    }
+
+    #countryCode + .select2-container .select2-results {
+        border-radius: 8px !important;
+        border: 1px solid #C3C6CB;
+        box-shadow: 0px 1px 2px 0px #0000001A;
+    }
+
+
+
+    #select2-countryCode-results {
+        border-radius: 8px !important;
+    }
+
+</style>
+
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<label class="sub-label">Add Business User</label>
+<div class="row" id="spacingCss">
+    <div class="col-md-12 plr">
+        <div class="card-custom">
+            <div class="card-body" style="padding:15px !important;">
+                <form asp-action="AddBusinessUser" asp-controller="BussinessUser" id="businessUserForm" enctype="multipart/form-data">
+                    <div class="form-row">
+                        <!-- LEFT COLUMN -->
+                        <div class="col-md-6">
+                            <!-- Active Fields -->
+                            <div class="form-group">
+                                <label asp-for="EmployeeEmail" class="form-label"></label>
+                                <input asp-for="EmployeeEmail" class="form-control" tabindex="1" />
+                                <span asp-validation-for="EmployeeEmail" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="NationalIdNumber" class="form-label"></label>
+                                <input asp-for="NationalIdNumber" class="form-control" tabindex="1" />
+                                <span asp-validation-for="NationalIdNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Designation" class="form-label"></label>
+                                <input asp-for="Designation" class="form-control" tabindex="1" />
+                                <span asp-validation-for="Designation" class="text-danger"></span>
+                            </div>
+
+                            <!-- Commented: Signature Photo -->
+                            <!--<div class="form-group">
+                                <span class="common-heading-color" style="font-size: 16px;">
+                                    <label asp-for="SignaturePhoto" class="form-label">
+                                        Signature Photo
+                                    </label>
+                                </span>
+                                <br>
+                                <div class="row">
+                                    <div class="col-md-12" style="padding:0px !important;">
+                                        <div>
+                                            <div role="button" tabindex="0" class="dropzone" onclick="open_file2()">
+                                                <div style="overflow:hidden;width: 0px; height: 0px;">
+                                                    <input asp-for="SignaturePhoto" onchange="fileSelect2(event)" type="file" accept=".jpg, .png, .jpeg" autocomplete="off" tabindex="-1">
+                                                    <input type="hidden" asp-for="SignaturePhoto" id="BusinessUser_Signature" />
+                                                </div>
+                                                <div id="uploadIconWrapper2" style="margin-bottom: -6px; margin-top: 5px;">
+                                                    <svg width="50" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path opacity="0.2" d="M28 7V22.2575L23.035 17.2925C22.8475 17.1051 22.5932 16.9998 22.3281 16.9998C22.063 16.9998 21.8088 17.1051 21.6213 17.2925L18.4137 20.5L12.2075 14.2925C12.1146 14.1995 12.0043 14.1258 11.8829 14.0754C11.7615 14.0251 11.6314 13.9992 11.5 13.9992C11.3686 13.9992 11.2385 14.0251 11.1171 14.0754C10.9957 14.1258 10.8854 14.1995 10.7925 14.2925L4 21.0863V7C4 6.73478 4.10536 6.48043 4.29289 6.29289C4.48043 6.10536 4.73478 6 5 6H27C27.2652 6 27.5196 6.10536 27.7071 6.29289C27.8946 6.48043 28 6.73478 28 7Z" fill="#343330" />
+                                                        <path d="M27 5H5C4.46957 5 3.96086 5.21071 3.58579 5.58579C3.21071 5.96086 3 6.46957 3 7V25C3 25.5304 3.21071 26.0391 3.58579 26.4142C3.96086 26.7893 4.46957 27 5 27H27C27.5304 27 28.0391 26.7893 28.4142 26.4142C28.7893 26.0391 29 25.5304 29 25V7C29 6.46957 28.7893 5.96086 28.4142 5.58579C28.0391 5.21071 27.5304 5 27 5ZM27 7V19.8438L23.7412 16.5863C23.5555 16.4005 23.335 16.2531 23.0923 16.1526C22.8497 16.052 22.5896 16.0003 22.3269 16.0003C22.0642 16.0003 21.8041 16.052 21.5614 16.1526C21.3187 16.2531 21.0982 16.4005 20.9125 16.5863L18.4125 19.0863L12.9125 13.5863C12.5375 13.2115 12.029 13.0009 11.4987 13.0009C10.9685 13.0009 10.46 13.2115 10.085 13.5863L5 18.6712V7H27ZM5 21.5L11.5 15L21.5 25H5V21.5ZM27 25H24.3288L19.8288 20.5L22.3288 18L27 22.6725V25ZM18 12.5C18 12.2033 18.088 11.9133 18.2528 11.6666C18.4176 11.42 18.6519 11.2277 18.926 11.1142C19.2001 11.0006 19.5017 10.9709 19.7926 11.0288C20.0836 11.0867 20.3509 11.2296 20.5607 11.4393C20.7704 11.6491 20.9133 11.9164 20.9712 12.2074C21.0291 12.4983 20.9993 12.7999 20.8858 13.074C20.7723 13.3481 20.58 13.5824 20.3334 13.7472C20.0867 13.912 19.7967 14 19.5 14C19.1022 14 18.7206 13.842 18.4393 13.5607C18.158 13.2794 18 12.8978 18 12.5Z" fill="#343330" />
+                                                    </svg>
+                                                </div>
+                                                <div id="imagePreviewWrapper2" style="margin-bottom: -6px; margin-top: 5px; display: none;">
+                                                    <img id="imagePreview2" style="width: 95px; height: 43px; object-fit: contain;" />
+                                                    <p id="uploadedFileName_Signature" style="font-size: 13px; color: #CBA344; margin: -7px; word-break: break-word;"></p>
+                                                </div>
+                                                <p>
+                                                    <strong style="font-weight: 500;color:#92722A">Upload a file</strong>
+                                                    <span style="font-weight: 400;"> or drag and drop</span>
+                                                </p>
+                                                <p style="font-weight: 400;font-size: 12px;color: #797E86; margin-top:-7px;">PNG, JPG, JPEG up to 20KB</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>-->
+
+                            <!-- Commented: Privileges -->
+                            <!--<div class="form-group">
+                                <fieldset style=" border: 1px solid #ffffff; border-radius: 5px; display: flex; flex-direction: column;">-->
+                                    @* height:190px; height:160px*@
+                                    <!--<legend class="form-label" id="legendId">Privileges</legend>
+                                    <label class="checkbox-primary" style="display: block;">
+                                        <input type="checkbox" asp-for="ESealSignatory" style="margin-left:5px" class="custom-check-box" />
+                                        Affix Eseal
+                                    </label>
+                                    <label class="checkbox-primary" style="display: block;">
+                                        <input type="checkbox" asp-for="ESealPrepatory" style="margin-left:5px" class="custom-check-box" />
+                                        Preparatory (eseal and Template)
+                                    </label>
+                                    <label class="checkbox-primary" style="display: block;">
+                                        <input type="checkbox" asp-for="Bulksign" style="margin-left:5px" class="custom-check-box" />
+                                        Bulk Signer
+                                    </label>-->
+                                    @* <label style="display: block;">
+                                        <input type="checkbox" asp-for="Delegate" style="margin-left:5px" class="custom-check-box" />
+                                        Delegation
+                                    </label> *@
+                                    <!--<label class="checkbox-primary" style="display: block;">
+                                        <input type="checkbox" asp-for="DigitalForm" style="margin-left:5px" class="custom-check-box" />
+                                        Digital Form Preparation
+                                    </label>-->
+                                    @* <label style="display: block;">
+                                        <input type="checkbox" asp-for="LsaPrivilege" style="margin-left:5px" class="custom-check-box" />
+                                        Local Signing
+                                    </label>*@
+                                <!--</fieldset>
+                            </div>-->
+                        </div>
+
+                        <!-- RIGHT COLUMN -->
+                        <div class="col-md-6">
+                            <!-- Active Fields -->
+                            <div class="form-group">
+                                <label asp-for="UgpassEmail" class="form-label"></label>
+                                <input asp-for="UgpassEmail" class="form-control" tabindex="1" />
+                                <span asp-validation-for="UgpassEmail" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="PassportNumber" class="form-label"></label>
+                                <input asp-for="PassportNumber" class="form-control" tabindex="1" maxlength="12" />
+                                <span asp-validation-for="PassportNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="MobileNumber" class="form-label">Mobile number</label>
+                                <div class="styled-input-group">
+                                    <select id="countryCode" class="country-code-dropdown select2">
+                                        <option value="+971">&nbsp;&nbsp;+971</option>
+                                    </select>
+                                    <input asp-for="MobileNumber" id="MobileNumber" class="mobile-input" maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '')" tabindex="2" />
+                                </div>
+                                <span asp-validation-for="MobileNumber" class="text-danger"></span>
+                            </div>
+
+                            <!-- Commented: Initial Image (Original) -->
+                            <!--<div class="form-group">
+                                <span class="common-heading-color" style="font-size: 16px;">
+                                    <label asp-for="InitialImage" class="form-label">
+                                        Initial Image
+                                    </label>
+                                </span>
+                                <br>
+                                <div class="row">
+                                    <div class="col-md-12" style="padding:0px !important;">
+                                        <div>
+                                            <div role="button" tabindex="0" class="dropzone" onclick="open_file()">
+                                                <div style="overflow:hidden;width: 0px; height: 0px;">
+                                                    <input asp-for="InitialImage" onchange="fileSelect(event)" type="file" accept=".jpg, .png, .jpeg" autocomplete="off" tabindex="-1">
+                                                    <input type="hidden" asp-for="InitialImage" id="BusinessUser_InitialImage" />
+                                                </div>-->
+                                                <!-- SVG Icon on Top -->
+                                                <!--<div id="uploadIconWrapper" style="margin-bottom: -6px; margin-top: 5px;">
+                                                    <svg width="50" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path opacity="0.2" d="M28 7V22.2575L23.035 17.2925C22.8475 17.1051 22.5932 16.9998 22.3281 16.9998C22.063 16.9998 21.8088 17.1051 21.6213 17.2925L18.4137 20.5L12.2075 14.2925C12.1146 14.1995 12.0043 14.1258 11.8829 14.0754C11.7615 14.0251 11.6314 13.9992 11.5 13.9992C11.3686 13.9992 11.2385 14.0251 11.1171 14.0754C10.9957 14.1258 10.8854 14.1995 10.7925 14.2925L4 21.0863V7C4 6.73478 4.10536 6.48043 4.29289 6.29289C4.48043 6.10536 4.73478 6 5 6H27C27.2652 6 27.5196 6.10536 27.7071 6.29289C27.8946 6.48043 28 6.73478 28 7Z" fill="#343330" />
+                                                        <path d="M27 5H5C4.46957 5 3.96086 5.21071 3.58579 5.58579C3.21071 5.96086 3 6.46957 3 7V25C3 25.5304 3.21071 26.0391 3.58579 26.4142C3.96086 26.7893 4.46957 27 5 27H27C27.5304 27 28.0391 26.7893 28.4142 26.4142C28.7893 26.0391 29 25.5304 29 25V7C29 6.46957 28.7893 5.96086 28.4142 5.58579C28.0391 5.21071 27.5304 5 27 5ZM27 7V19.8438L23.7412 16.5863C23.5555 16.4005 23.335 16.2531 23.0923 16.1526C22.8497 16.052 22.5896 16.0003 22.3269 16.0003C22.0642 16.0003 21.8041 16.052 21.5614 16.1526C21.3187 16.2531 21.0982 16.4005 20.9125 16.5863L18.4125 19.0863L12.9125 13.5863C12.5375 13.2115 12.029 13.0009 11.4987 13.0009C10.9685 13.0009 10.46 13.2115 10.085 13.5863L5 18.6712V7H27ZM5 21.5L11.5 15L21.5 25H5V21.5ZM27 25H24.3288L19.8288 20.5L22.3288 18L27 22.6725V25ZM18 12.5C18 12.2033 18.088 11.9133 18.2528 11.6666C18.4176 11.42 18.6519 11.2277 18.926 11.1142C19.2001 11.0006 19.5017 10.9709 19.7926 11.0288C20.0836 11.0867 20.3509 11.2296 20.5607 11.4393C20.7704 11.6491 20.9133 11.9164 20.9712 12.2074C21.0291 12.4983 20.9993 12.7999 20.8858 13.074C20.7723 13.3481 20.58 13.5824 20.3334 13.7472C20.0867 13.912 19.7967 14 19.5 14C19.1022 14 18.7206 13.842 18.4393 13.5607C18.158 13.2794 18 12.8978 18 12.5Z" fill="#343330" />
+                                                    </svg>
+                                                </div>
+                                                <div id="imagePreviewWrapper" style="margin-bottom: -6px; margin-top: 5px; display: none;">
+                                                    <img id="imagePreview" style="width: 95px; height: 43px; object-fit: contain;" />
+                                                    <p id="uploadedFileName_Initial" style="font-size: 13px; color: #CBA344; margin: -7px; word-break: break-word;"></p>
+                                                </div>
+                                                <p>
+                                                    <strong style="font-weight: 500; color:#92722A">Upload a file</strong>
+                                                    <span style="font-weight: 400;"> or drag and drop</span>
+                                                </p>
+                                                <p style="font-weight: 400;font-size: 12px;color: #797E86; margin-top:-7px;">PNG, JPG, JPEG up to 20KB</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>-->
+                        </div>
+                    </div>
+                    <div style="padding-right: 10px">
+                        <div style="float: left;margin-top: 37px;padding-left: 22px;">
+                            <b>NOTE: </b>(*) Mark fields are mandatory.
+                        </div>
+                        <div class="d-flex justify-content-end" style="padding-top: 31px;">
+
+                            <a type="button" asp-action="List" class="btn btn-other">
+                                Cancel
+                            </a>
+                            &nbsp;&nbsp;
+
+                            <button type="button" id="submitBtn" class="btn btn-primary uaeid-primary" onclick="addBusinessUser()">Save</button>
+                        </div>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+<script>
+    var ninRegex = /^[A-Z0-9]{1,14}$/;
+    var passportRegex = /^[A-Z0-9]{1,12}$/;
+    var signature_templateID = @Html.Raw(ViewBag.SignatureTemplate);
+    $(document).ready(function () {
+        $("#BusinessModule > a")
+            .attr("aria-expanded", "true")
+            .addClass("active");
+
+        $("#BusinessModule")
+            .addClass("submenu-active show");
+
+        $("#BusinessModule .submenu")
+            .addClass("show");
+
+        $('#Business-Users').addClass('active');
+
+        $('#District').addClass('active');
+        $('#countryCode').select2();
+
+
+        /*For Beadcrum Start*/
+        $('#homeMenu').addClass('breadcrumb-item').append('Business Users > Add');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        const parentNavItem = document.querySelector(`[data-section="Business"] .nav-link`);
+        if (parentNavItem) {
+            parentNavItem.classList.add("active");
+        }
+            document.getElementById("navigationNetworkOverlay").style.display = "none";
+            $('#networkOverlay').hide();
+        });
+
+    function fileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const imgElement = document.getElementById("imagePreview");
+            imgElement.src = e.target.result;
+
+            // Hide the SVG icon and show the uploaded image
+            document.getElementById("uploadIconWrapper").style.display = "none";
+            document.getElementById("imagePreviewWrapper").style.display = "block";
+            $('#uploadedFileName_Initial').text(file.name);
+            $('#imagePreviewWrapper').css('margin-top', '0');
+        };
+
+        reader.onloadend = function () {
+            var base64String = reader.result.split(',')[1]; // Extract base64 string from data URL
+            $("#BusinessUser_InitialImage").val(base64String);
+        }
+        reader.readAsDataURL(file);
+    }
+      function open_file() {
+            document.getElementById('InitialImage').click();
+      }
+
+    function fileSelect2(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const imgElement = document.getElementById("imagePreview2");
+            imgElement.src = e.target.result;
+
+            // Hide the SVG icon and show the uploaded image
+            document.getElementById("uploadIconWrapper2").style.display = "none";
+            document.getElementById("imagePreviewWrapper2").style.display = "block";
+            $('#uploadedFileName_Signature').text(file.name);
+            $('#imagePreviewWrapper2').css('margin-top', '0');
+        };
+            reader.onloadend = function () {
+                var base64String = reader.result.split(',')[1]; // Extract base64 string from data URL
+                $("#BusinessUser_Signature").val(base64String);
+            }
+        reader.readAsDataURL(file);
+
+
+    }
+      function open_file2() {
+            document.getElementById('SignaturePhoto').click();
+        }
+
+    function FileToBase64(element) {
+
+
+        var file = element.files[0];
+
+        var maxSizeKB = 20;
+        var maxSize = maxSizeKB * 1024;
+        if (file.size > maxSize) {
+            Swal.fire({ icon: 'error', title: "Max size exceeded", text: "File must be less than 20 Kb" });
+            element.value = ""; // Clear the input field
+            return; // Stop further processing
+        }
+
+        var reader = new FileReader();
+
+        reader.onloadend = function () {
+            var base64String = reader.result.split(',')[1]; // Extract base64 string from data URL
+            $("#BusinessUser_Signature").val(base64String);
+        }
+
+        reader.readAsDataURL(file);
+    }
+
+    function FileToBase64Initial(element) {
+
+
+        var file = element.files[0];
+
+        var maxSizeKB = 20;
+        var maxSize = maxSizeKB * 1024;
+        if (file.size > maxSize) {
+            Swal.fire({ icon: 'error', title: "Max size exceeded", text: "File must be less than 20 Kb" });
+            element.value = ""; // Clear the input field
+            return; // Stop further processing
+        }
+
+        var reader = new FileReader();
+
+        reader.onloadend = function () {
+            var base64String = reader.result.split(',')[1]; // Extract base64 string from data URL
+            $("#BusinessUser_InitialImage").val(base64String);
+        }
+
+        reader.readAsDataURL(file);
+    }
+
+    function emailDomain(email){
+        return $.ajax({
+            url: '@Url.Action("GetOrgDetails", "BussinessUser")',
+            method: 'GET',
+            data: { email: email },
+            error: ajaxErrorHandler
+        });
+    }
+
+    async function addBusinessUser() {
+
+        var form = $("#businessUserForm");
+        var url = form.attr("action");
+        var validData = true;
+        var ugpassEmail = $('#UgpassEmail').val();
+        var nationalIdNumber = $('#NationalIdNumber').val();
+        var passportNumber = $('#PassportNumber').val();
+        var employeeEmail = $('#EmployeeEmail').val();
+        var signaturePhoto = $('#BusinessUser_Signature').val();
+        var initialImage = $('#BusinessUser_InitialImage').val();
+        var mobileNumber = $('#MobileNumber').val();
+        var designation = $('#Designation').val();
+        var eSealSignatory = $('#ESealSignatory').prop('checked');
+        var eSealPreparatory = $('#ESealPrepatory').prop('checked');
+        var bulksign = $('#Bulksign').prop('checked');
+        var delegate = $('#Delegate').prop('checked');
+        var digitalForm = $('#DigitalForm').prop('checked');
+       // var lsaPrivilage = $('#LsaPrivilege').prop('checked');
+        let domainResponse = await emailDomain(employeeEmail);
+
+        if (employeeEmail == null || employeeEmail.trim() === '') {
+            $('#EmployeeEmail').addClass('error_Input').siblings("label").addClass('error_Label');
+            //$('#EmployeeEmail').siblings(".text-danger").text("Employee Email is required.");
+            $('#EmployeeEmail').siblings(".text-danger").html("<strong>Error:</strong> Employee Email is required.");
+
+            validData = false;
+        } else if (!isValidEmail(employeeEmail))
+        {
+            $('#EmployeeEmail').addClass('error_Input').siblings("label").addClass('error_Label');
+            $('#EmployeeEmail').siblings(".text-danger").html("<strong>Error:</strong> Please enter a valid employee email address.");
+            validData = false;
+        }
+        else if(!domainResponse.success){
+            var res = domainResponse.resource;
+            $('#EmployeeEmail').addClass('error_Input').siblings("label").addClass('error_Label');
+            $('#EmployeeEmail').siblings(".text-danger").html("<strong>Error:</strong> Employee Email domain is invalid.");
+            validData = false;
+        }
+        else {
+            $('#EmployeeEmail').removeClass('error_Input').siblings("label").removeClass('error_Label');
+            $('#EmployeeEmail').siblings(".text-danger").text(""); // Clear the validation message if no error
+        }
+
+        // Validate the UgpassEmail field
+        if (ugpassEmail != "" && !isValidEmail(ugpassEmail)) {
+            $('#UgpassEmail').siblings(".text-danger").text("Please enter a valid UAEID email address.");
+            validData = false;
+        } else {
+            $('#UgpassEmail').siblings(".text-danger").text(""); // Clear the validation message if no error
+        }
+
+        if (nationalIdNumber != "" && !ninRegex.test(nationalIdNumber)) {
+            $('#NationalIdNumber').siblings(".text-danger").text("Please enter a valid NIN number accepts A-Z(capital)&0-9 and max length is 14.");
+            validData = false;
+
+        }
+        else{
+            $('#NationalIdNumber').siblings(".text-danger").text("");
+        }
+
+        if (passportNumber != "" && !passportRegex.test(passportNumber)) {
+            $('#PassportNumber').siblings(".text-danger").text("Please enter a valid passport number accepts A-Z(capital)&0-12 and max length is 12.");
+            validData = false;
+
+        }
+        else{
+            $('#PassportNumber').siblings(".text-danger").text("");
+        }
+
+
+        if (mobileNumber != "") {
+            var newNumber = ValidateNumber(mobileNumber);
+            if (newNumber == null) {
+                $('#MobileNumber').siblings(".text-danger").text("Invalid Mobile number");
+                return false;
+            }
+            mobileNumber = newNumber;
+        }
+        if(signature_templateID == 2){
+            if(designation == null || designation == ""){
+                Swal.fire({ icon: 'error', title: "error", text: "Designation is Mandatory Based on the selected Signature Template" });
+                 validData = false;
+            }
+
+        }
+        if(signature_templateID == 3){
+            if(signaturePhoto == null || signaturePhoto == ""){
+                Swal.fire({ icon: 'error', title: "error", text: "SignaturePhoto Photo is Mandatory Based on the selected Signature Template" });
+                 validData = false;
+            }
+
+        }
+        if(signature_templateID == 4){
+            if((signaturePhoto == null || signaturePhoto == "") || (designation == null || designation == "")){
+                Swal.fire({ icon: 'error', title: "error", text: "SignaturePhoto Photo and Designation is Mandatory Based on the selected Signature Template" });
+                 validData = false;
+            }
+
+        }
+        if (!validData) {
+            return;
+        }
+
+        // Create the businessUser object with the validated values
+        var businessUser = [
+            {
+                UgpassEmail: ugpassEmail,
+                NationalIdNumber: nationalIdNumber,
+                PassportNumber: passportNumber,
+                EmployeeEmail: employeeEmail,
+                SignaturePhoto: signaturePhoto,
+                InitialImage: initialImage,
+                MobileNumber: mobileNumber,
+                Designation: designation,
+                ESealSignatory: eSealSignatory,
+                ESealPrepatory: eSealPreparatory,
+                Bulksign: bulksign,
+                Delegate: delegate,
+                DigitalForm: digitalForm,
+               // LsaPrivilege: lsaPrivilage
+            }
+        ];
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: JSON.stringify(businessUser),
+            cache: false,
+            contentType: "application/json; charset=utf-8",
+            processData: false,
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+
+                $('#overlay').hide();
+            },
+            success: function (data) {
+            if (data.status == "Success") {
+                Swal.fire({
+                    icon: 'success',
+                    title: "Success",
+                    text: data.message
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '@Url.Action("List", "BussinessUser")';
+                    }
+                });
+            }
+
+            if (data.status == "Failed") {
+                Swal.fire({
+                    icon: 'error',
+                    title: "Error",
+                    text: data.message
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '@Url.Action("List", "BussinessUser")';
+                    }
+                });
+
+            }
+        },
+            error: ajaxErrorHandler
+        });
+    };
+
+    function isValidEmail(email) {
+        // Regular expression for basic email validation
+        var emailRegex = /^([\w-\.]+)@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+        return emailRegex.test(email);
+    }
+
+     function ValidateNumber(MobNumber) {
+
+                if (MobNumber.startsWith("+256")) {
+                    if (MobNumber.length != 13) {
+                        return null;
+                    }
+                } else if (MobNumber.startsWith("256")) {
+                    if (MobNumber.length != 12) {
+                        return null;
+                    }
+                    MobNumber = "+" + MobNumber;
+
+                } else if (MobNumber.startsWith("+91")) {
+                    if (MobNumber.length != 13) {
+                        return null;
+                    }
+                }
+                else if (MobNumber.startsWith("91")) {
+                    if (MobNumber.length != 12) {
+                        return null;
+                    }
+                    MobNumber = "+" + MobNumber;
+                }
+                else if (MobNumber.startsWith("0")) {
+                    if (MobNumber.length == 10) {
+                        MobNumber = MobNumber.replace("0", "+256");
+                    }
+                    else if (MobNumber.length == 11) {
+                        MobNumber = MobNumber.replace("0", "+91");
+                    } else {
+                        return null;
+                    }
+                }
+                else if (MobNumber.length == 9) {
+                    MobNumber = "+256" + MobNumber;
+                }
+
+                else if (MobNumber.length == 10) {
+                    MobNumber = "+91" + MobNumber;
+                }
+                else {
+                      return Swal.fire({ icon: 'error', title: "mobile number", text: "Check your mobile number " });
+                }
+
+                return MobNumber
+            }
+
+</script>
+

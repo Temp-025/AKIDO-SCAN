@@ -1,0 +1,11 @@
+﻿@inject IHttpContextAccessor httpContextAccessor
+
+@{
+    var layoutType = Context.Request.Cookies["HeaderNavigationLayout"];
+    Layout = layoutType switch
+    {
+        "Horizontal" => "~/Views/Shared/_HorizontalLayout.cshtml",
+        "Vertical" => "~/Views/Shared/_VerticalLayout.cshtml",
+        _ => "~/Views/Shared/_HorizontalLayout.cshtml"
+    };
+}

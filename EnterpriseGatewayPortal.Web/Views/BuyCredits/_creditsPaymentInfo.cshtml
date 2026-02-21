@@ -1,0 +1,435 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.BuyCredits.CreditsSummeryViewModel
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+
+<style>
+    table {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+    .price{
+        margin-left:41px;
+        font-weight:400;
+    }
+
+    ._profile {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        /*justify-content: space-between; */
+        padding: 6px;
+    }
+
+    .list-group-item {
+        text-decoration: none !important; /* Remove underline */
+    }
+</style>
+
+<div class="modal-dialog modal-dialog-centered modal-lg" style="max-width:1000px;" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title s3">
+                <span class="text-capitalize s3" style="font-size: 18px">
+                    Payment Information
+                </span>
+            </h5>
+            <button type="button" class="close cross" data-dismiss="modal">
+                &times;
+            </button>
+        </div>
+        <div class="modal-body d-flex align-items-center justify-content-center">
+            @* d-flex align-items-center justify-content-center *@
+
+            <div class="container-fluid">
+                <div class="row" id="Info_payment">
+                    <div class="col-md-4" id="DS_div">
+                        <div class="card">  
+                            <div class="col-md-12" style="background:#dae0e5;">
+                                <h4>Digital Signature</h4>
+                            </div>
+
+                            <div class="card-body no-padding height-9" style="padding: 0px 0px;">
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Credits</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                           <b class="price">@Model.DS_Credits</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box" >Base Price</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.DS_BasePrice</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box" >Rate</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.DS_TotalRate</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box" >Charges (@Model.DS_Tax%)</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.DS_TotalTax</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Discount (@Model.DS_Discount%)</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.DS_TotalDiscount</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group" style="border-top: 1px solid rgba(0, 0, 0, 0.125);">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box" >Total Amount</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.DS_TotalAmount</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-4" id="ES_div">
+                        <!-- Second column content -->
+                        <div class="card">
+                            <div class="col-md-12" style="background:#dae0e5;">
+                                
+                                <h4>Eseal Signature</h4>
+                            </div>
+
+                            <div class="card-body no-padding height-9" style="padding: 0px 0px;">
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Credits</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.ES_Credits</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Base Price</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.ES_BasePrice</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Rate</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.ES_TotalsRate</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Charges (@Model.ES_Taxp%)</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.ES_TotalTax</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Discount (@Model.ES_Discount%)</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.ES_TotalDiscount</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group" style="border-top: 1px solid rgba(0, 0, 0, 0.125);">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Total Amount</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.ES_TotalAmount</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-4" id="US_div">
+                        <!-- Third column content -->
+                        <div class="card">
+                            <div class="col-md-12" style="background:#dae0e5;">
+                               
+                                <h4>User Subscription</h4>
+                            </div>
+
+                            <div class="card-body no-padding height-9" style="padding: 0px 0px;">
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Credits</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.US_Credits</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Base Price</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.US_BasePrice</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Rate</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.US_TotalsRate</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Charges (@Model.US_Taxper%)</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.US_TotalTax</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Discount (@Model.US_Discountper%)</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.US_TotalDiscount</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-group" style="border-top: 1px solid rgba(0, 0, 0, 0.125);">
+                                    <li class="_profile row">
+                                        <div class="col-md-6">
+                                            <div class="box">Total Amount</div>
+                                        </div>
+                                        <div class="col-md-6 text-left">
+                                            <b class="price">@Model.US_TotalAmount</b>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="list-group list-group-unbordered" style="border-bottom: 1px solid black; border-top: 1px solid black;">
+                            <li class="_profile list-group-item" style="padding-left: 32px; padding-right: 26px;">
+                                <b>Total Amount</b>
+                                <span class="pull-right"><b>@Model.GrandTotal</b><b>(UGX)</b></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" id="payNow" class="btn btn-primary" onclick="PayNow()" >Confirm</button>
+            &nbsp;&nbsp;
+            <button class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        </div>
+       
+    </div>
+
+       
+    
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#networkOverlay').hide();
+        var dsCredits = parseInt('@Model.DS_Credits');
+        var esCredits = parseInt('@Model.ES_Credits');
+        var usCredits = parseInt('@Model.US_Credits');
+             
+         if (dsCredits === 0) {
+             $('#DS_div').hide();
+
+              $('#ES_div').addClass('offset-md-2');
+              $('#US_div').addClass('offset-md-2');
+            // $('#ES_div').css('margin-right', '10px');
+             $('#US_div').css('margin-left', '0px');
+         
+         }
+
+         if(usCredits === 0){ // if(usCredits === 0 && (dsCredits !=0 && esCredits !=0){
+             $('#US_div').hide();
+
+            $('#ES_div').addClass('offset-md-2');
+            $('#DS_div').addClass('offset-md-2');
+            //$('#DS_div').css('margin-right', '10px');
+            $('#ES_div').css('margin-left', '0px');
+         }
+
+         if(esCredits === 0){
+             $('#ES_div').hide();
+
+            $('#DS_div').addClass('offset-md-2');
+            $('#US_div').addClass('offset-md-2');
+            $('#US_div').css('margin-left', '0px');
+         }
+
+         if(dsCredits === 0 && usCredits === 0){  //es not null
+             $('#DS_div').hide();
+             $('#US_div').hide();
+             $('#ES_div').removeClass('offset-md-2');
+             $('#Info_payment').css('justify-content', 'center');
+         }
+
+        if (dsCredits === 0 && esCredits === 0) { //us not null
+            $('#DS_div').hide();
+            $('#ES_div').hide();
+            $('#US_div').removeClass('offset-md-2');
+            $('#Info_payment').css('justify-content', 'center');
+        }
+
+        if (esCredits === 0 && usCredits === 0) { // ds not null
+            $('#ES_div').hide();
+            $('#US_div').hide();
+            $('#DS_div').removeClass('offset-md-2');
+            $('#Info_payment').css('justify-content', 'center');
+        }
+
+    });
+
+    function PayNow() {
+        
+        var digitalSignature = {
+            discount: '@Model.DS_Discount',
+            rate: '@Model.DS_BasePrice',
+            previlageServiceId: '@Model.DS_PrevialageServiceId',
+            serviceName: '@Model.DS_DisplayName',
+            serviceId: '@Model.DS_ServiceId',
+            tax: '@Model.DS_Tax',
+            volume: '@Model.DS_Credits'
+        };
+
+        var eSealSignature = {
+            discount: '@Model.ES_Discount',
+            rate: '@Model.ES_BasePrice',
+            previlageServiceId: '@Model.ES_PrevialageServiceId',
+            serviceName: '@Model.ES_DisplayName',
+            serviceId: '@Model.ES_ServiceId',
+            tax: '@Model.ES_Taxp',
+            volume: '@Model.ES_Credits'
+        };
+
+        var userSubscription = {
+            discount: '@Model.US_Discountper',
+            rate: '@Model.US_BasePrice',
+            previlageServiceId: '@Model.US_PrevialageServiceId',
+            serviceName: '@Model.US_DisplayName',
+            serviceId: '@Model.US_ServiceId',
+            tax: '@Model.US_Taxper',
+            volume: '@Model.US_Credits'
+        };
+
+        paymentInfo = [digitalSignature, eSealSignature, userSubscription];
+
+        var grandTotal = '@Model.GrandTotal';
+        //var payerMobile = $('#mobileNumber').val();
+
+        var viewModel = {
+            paymentInfo: paymentInfo,
+            grandTotal: grandTotal,
+           // payerMobile: payerMobile,
+            orgId: '@Model.Org_Id',
+        }
+
+        $('#modalDiv').modal('hide');
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("MobileEntry", "BuyCredits")',
+            data: JSON.stringify(viewModel),
+            contentType: "application/json",
+
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+                $('#overlay').hide();
+            },
+            success: function (data) {
+                if (data != null) {
+                    $('#modalDialogDiv').modal('hide');
+                    $('#firstDiv').css('display', 'none');
+                     $('#organizationDiv').html(data);
+                }
+
+                else {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Error",
+                        text: response.message
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            paymentInfo = [];
+                        }
+                    });
+
+                }
+            },
+            error: function (response) {
+
+                console.log('Error sending data:');
+            }
+        });
+
+    }
+
+</script>

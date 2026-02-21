@@ -1,0 +1,292 @@
+﻿@model IEnumerable<EnterpriseGatewayPortal.Web.ViewModel.VerifyWalletCredential.VerifyCredentialListViewModel>
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+    {
+        new BreadCrumbModel { Title = "Wallet - Subscription Requests", Url = "",IconKey = "wallet-subscriptionRequest"},
+    };
+}
+
+
+@{
+    ViewData["Title"] = "Wallet";
+}
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+@{
+    var hasData = Model != null && Model.Count() > 0;
+}
+<style>
+    /* Customizing the popup */
+    .swal-popup {
+        border-radius: 12px;
+        padding: 20px;
+        color: white;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Title Styling */
+    .swal-title {
+        font-family: 'Arial', sans-serif;
+        font-size: 23px !important;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: Black;
+    }
+
+    /* Input Field Styling */
+    .swal-input {
+        width: 84%;
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        margin-bottom: 15px;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.3s;
+        color: black !important;
+    }
+
+        .swal-input:focus {
+            border-color: #2575fc;
+        }
+
+    /* Confirm Button Styling */
+    .swal-confirm-button {
+        background-color: #2575fc;
+        color: white;
+        font-size: 16px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        .swal-confirm-button:hover {
+            background-color: #6a11cb;
+        }
+
+    /* Cancel Button Styling */
+    .swal-cancel-button {
+        background-color: #FF3636 !important;
+        color: white;
+        font-size: 16px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        .swal-cancel-button:hover {
+            background-color: #ddd;
+        }
+
+    .classshide {
+        display: none !important;
+    }
+</style>
+
+@if (Model == null || Model.Count() == 0)
+{
+    <style>
+        table {
+            height: 70% !important;
+        }
+
+        .table-hover > tbody > tr:hover > td {
+            background: none !important;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        /* Apply 100% height to all DataTables wrappers */
+        .dataTables_wrapper {
+            height: 100% !important;
+        }
+
+            /* Apply 100% height only to the second .row inside any DataTables wrapper */
+            .dataTables_wrapper > .row:nth-of-type(2) {
+                height: 100% !important;
+            }
+
+        td:not([style*="display: none"]) {
+            border-bottom-right-radius: 12px !important;
+            border-bottom-left-radius: 12px !important;
+        }
+    </style>
+}
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" style="height:100%;">
+    <div class="col-md-12 plr">
+
+        <div class="card-body">
+
+            <div class="row align-items-center justify-content-between" style="padding-left: 15px; padding-right: 15px;">
+                <!-- Left: Search bar (will be injected by DataTables) -->
+                <div class="col-md-6 col-sm-12 d-flex align-items-center plr" id="custom-search-container"></div>
+
+                <!-- Right: Buttons -->
+                <div class="col-md-6 col-sm-12 plr text-right">
+                    <div class="btn-group">
+                        <a class="btn btn-other" asp-action="List">
+                            <svg width="17" height="17" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="padding-top:2.5px; margin-right: 3px;">
+                                <path d="M30 7.0001V13.0001C30 13.2653 29.8946 13.5197 29.7071 13.7072C29.5196 13.8947 29.2652 14.0001 29 14.0001H23C22.7348 14.0001 22.4804 13.8947 22.2929 13.7072C22.1053 13.5197 22 13.2653 22 13.0001C22 12.7349 22.1053 12.4805 22.2929 12.293C22.4804 12.1055 22.7348 12.0001 23 12.0001H26.425L23.1012 8.9551L23.07 8.9251C21.6801 7.53571 19.9116 6.58667 17.9854 6.19653C16.0593 5.80639 14.0609 5.99245 12.2399 6.73147C10.4188 7.47049 8.85594 8.7297 7.74641 10.3518C6.63688 11.9739 6.02991 13.887 6.00132 15.852C5.97273 17.8171 6.52379 19.747 7.58565 21.4007C8.64752 23.0544 10.1731 24.3585 11.9719 25.1502C13.7706 25.9419 15.7628 26.186 17.6995 25.8521C19.6361 25.5181 21.4315 24.621 22.8612 23.2726C23.054 23.0903 23.3113 22.992 23.5766 22.9994C23.8418 23.0067 24.0933 23.1192 24.2756 23.312C24.458 23.5047 24.5562 23.7621 24.5489 24.0273C24.5415 24.2926 24.429 24.544 24.2362 24.7263C22.0131 26.8348 19.0639 28.007 16 28.0001H15.835C13.8697 27.9732 11.941 27.4639 10.2186 26.5171C8.49619 25.5702 7.03272 24.2148 5.95681 22.5699C4.88091 20.925 4.22552 19.041 4.04824 17.0835C3.87096 15.126 4.17723 13.155 4.94013 11.3435C5.70302 9.53213 6.89918 7.93583 8.42348 6.69496C9.94777 5.45409 11.7535 4.60664 13.6821 4.22709C15.6106 3.84753 17.6028 3.9475 19.4836 4.5182C21.3645 5.08891 23.0763 6.11287 24.4687 7.5001L28 10.7251V7.0001C28 6.73488 28.1053 6.48053 28.2929 6.29299C28.4804 6.10545 28.7348 6.0001 29 6.0001C29.2652 6.0001 29.5196 6.10545 29.7071 6.29299C29.8946 6.48053 30 6.73488 30 7.0001Z" fill="#4B4F58" />
+                            </svg>Refresh
+                        </a>
+                    </div>
+
+
+                </div>
+            </div>
+            <table id="CredentialVerifyTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table @(Model == null || Model.Count() == 0 ? "empty-table" : "")">
+                <thead>
+                    <tr>
+                        <th hidden> Id</th>
+                        <th>Credential Name</th>
+                        <th>organization Name</th>
+
+                        <th>Created Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model == null || Model.Count() == 0)
+                    {
+                        <tr>
+                            <td style="display: none;"></td>
+                            <td style="text-align:center" valign="top" colspan="6" class="dataTables_empty">
+                                <img class="NoRecordsCls" src="~/assets/images/No-Records-icon.svg" alt="No records" style=" display:block; margin:0 auto 8px;">
+                                <p class="NoRecordFound-paragarph">No records found</p>
+
+                            </td>
+
+                            <td style="display: none;"></td>
+                            <td style="display: none;"></td>
+                            <td style="display: none;"></td>
+                            <td style="display: none;"></td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr class="odd gradeX">
+                                <td hidden>@item.id</td>
+                                <td>@item.credentialName</td>
+                                <td>@item.organizationName</td>
+
+                                <td>@item.createdDate.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @if (string.IsNullOrWhiteSpace(item.status))
+                                    {
+                                        <span class="status-tag status-na">N/A</span>
+                                    }
+                                    else
+                                    {
+                                        var status = item.status.Trim().ToLower();
+                                        var statusCapitalized = char.ToUpper(status[0]) + status.Substring(1);
+                                        var cssClass = status switch
+                                        {
+                                            "active" => "status-tag status-active",
+                                            "failed" => "status-tag status-failed",
+                                            "In Progress" => "status-tag status-inprogress",
+                                            _ => "status-tag status-na"
+                                        };
+                                        <span class="@cssClass">@statusCapitalized</span>
+                                    }
+                                </td>
+
+
+                                <td class="valigntop">
+
+                                    <div class="btn-group">
+                                        <button class="btn btn-xs deepPink-bgcolor no-margin" type="button" data-toggle="dropdown"
+                                                aria-expanded="false">
+                                            Actions
+                                            <i class="fa fa-angle-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-left" role="menu">
+
+                                            <li class="table-dropdown-li">
+                                                <a asp-action="ViewVerifyCredentialRequestDetails" asp-route-id="@item.id">
+                                                    <img src="~/assets/images/Eye_View_Icon.svg" alt="edit" style="position: relative;bottom: 1px;width: 18px;height: 18px;" />View
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+@section scripts {
+    <script>
+        var walletCertificateStatus = @Json.Serialize(ViewBag.WalletCertificateStatus);
+
+        $(document).ready(function () {
+
+            $('#walletCredentialsVerifyRequestMenu').addClass('active');
+            $('#networkOverlay').hide();
+            document.getElementById("navigationNetworkOverlay").style.display = "none";
+
+            $("#Wallet-Manager > a")
+                .attr("aria-expanded", "true")
+                .addClass("active");
+
+            $("#Wallet-Manager")
+                .addClass("submenu-active show");
+
+            $("#Wallet-Manager .submenu")
+                .addClass("show");
+
+            $('#Wallet-Subscriptions').addClass('active');
+
+            $('#homeMenu').addClass('breadcrumb-item').append('Wallet > Wallet Subscribed Requests');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            // var table = $("#CredentialVerifyTable").DataTable({
+            //     "bLengthChange": false,
+            //     "searching": true,
+            //     "ordering": true, // Enable ordering
+            //     "order": [[0, "desc"]] // Order by first column (index 0), descending
+            // });
+            var table = $("#CredentialVerifyTable").DataTable({
+                "bLengthChange": false,
+                "searching": true,
+                 "paging": @hasData.ToString().ToLower(),
+ "info": @hasData.ToString().ToLower(),
+                //  "dom": '<"top"f>rt<"bottom"ip><"clear">', // Keep 'f' for the search input only
+                "initComplete": function () {
+                    // Move the search bar into our custom container
+                    $(".dataTables_filter").appendTo("#custom-search-container");
+                    $('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+                    $('.dataTables_filter label').contents().filter(function () {
+                        return this.nodeType === 3;
+                    }).remove();
+
+                }
+
+            });
+
+
+        });
+
+    </script>
+}

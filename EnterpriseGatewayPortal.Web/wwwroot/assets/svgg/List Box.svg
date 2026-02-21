@@ -1,0 +1,11 @@
+<svg id="List_Box" data-name="List Box" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="19.123" height="19.123" viewBox="0 0 19.123 19.123">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_49754" data-name="Rectangle 49754" width="19.123" height="19.123" transform="translate(0 0)" fill="#080808"/>
+    </clipPath>
+  </defs>
+  <g id="Group_114424" data-name="Group 114424" clip-path="url(#clip-path)">
+    <path id="Path_110361" data-name="Path 110361" d="M16.72,19.123H2.4A2.406,2.406,0,0,1,0,16.72V2.4A2.406,2.406,0,0,1,2.4,0H16.72a2.406,2.406,0,0,1,2.4,2.4V16.72a2.406,2.406,0,0,1-2.4,2.4M2.4,2a.4.4,0,0,0-.4.4V16.72a.4.4,0,0,0,.4.4H16.72a.4.4,0,0,0,.4-.4V2.4a.4.4,0,0,0-.4-.4Z" fill="#080808"/>
+    <path id="Path_110362" data-name="Path 110362" d="M5.155,6.808h8.7l-4.29,5.85Z" fill="#080808"/>
+  </g>
+</svg>

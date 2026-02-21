@@ -1,0 +1,576 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.DocumentVerification.CreateVerificationViewModelcs
+@using Newtonsoft.Json;
+@using EnterpriseGatewayPortal.Core.Constants;
+
+@{
+    ViewData["Title"] = "CreateDocVer";
+}
+
+<style>
+
+    .classshide {
+        display: none !important;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .sweet-alert fieldset {
+        display: none;
+    }
+
+    
+
+    .sweet-alert p {
+        font-weight: 400;
+        overflow: auto;
+        max-height: 200px;
+        white-space: break-spaces;
+        line-height: 1.75;
+        max-width: 1000px !important;
+        width: 450px !important;
+    }
+    .dropzone {
+        border: 2px dashed #ced4da;
+        border-radius: 5px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        margin-bottom: 20px;
+        height: 150px;
+    }
+
+        .dropzone p {
+            margin: 0;
+            font-size: 16px;
+            color: #6c757d;
+            padding: 39px;
+        }
+
+    #thumbnail img {
+        height: 138px;
+        width: 138px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+    }
+
+   
+
+    .btn-primary {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+
+    /* Style for the form controls */
+    .form-control {
+        margin-bottom: 10px;
+    }
+
+    .custom-card {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        max-width: 665px;
+        width: 580px;
+        margin-left: 16px;
+        margin-right: 19px;
+        
+    }
+
+        .custom-card .card-body {
+            
+            padding: 20px;
+        }
+
+    .left-align-swal-text {
+        text-align: left !important;
+    }
+
+    .sweet-alertClass p{
+        font-weight: 400;
+        overflow: auto;
+        max-height: 500px;
+        white-space: break-spaces;
+        line-height: 1.62;
+        width: 448px;
+        text-align: start;
+       
+        
+    }
+   
+    /* Style for the 'Yes' button */
+    .swal-button--confirm {
+        background-color: #4CAF50 !important; 
+        border-color: #4CAF50 !important; 
+    }
+    .my-custom-text-class {
+       
+        font-size: 16px;
+        color: #ff0000; 
+        padding-left:50px;
+        
+    }
+
+    .classshide {
+        display: none !important;
+    }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" id="spacingCss">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body" id="create">
+                <form id="createDocVer" enctype="multipart/form-data" style="height: 235px;">
+                    <div class="row">
+                        
+                        <div class="col-md-6">
+                            
+                            <div class="form-group">
+                                <label asp-for="IssuerName" style="font-weight: 600; font-size: 14.5px;">Issuer Organization Name<span style="color: red;">*</span></label>
+                                <select class="form-control" asp-for="IssuerName" style="padding: 5px;" id="issuerNameDropdown">
+                                    <option value="">Choose an option</option>
+                                  
+                                </select>
+                            </div>
+
+                          
+                            <div class="form-group">
+                                <label asp-for="VerificationMethod" style="font-weight: 600; font-size: 14.5px;">Verification Method<span style="color: red;">*</span></label>
+                                <select class="form-control" id="VerificationMethod" name="verificationMethod" style="padding: 5px;">
+                                    <option value="">Choose an option</option>
+                                    
+                                </select>
+                            </div>
+                          
+                          </div>
+                          <div class="col-md-6">
+                                                      
+                            <div class="form-group">
+                                <label asp-for="DocumentType" style="font-weight: 600; font-size: 14.5px;">Document Type<span style="color: red;">*</span></label>
+                                <select class="form-control" id="documentType" name="DocumentType" style="padding: 5px;">
+                                     <option value="">Choose an option</option>
+                                   
+                                </select>
+                            </div>
+
+                            <!-- File input for document upload -->
+                            <div class="form-group">
+                                <label asp-for="File" style="font-weight: 600; font-size: 14.5px;">
+                                    Upload Document<span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <div class="custom-file">
+                                        <input asp-for="File" type="file" class="custom-file-input" id="uploadDocument" name="uploadDocument" accept=".docx, .pdf">
+                                        <label asp-for="File" class="custom-file-label" for="uploadDocument" id="fileLabel">Choose file</label>
+                                        <span asp-validation-for="File" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                                                  
+                          </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end" style="padding-top: 31px;">
+                        <button type="submit" class="btn btn-primary" id="Save" onclick="SaveVerification(event)">Send Request</button>
+                    </div>
+                </form>
+             
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    
+  
+    <script>
+
+        var issuerOrgNamesDetails = @Html.Raw(JsonConvert.SerializeObject(Model.IssuerOrgNameDetails));
+
+        var selectedDocumentDetails;
+        var globalVerificationMethods = [];
+        var verificationType;
+        var price;
+        var duration;
+        var responseMsg;
+        var fileId;
+
+        $(document).ready(function () {
+
+            var DocumentVerificationLink = document.getElementById('DocumentVerificationModle').querySelector('.nav-link');
+            DocumentVerificationLink.click();
+            $('#homeMenu').addClass('breadcrumb-item').append('Document Verification > New Verification');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#VerificationMenu').addClass('active');
+            $('#networkOverlay').hide();
+            updateIssuerNames();
+
+        });
+
+        $('#issuerNameDropdown').change(function () {
+
+            sendIssuerUidToController();
+        });
+
+        $('#documentType').change(function () {
+
+            sendDocTypeToController();
+        });
+
+
+           $('#VerificationMethod').change(function () {
+
+            var verificationValue = $('#VerificationMethod').val();
+            var selectedVerificationMethod = globalVerificationMethods.find(function (method) {
+                return method.verificationType === verificationValue;
+            });
+
+            if (selectedVerificationMethod) {
+
+                price = selectedVerificationMethod.price;
+                duration = selectedVerificationMethod.duration;
+
+            }
+           });
+
+        document.getElementById('uploadDocument').addEventListener('change', function () {
+            var allowedExtensions = /(\.docx|\.pdf)$/i;
+            var uploadedFileName = this.value;
+
+
+            if (!allowedExtensions.exec(uploadedFileName)) {
+
+                Swal.fire({
+                    title: 'Invalid File Type!',
+                    text: 'Only .docx and .pdf files are allowed.',
+                    icon: 'error'
+                });
+                this.value = '';
+                return false;
+            }
+            var fileName = uploadedFileName.split('\\').pop();
+            $('#fileLabel').text(fileName);
+
+        });
+
+
+        function updateIssuerNames() {
+
+            var uniqueIssuerNames = [...new Set(issuerOrgNamesDetails.map(item => item.documentProperty))];
+            var issuerNameDropdown = $('#issuerNameDropdown');
+
+            issuerNameDropdown.empty();
+            issuerNameDropdown.append($('<option></option>').attr('value', '').text('Choose an option'));
+
+            $.each(uniqueIssuerNames, function (index, issuerName) {
+                issuerNameDropdown.append($('<option></option>').attr('value', issuerName).text(issuerName));
+            });
+        }
+
+        function updateDocumentTypes(documentTypes) {
+
+            var documentTypeDropdown = $('#documentType');
+
+            documentTypeDropdown.empty();
+            documentTypeDropdown.append($('<option></option>').attr('value', '').text('Choose an option'));
+
+            $.each(documentTypes, function (index, documentType) {
+                documentTypeDropdown.append($('<option></option>').attr('value', documentType.documentProperty).text(documentType.documentProperty));
+            });
+        }
+
+        function updateVerifyTypes(verificationTypes) {
+
+            var verificationMethodDropdown = $('#VerificationMethod');
+
+            verificationMethodDropdown.empty();
+            verificationMethodDropdown.append($('<option></option>').attr('value', '').text('Choose an option'));
+
+            $.each(verificationTypes, function (index, verifyMethod) {
+
+                verificationMethodDropdown.append($('<option></option>').attr('value', verifyMethod.verificationType).text(verifyMethod.verificationType));
+            });
+
+        }
+
+        function sendIssuerUidToController() {
+
+            var selectedIssuerName = $('#issuerNameDropdown').val();
+            var selectedIssuer = issuerOrgNamesDetails.find(item => item.documentProperty === selectedIssuerName);
+
+
+            if (selectedIssuer) {
+                var selectedIssuerUid = selectedIssuer.IssuerUid;
+                $.ajax({
+                    url: '@Url.Action("GetDocumentType", "DocumentVerification")',
+                    type: 'POST',
+                    data: { issuerUid: selectedIssuerUid },
+                    success: function (response) {
+
+                        if (response.success) {
+                            updateDocumentTypes(response.result);
+
+                            console.log(response.message);
+                        } else {
+
+                            console.error(response.message);
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Error:', error.statusText);
+                    }
+                });
+            }
+        }
+
+        function sendDocTypeToController() {
+            var selectedIssuerName = $('#issuerNameDropdown').val();
+
+            var selectedDocType = $('#documentType').val();
+
+            var selectedIssuer = issuerOrgNamesDetails.find(item => item.documentProperty === selectedIssuerName);
+            var selectedIssuerUid = selectedIssuer.IssuerUid;
+
+
+            if (selectedIssuer) {
+
+                $.ajax({
+                    url: '@Url.Action("GetVerificationMethods", "DocumentVerification")',
+                    type: 'POST',
+                    data: { docType: selectedDocType, issuerUid: selectedIssuerUid },
+                    success: function (response) {
+
+                        if (response.success) {
+
+                            globalVerificationMethods = response.result;
+                            updateVerifyTypes(response.result);
+
+                            console.log(response.message);
+                        } else {
+
+                            console.error(response.message);
+                        }
+                    },
+                    error: function (error) {
+
+                        console.error('Error:', error.statusText);
+                    }
+                });
+            }
+        }
+
+        function validateFields() {
+            if ($("#issuerNameDropdown").val() === "") {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Organization Required!',
+                    text: 'Please select any Organization.'
+
+                });
+
+                return false;
+            }
+
+            if ($("#documentType").val() === "") {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Document Type Required!',
+                    text: 'Please select any Document.'
+                });
+
+                return false;
+            }
+            if ($("#VerificationMethod").val() === "") {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Verification Method Required!',
+                    text: 'Please select any Verification Method.'
+                });
+
+                return false;
+            }
+            if ($("#uploadDocument").val() === "") {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Document File not uploaded!',
+                    text: 'Please upload any Document.'
+                });
+
+                return false;
+            }
+
+            return true;
+        }
+
+        function verifyDocument() {
+
+            var selectedIssuerName = $('#issuerNameDropdown').val();
+            var selectedIssuer = issuerOrgNamesDetails.find(item => item.documentProperty === selectedIssuerName);
+            var selectedIssuerUid = selectedIssuer.IssuerUid;
+
+            return new Promise(function (resolve, reject) {
+                var formData = new FormData();
+                formData.append('IssuerUid', selectedIssuerUid);
+                formData.append('IssuerName', $("#issuerNameDropdown").val());
+                formData.append('documentType', $("#documentType").val());
+                formData.append('verificationMethod', $("#VerificationMethod").val());
+                formData.append('File', $("#uploadDocument")[0].files[0]);
+
+                $.ajax({
+                    url: '@Url.Action("Add", "DocumentVerification")',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    beforeSend: function () {
+                        $('#overlay').show();
+                    },
+                    complete: function () {
+
+                        $('#overlay').hide();
+                    },
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            fileId = response.fileId;
+                            responseMsg = response.message;
+                            resolve(true);
+                            console.log(response.message);
+                        } else {
+                            responseMsg = response.message;
+                            resolve(false);
+                            console.error(response.message);
+                        }
+                    },
+                    error: function (error) {
+                        resolve(false);
+                        console.error('Error:', error.statusText);
+                    }
+                });
+            });
+        }
+
+        function SaveVerification(event) {
+            event.preventDefault();
+
+            if (validateFields()) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    html: `
+                        <div style="text-align: left; line-height: 1.8;">
+                            <strong>Max Duration for Report:</strong> ${duration} (Days)<br>
+                            <strong>Price for Report:</strong> ${price} (UGX)<br><br>
+                            Do you want to Continue?
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No',
+                    customClass: 'sweet-alertClass'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        verifyDocument().then(function (verify) {
+                            console.log("verifyDocument", verify);
+
+                            if (verify) {
+                                const method = $("#VerificationMethod").val();
+                                const isTechOrQR = method === "Technical" || method === '@VerificationTypeConstants.Qr';
+
+                                if (isTechOrQR) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success!',
+                                        text: responseMsg,
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Download Report',
+                                        cancelButtonText: 'Close'
+                                    }).then((result2) => {
+                                        if (result2.isConfirmed) {
+                                            $.ajax({
+                                                url: '@Url.Action("DownloadReport", "DocumentVerification")',
+                                                type: 'POST',
+                                                data: { fileId: fileId },
+                                                xhrFields: { responseType: 'blob' },
+                                                success: function (blob) {
+                                                    console.log("File download initiated");
+                                                    var fileName = $("#uploadDocument").val().split('\\').pop();
+
+                                                    var link = document.createElement('a');
+                                                    link.href = window.URL.createObjectURL(blob);
+                                                    link.download = fileName;
+                                                    link.click();
+
+                                                    if (blob) {
+                                                        window.location.href = '@Url.Action("Index", "DocumentVerification")';
+                                                    }
+                                                },
+                                                error: function (error) {
+                                                    console.log("Error during file download");
+                                                    Swal.fire('Error', 'Failed to download the report.', 'error');
+                                                }
+                                            });
+                                        } else {
+                                            window.location.href = '@Url.Action("Index", "DocumentVerification")';
+                                        }
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success!',
+                                        text: responseMsg
+                                    }).then(() => {
+                                        window.location.href = '@Url.Action("Index", "DocumentVerification")';
+                                    });
+                                }
+
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: responseMsg
+                                });
+                            }
+
+                        }).catch(function (error) {
+                            console.error('Error during document verification:', error);
+                            Swal.fire('Error', 'An error occurred during verification. Please try again.', 'error');
+                        });
+                    }
+                });
+
+
+
+
+
+            }
+        }
+
+
+    </script>
+
+}

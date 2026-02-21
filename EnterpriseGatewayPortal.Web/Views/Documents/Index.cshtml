@@ -1,0 +1,223 @@
+﻿@model List<EnterpriseGatewayPortal.Core.Domain.Models.Document>
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+    var len = Model.Count();
+}
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+    {
+        new BreadCrumbModel { Title = "Document - Signing" , Url = ""},
+    };
+}
+
+@{
+    var hasData = Model != null || Model.Count() != 0;
+
+}
+
+<style>
+    .classshide {
+        display: none !important;
+    }
+
+    .dropdown-menu > li.active:hover > a, .dropdown-menu > li.active > a, .dropdown-menu > li:hover > a
+    {
+        text-decoration: none;
+        background-image: none;
+        background-color: #fff !important;
+        color: #555;
+        filter: none;
+    }
+
+</style>
+
+@if (Model == null || Model.Count() == 0)
+{
+    <style>
+        table {
+            height: 70% !important;
+           
+        }
+
+        .table-hover > tbody > tr:hover > td {
+            background: none !important;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        .dataTables_wrapper {
+            height: 100% !important;
+        }
+
+            .dataTables_wrapper > .row:nth-of-type(2) {
+                height: 100% !important;
+            }
+
+        td:not([style*="display: none"]) {
+            border-bottom-right-radius: 12px !important;
+            border-bottom-left-radius: 12px !important;
+        }
+    </style>
+}
+
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" style="height:100%;">
+    <div class="col-md-12 plr">
+        
+            <div class="card-body">
+                <div class="row align-items-center justify-content-between plr" style="padding-left: 15px; padding-right: 15px;">
+                    <!-- Left: Search bar (will be injected by DataTables) -->
+                    <div class="col-md-6 col-sm-12 d-flex align-items-center" id="custom-search-container"></div>
+
+                    <!-- Right: Buttons -->
+                    <div class="col-md-6 col-sm-12 text-right">
+                        <div class="btn-group">
+                            <a class="btn btn-primary uaeid-primary" onclick="createDoc()">
+                                <i class="fa fa-plus"></i>Sign Document
+                            </a>
+
+                        </div>
+                       
+                    </div>
+                </div>
+                <table id="scopesTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table @(Model == null || Model.Count() == 0 ? "empty-table" : "")">
+                    <thead>
+                        <tr>
+                            <th>Document Name</th>
+                            
+                            <th>Created Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || Model.Count() == 0)
+                        {
+                            <tr>
+                                <td style="display: none;"></td>
+                                <td style="text-align:center" valign="top" colspan="6" class="dataTables_empty">
+                                    <img class="NoRecordsCls" src="~/assets/images/No-Records-icon.svg" alt="No records" style=" display:block; margin:0 auto 8px;">
+                                    <p class="NoRecordFound-paragarph">No records found</p>
+                                    <p class="NoRecordTable-Text">Get started by clicking on 'Create Template'</p>
+                                </td>
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
+                                
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr class="odd gradeX">
+
+                                    <td style="max-width:50% !important;width:100%;">@item.DocumentName</td>
+                                   
+                                    <td>@item.CreatedAt</td>
+
+                                    <td>
+                                        @{
+                                            var status = item.Status.Trim().ToLower();
+                                            var statusCapitalized = char.ToUpper(status[0]) + status.Substring(1);
+                                            var cssClass = status switch
+                                            {
+                                                "active" => "status-tag status-active",
+                                                "completed" => "status-tag status-active",
+                                                "failed" => "status-tag status-failed",
+                                                "declined" => "status-tag status-failed",
+                                                "in progress" => "status-tag status-inprogress",
+                                                "action required" => "status-tag wid status-na",
+                                                _ => "status-tag status-na"
+                                            };
+                                            <span class="@cssClass">@statusCapitalized</span>
+                                        }
+
+                                    </td>
+                                    <td class="valigntop">
+                                        <div class="btn-group">
+                                            <button class="btn btn-xs deepPink-bgcolor no-margin" type="button" data-toggle="dropdown"
+                                            aria-expanded="false">
+                                                Actions
+                                                <i class="fa fa-angle-down"></i>
+                                            </button>
+                                            <ul class="dropdown-menu pull-left" role="menu">
+                                                <li>
+                                                    @*  @if (item.Status == "Completed")
+                                                     { 
+                                                        <a asp-action="DocumentStatus" asp-route-Id="@item.DocumentId">
+                                                            <i class="icon-pencil"></i>View Status
+                                                        </a>
+                                                     }  *@
+                                                  
+                                                        <a asp-action="DocumentStatus" asp-route-Id="@item.DocumentId">
+                                                    <img src="~/assets/images/Eye_View_Icon.svg" alt="edit" style="position: relative;bottom: 1px;width: 18px;height: 18px;" />View Status
+                                                        </a>
+
+
+                                                    @if (item.Status == "In Progress")
+                                                    { 
+                                                        <a asp-action="SignActionConfigByDocId" asp-route-Id="@item.DocumentId">
+                                                        <img src="~/assets/images/Pencil-edit-icon.svg" alt="edit" style="position: relative;bottom: 1px;width: 18px;height: 18px;" />Sign
+                                                        </a>
+                                                    }
+                                                </li>
+
+                                            </ul>
+                                        </div>
+
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+
+        $("#DocumentSigningModule").addClass("active");
+
+        var count = @len;
+        if (count > 0) {
+            if ($("#scopesTable").length) {
+                //$('#scopesTable').DataTable();
+                $('#scopesTable').DataTable({
+                    "bLengthChange": false,
+                    "searching": true,
+                    order: [[1, 'desc']], // 1 refers to the index of 'CreatedAt' column
+                    "paging": @hasData.ToString().ToLower(),
+                    "info": @hasData.ToString().ToLower(),
+                     "initComplete": function () {
+                        // Move the search bar into our custom container
+                        $(".dataTables_filter").appendTo("#custom-search-container");
+                        $('.dataTables_filter input[type="search"]').attr('placeholder', 'Search');
+                        $('.dataTables_filter label').contents().filter(function () {
+                            return this.nodeType === 3;
+                        }).remove();
+
+                     }
+                });
+            }
+        }
+        $('#homeMenu').addClass('breadcrumb-item').append('Documents');
+        $('#mainMenu').removeClass('breadcrumb-item');
+        $('#subMenu').removeClass('breadcrumb-item');
+        $('#DocumentMenu').addClass('active');
+        $('#networkOverlay').hide();
+        document.getElementById("navigationNetworkOverlay").style.display = "none";
+    });
+        function createDoc() {
+        document.getElementById("navigationNetworkOverlay").style.display = "block";
+        window.location.href = '@Url.Action("CreateDocument", "Documents")';
+    }
+</script>

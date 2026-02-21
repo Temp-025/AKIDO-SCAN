@@ -1,0 +1,2250 @@
+﻿@*@model IList<DTPortal.Core.DTOs.IdValidationResponseDTO>*@
+@using EnterpriseGatewayPortal.Core.DTOs
+@using EnterpriseGatewayPortal.Core.Utilities
+@model EnterpriseGatewayPortal.Web.ViewModel.KYCDashboard.KYCDashboardViewModel
+@using System.Security.Claims
+@using EnterpriseGatewayPortal.Web.Models
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+
+@{
+    var kafkaUrl = Configuration["SignalR:KafkaLogHubUrl"] ?? string.Empty;
+    var layoutType = Context.Request.Cookies["HeaderNavigationLayout"];
+
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<link href="~/lib/phosphor/regular/style.css" rel="stylesheet" />
+
+<style>
+
+    .dashboard-header {
+        display: flex;
+        flex-direction: column;
+        background-color: rgba(252, 252, 252, 1);
+        padding: @(layoutType == "Vertical" ? "15px 13.5px" : "15px 35px") ;
+    }
+
+    body.zoomed-in .dashbord-header {
+        padding: 15px 15px !important;
+    }
+
+    .dashboard-row-1 {
+        flex: 1;
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1%;
+    }
+
+    .dashboard-row-2 {
+        flex: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .row-30 {
+        flex: 3;
+        display: flex;
+        gap: 1rem;
+    }
+
+        .row-30 > div {
+            flex: 1;
+        }
+
+    .row-70 {
+        flex: 7;
+    }
+
+    .kpi-card {
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        padding: 1rem;
+        background: #fff;
+        text-align: center;
+        height: 100%;
+    }
+
+
+    .kpi-value {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .kpi-label {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+
+    .shimmer-wrapper .shimmer-item {
+        height: 90px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        background: #f3f3f3;
+        position: relative;
+        overflow: hidden;
+    }
+
+    @@media screen and (max-width:1200px) {
+        .shimmer-wrapper .shimmer-item {
+            height: 150px;
+        }
+    }
+
+    .shimmer-wrapper .shimmer-item::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient( to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0) 100% );
+        animation: shimmer-horizontal 1.6s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @@keyframes shimmer-horizontal {
+        0% {
+            left: -100%;
+        }
+
+        100% {
+            left: 100%;
+        }
+    }
+
+
+    .service-provider-card {
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 1rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        color: #212529;
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+    }
+
+        .service-provider-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+    /* Backgrounds by status */
+    .status-active {
+        background-color: #e8f5e9 !important;
+    }
+
+    .status-inactive {
+        background-color: #f8d7da !important;
+    }
+
+    .status-registered {
+        background-color: #fff3cd !important;
+    }
+
+    /* Status badge */
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        min-width: 100px;
+        text-align: center;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        text-transform: capitalize;
+    }
+
+    .status-badge-active {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    .status-badge-inactive {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    .sp-label-heading {
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0%;
+        color: rgba(95, 100, 109, 1);
+        margin-bottom: 5px;
+    }
+
+    hr {
+        border: none;
+        border-top: 1px solid #ddd;
+        margin: 10px 0px 10px 0;
+        width: 100%;
+    }
+
+    .kyc-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border-radius: 30px;
+        margin: 4px 6px 4px 0;
+        background-color: #f5f3ff;
+        color: #5b21b6;
+        border: 1px solid #ddd6fe;
+        white-space: nowrap;
+    }
+
+        .kyc-badge i {
+            font-size: 1rem;
+        }
+
+    .method-badge {
+        background-color: #f3faf4;
+        color: rgba(74, 157, 92, 1);
+        font-family: 'Inter';
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 16px;
+        border-radius: 50px;
+    }
+
+    .status-badge-SUCCESS {
+        background-color: rgba(243, 250, 244, 1);
+        color: #2f663c;
+        font-family: 'Inter';
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 16px;
+        border-radius: 50px;
+        padding: 6px 14px;
+        align-items: center;
+        gap: 6px;
+        text-transform: uppercase;
+    }
+
+    .status-badge-FAILURE {
+        background-color: #fef2f2;
+        color: #b52520;
+        font-size: 12px;
+        line-height: 1.5rem;
+        border-radius: 50px;
+        padding: 6px 14px;
+        align-items: center;
+        font-weight: 600;
+        gap: 6px;
+        text-transform: uppercase;
+    }
+
+    .underline-tabs {
+        display: flex;
+        width: 100%;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+        .underline-tabs .tab-link {
+            flex: 1;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 12px 0;
+            text-align: center;
+            color: #6c757d;
+            transition: border-color 0.3s, color 0.3s;
+            cursor: pointer;
+        }
+
+            .underline-tabs .tab-link.active {
+                outline: none;
+                color: #000;
+                border-bottom: 3px solid #007bff;
+                font-weight: 600;
+            }
+
+    .hover-kpi:hover {
+        background-color: #f8f9fa;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .custom-tabs {
+        border-bottom: 2px solid #E1E3E5;
+    }
+
+        .custom-tabs .tab-btn {
+            border: none;
+            padding: 10px 24px;
+            font-weight: 500;
+            background-color: transparent;
+            color: rgba(62, 64, 70, 1);
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+            .custom-tabs .tab-btn.active {
+                outline: none;
+                font-weight: 500;
+                font-size: 14px;
+                line-height: 20px;
+                background: transparent;
+                color: rgba(146, 114, 42, 1);
+                border-bottom: 4px solid #92722a;
+            }
+
+            .custom-tabs .tab-btn:hover:not(.active) {
+                background-color: #E1E3E5;
+            }
+
+            .custom-tabs .tab-btn:focus {
+                outline: none;
+            }
+
+    .tab-pane {
+        display: none;
+    }
+
+        .tab-pane.show.active {
+            display: block;
+        }
+
+    .org-details {
+        padding: 0px 20px;
+        display: flex;
+        flex-direction: row;
+        gap: 40px;
+        align-items: center;
+        font-family: 'Inter';
+    }
+
+    .org-card {
+        width: 50%;
+        border: 1px solid #E1E3E5;
+        border-radius: 12px;
+        width: 40%;
+        padding: 10px;
+        box-shadow: 0px 0px 4px 0px rgba(187, 187, 187, 0.25);
+    }
+
+        .org-card > h1 {
+            font-family: 'Inter';
+            padding: 0px;
+            margin: 0px;
+            font-size: 12px !important;
+            font-weight: 600;
+            color: black;
+        }
+
+        .org-card > p {
+            text-align: left;
+            color: rgba(158, 162, 169, 1);
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
+            letter-spacing: 0%;
+        }
+
+    .org-info {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        gap: 10px;
+        align-items: center;
+    }
+
+        .org-info > h6 {
+            color: black;
+            font-weight: 500;
+            font-family: 'Inter';
+        }
+
+    .btn-vmore {
+        background-color: transparent;
+        outline: none;
+        border: none;
+        color: #92722A;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+        .btn-vmore:active {
+            outline: none;
+        }
+
+        .btn-vmore:focus {
+            outline: none;
+        }
+
+    .graph-card {
+        border: 1px solid #E1E3E5;
+        border-radius: 12px;
+        box-shadow: 0px 0px 4px 0px rgba(187, 187, 187, 0.25);
+        width: 60%;
+        padding: 10px;
+        font-family: 'Inter';
+    }
+
+        .graph-card > h5 {
+            color: black !important;
+            margin-left: 10px !important;
+            margin-bottom: 15px !important;
+            margin-top: 5px !important;
+            font-family: 'Inter';
+            font-size: 12px !important;
+            font-weight: 600;
+            text-align: left;
+        }
+
+    .stat-card {
+        height: 136px;
+        border-radius: 12px;
+        border: 1px solid #E1E3E5;
+        padding: 16px 20px;
+        display: flex;
+        flex-direction: column;
+        background-color: #fff;
+        width: 200px;
+        box-shadow: 0px 0px 4px 0px rgba(187, 187, 187, 0.25);
+        transition: all 0.3s ease;
+    }
+
+    .stat-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .stat-card > hr {
+        border: none;
+        border-top: 1px solid #ccc;
+        margin-top: 12px;
+        margin-bottom: 12px;
+    }
+
+
+    .stat-icon-wrapper {
+        background-color: rgba(249, 247, 237, 1);
+        padding: 0.8rem;
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 48px;
+        min-height: 48px;
+    }
+
+        .stat-icon-wrapper i {
+            font-size: 1.2rem;
+            color: #D6B262;
+        }
+
+    .stat-title {
+        font-size: 0.85rem;
+        color: #9E9E9E;
+        font-weight: 500;
+        line-height: 1.2;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #1C1C1C;
+        font-family: 'Inter';
+    }
+
+    .stat-footer {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        font-size: 1rem;
+        color: #C4C4C4;
+    }
+
+    .stat-label-light {
+        line-height: 20px;
+        font-size: 14px;
+        color: rgba(71, 85, 105, 1);
+        font-weight: 300;
+    }
+
+    .stat-label-bold {
+        color: #1C1C1C;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 24px;
+    }
+
+    hr {
+        border: none;
+        height: 0.5px;
+        background-color: #ccc;
+        margin-top: 4px;
+        margin-bottom: 4px;
+        opacity: 0.5;
+    }
+
+    .latest-trans-cont {
+        border: 1px solid #E1E3E5;
+        border-radius: 10px;
+    }
+
+    .latest-trans-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+        .latest-trans-header > h5 {
+            font-family: 'Inter' !important;
+            font-weight: 500;
+        }
+
+    .filter-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .filter-select-wrapper {
+        cursor: pointer;
+        position: relative;
+        display: inline-block;
+        width: auto;
+    }
+
+        .filter-select-wrapper .form-select {
+            padding-left: 45px;
+            padding-right: 30px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 10px;
+        }
+
+        .filter-select-wrapper .filter-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #6c757d;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+    .form-select {
+        display: block;
+        width: 100%;
+        padding: 10px 1rem;
+        font-family: 'Inter';
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #e9ecef;
+        border-radius: 0.5rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+        .form-select:focus {
+            border-color: #86b7fe;
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+        }
+
+    .rounded-pill {
+        border-radius: 5px;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+    }
+
+    .border-secondary-subtle {
+        border-color: #e9ecef !important;
+    }
+
+    .btn-vresponse {
+        font-weight: 600;
+        border-radius: 5px;
+        padding: 10px;
+        background-color: transparent !important;
+        color: #92722a !important;
+        border: 1px solid rgba(226, 232, 240, 1) !important;
+        cursor: pointer;
+    }
+
+        .btn-vresponse:hover {
+            transition: ease-in-out 0.3s;
+            background-color: #f9f7ed !important;
+        }
+
+    .stat-inline-box .stat-value {
+        font-size: 1.8rem;
+        color: #333;
+    }
+
+    .icon-box {
+        background-color: #f1f1f1;
+        border: 1px solid #6a6a6a3b;
+        border-radius: 50px;
+        padding: 4px;
+        height: 32px;
+        width: 32px;
+    }
+
+    .stat-icon-wrapper img:last-child {
+        opacity: 1 !important;
+    }
+
+    .full-click-date {
+        position: relative;
+        cursor: pointer;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='gray' viewBox='0 0 24 24'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM5 20V9h14v11H5z'/%3E%3C/svg%3E") no-repeat right 0.8rem center;
+        background-size: 18px;
+    }
+
+        .full-click-date::-webkit-calendar-picker-indicator {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+    #responseTabs .nav-link.active {
+        background-color: #92722a !important;
+        color: white !important;
+        border-color: #92722a !important;
+        outline: none !important;
+    }
+
+    #responseTabs .nav-link {
+        color: black;
+    }
+
+    .custom-modal-body {
+        max-height: 400px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 1rem;
+        word-break: break-word;
+    }
+
+    @@media (width <= 768px){
+        .dashboard-row-1{
+            flex-direction: column;
+        }
+        .org-card{
+            width: 100% !important;
+        }
+        .graph-card{
+            width: 100% !important;
+        }
+        .row-30{
+            flex-wrap:wrap;
+        }
+        .latest-trans-header{
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .search-container{
+            max-width: 100% !important;
+        }
+        .date-filter{
+            flex:1;
+        }
+        .filter-container{
+            width:100%;
+        }
+        .service-provider-card{
+            margin-left:0 !important;
+            margin-right:0 !important;
+        }
+        .m-status-badge {
+            word-break: break-word;
+            text-align: start;
+        }
+        .org-details {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            text-align: center;
+            gap:0px;
+        }
+
+        .org-main-cont {
+            width:100%;
+            margin: 0 0 15px 0 !important;
+        }
+
+            .org-main-cont img,
+            .org-main-cont .d-flex {
+                width: 120px !important;
+                height: 120px !important;
+            }
+
+        .org-info {
+            justify-content: flex-start !important;
+            text-align: center !important;
+        }
+
+            .org-info h6 {
+                font-size: 14px;
+                word-break: break-word;
+            }
+    }
+
+    .classshide {
+        display: none !important;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="dashboard-header container-fluid"
+     style="overflow-y:auto;scrollbar-width:none;@(layoutType == "Vertical" ? "margin-top:0px;" : "margin-top:-55px;")">
+    <!-- First Row (Two equal columns) -->
+    <div class="dashboard-row-1 d-flex mb-3 gap-3">
+        <div class="org-card">
+            <h1>Organization Details</h1>
+            <div class="org-details">
+                <div class="org-main-cont">
+                    @if (!string.IsNullOrEmpty(Model.orgReport?.orgLogo))
+                    {
+                        <img src="data:image/png;base64,@Model.orgReport.orgLogo"
+                             alt="Logo"
+                             style="width: 144px; height: 144px; object-fit: contain;padding:5px; border-radius: 50%; border: 1px solid #dee2e6;" />
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column justify-content-center align-items-center" style="width: 144px; height: 144px; object-fit: cover; border-radius: 50%; border: 1px solid #dee2e6;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#B68A35" viewBox="0 0 256 256"><path d="M239.73,208H224V96a16,16,0,0,0-16-16H164a4,4,0,0,0-4,4V208H144V32.41a16.43,16.43,0,0,0-6.16-13,16,16,0,0,0-18.72-.69L39.12,72A16,16,0,0,0,32,85.34V208H16.27A8.18,8.18,0,0,0,8,215.47,8,8,0,0,0,16,224H240a8,8,0,0,0,8-8.53A8.18,8.18,0,0,0,239.73,208ZM76,184a8,8,0,0,1-8.53,8A8.18,8.18,0,0,1,60,183.72V168.27A8.19,8.19,0,0,1,67.47,160,8,8,0,0,1,76,168Zm0-56a8,8,0,0,1-8.53,8A8.19,8.19,0,0,1,60,127.72V112.27A8.19,8.19,0,0,1,67.47,104,8,8,0,0,1,76,112Zm40,56a8,8,0,0,1-8.53,8,8.18,8.18,0,0,1-7.47-8.26V168.27a8.19,8.19,0,0,1,7.47-8.26,8,8,0,0,1,8.53,8Zm0-56a8,8,0,0,1-8.53,8,8.19,8.19,0,0,1-7.47-8.26V112.27a8.19,8.19,0,0,1,7.47-8.26,8,8,0,0,1,8.53,8Z"></path></svg>
+                        </div>
+                    }
+                </div>
+
+                <div>
+                    <div class="org-info">
+                        <img src="~/assets/images/org_icon.svg" height="23" />
+                        <h6>@(Model.orgReport?.orgName ?? "N/A")</h6>
+                    </div>
+                    <div class="org-info">
+                        <img src="~/assets/images/org_user.svg" height="23" />
+                        <h6>@(Model.orgReport?.spocName?? "N/A")</h6>
+                    </div>
+                    <div class="org-info">
+                        <img src="~/assets/images/org_mail.svg" height="23" />
+                        <h6>@(Model.orgReport?.spocEmail ?? "N/A")</h6>
+                    </div>
+                    <div class="org-info">
+                        <img src="~/assets/images/org_phone.svg" height="23" />
+                        <h6>@(Model.orgReport?.spocMobileNumber ?? "N/A")</h6>
+                    </div>
+                    <div class="org-info">
+                        <img src="~/assets/images/org_verified_icon.svg" height="23" />
+                        <h6>Verified</h6>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <p>All the information has been securely retrived, verified, and certified by DigitalTrust to ensure authenticity, accuracy, and complete data integrity</p>
+            <div class="d-flex justify-content-between w-100 flex-row"
+                 style="cursor: pointer;"
+                 onclick="window.location.href='@Url.Action("GetKYCOrganizationById", "ESealRegistration")'">
+                <button class="btn-vmore">View Details</button>
+                <img src="~/assets/images/arrow_circle_up_right.svg" height="32" />
+            </div>
+        </div>
+
+        <!-- Chart Card -->
+        <div class="kpi-card d-flex flex-column graph-card kpi-graph-card bg-white p-2 text-start">
+            <h5 class="fw-bold text-dark mb-2">Monthly ID Verifications</h5>
+            @*<div id="dailyStatusBar" style="min-height: 150px;"></div>*@
+            <div style="height: 285px;">
+                <canvas id="barChart" style="width: 100%; height: 100%;"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Second Row (Stacked vertically: 30% height, 70% height) -->
+    <div class="dashboard-row-2">
+        <!-- 30% height row with 4 equal columns -->
+        <div class="row-30">
+            <!-- Box 1: Total KYCs this month -->
+            @*<div class="kpi-card d-flex flex-column justify-content-center align-items-center">
+                    <div class="kpi-value">
+                        @Model.orgReport.totalKycDoneCurrentMonth
+                    </div>
+                    <div class="kpi-label">IDs Verified This Month</div>
+                </div>*@
+            <!-- Common KPI Card Structure -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon-wrapper">
+                        <img src="~/assets/images/org_user_card.svg" height="24" width="24" />
+                    </div>
+                    <div class="stat-text">
+                        <div class="stat-label-light">This month's</div>
+                        <div class="stat-label-bold">IDs Verified</div>
+                    </div>
+                </div>
+                <hr />
+                <div class="stat-footer">
+                    <div class="stat-value">@Model.orgReport.totalKycCountSuccessfulCurrentMonth</div>
+                    <img src="~/assets/images/arrow_circle_up_right.svg" height="32" />
+                </div>
+            </div>
+
+            <!-- Total IDs Verified -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon-wrapper">
+                        <img src="~/assets/images/org_users_total.svg" height="24" width="24" />
+                    </div>
+                    <div class="stat-text">
+                        <div class="stat-label-light">Total</div>
+                        <div class="stat-label-bold">IDs Verified</div>
+                    </div>
+                </div>
+                <hr />
+                <div class="stat-footer">
+                    <div class="stat-value">@Model.orgReport.totalKycCountSuccessfulCurrentYear</div>
+                    <img src="~/assets/images/arrow_circle_up_right.svg" height="32" />
+                </div>
+            </div>
+
+            <!-- Registered Devices -->
+            <div class="stat-card hover-kpi" style="cursor:pointer;" onclick="window.location.href='@Url.Action("Index", "KYCDevice")'">
+                <div class="stat-header">
+                    <div class="stat-icon-wrapper">
+                        <img src="~/assets/images/org_device_icon.svg" height="24" width="24" />
+                    </div>
+                    <div class="stat-text">
+                        <div class="stat-label-light">Registered</div>
+                        <div class="stat-label-bold">Devices</div>
+                    </div>
+                </div>
+                <hr />
+                <div class="stat-footer">
+                    <div class="stat-value">@Model.NoOfKycDevices</div>
+                    <img src="~/assets/images/arrow_circle_up_right.svg" height="32" />
+                </div>
+            </div>
+
+            <!-- Success Rate -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon-wrapper">
+                        <img src="~/assets/images/org_success_rate_icon.svg" height="24" width="24" />
+                    </div>
+                    <div class="stat-text">
+                        <div class="stat-label-light">Success</div>
+                        <div class="stat-label-bold">Rate</div>
+                    </div>
+                </div>
+                <hr />
+                <div class="stat-footer">
+                    <div class="stat-value">
+                        @{
+                            var success = Model.orgReport?.totalKycCountSuccessful ?? 0;
+                            var total = (Model.orgReport?.totalKycCountSuccessful + Model.orgReport?.totalKycCountFailed) ?? 1;
+                            var rate = total > 0 ? (int)Math.Round((double)success / total * 100) : 0;
+                        }
+                        @($"{rate}%")
+                    </div>
+                    <img src="~/assets/images/arrow_circle_up_right.svg" height="32" />
+
+                </div>
+            </div>
+
+            <!-- Failed Proofings -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon-wrapper">
+                        <img src="~/assets/images/org_fail_icon.svg" height="24" width="24" />
+                    </div>
+                    <div class="stat-text">
+                        <div class="stat-label-light">Failed</div>
+                        <div class="stat-label-bold">Proofing’s</div>
+                    </div>
+                </div>
+                <hr />
+                <div class="stat-footer">
+                    <div class="stat-value">@Model.orgReport.totalKycCountFailed</div>
+                    <img src="~/assets/images/arrow_circle_up_right.svg" height="32" />
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- 70% height row -->
+        <div class="row-70 d-flex flex-column latest-trans-cont">
+            <div class="kpi-card flex-grow-1 d-flex flex-column">
+                <!-- Heading -->
+                <!-- Search + Filter Section -->
+                <div class="latest-trans-header mb-4 bg-white pb-2 pt-2">
+                    <h5 class="mb-3 text-start">Latest IDs Verified</h5>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="gap:10px;">
+                        <div class="flex-grow-1 d-flex align-items-center bg-light search-container px-3"
+                             style="max-width: 80%; border: 1px solid #E1E3E5; border-radius: 5px;">
+                            <i class="fa fa-search text-muted me-2"></i>
+                            <input type="text"
+                                   id="spSearchInput"
+                                   class="form-control border-0 bg-transparent shadow-none"
+                                   placeholder="Search by ID Number or Passport Number"
+                                   style=" box-shadow: none !important;border:none !important;" />
+                        </div>
+                        <div class="filter-container">
+                            <div style="position: relative; width: fit-content;" class="date-filter">
+                                <input type="date"
+                                       id="spDateFilter"
+                                       class="form-control rounded-pill border-secondary-subtle full-click-date border shadow-sm"
+                                       style="padding: 10px 1rem !important; border-radius: 4px !important;" />
+                            </div>
+                            <div class="filter-select-wrapper">
+                                <i class="fa fa-filter filter-icon"></i>
+                                <select id="spStatusFilter" class="form-select rounded-pill border-secondary-subtle border shadow-sm" style="cursor:pointer;">
+                                    <option value="" selected>All Status</option>
+                                    <option value="SUCCESS">Success</option>
+                                    <option value="FAILURE">Failure</option>
+                                </select>
+                            </div>
+                            <div>
+                                <button class="form-select rounded-pill border-secondary-subtle border shadow-sm" id="spRefreshButton" style="cursor:pointer;">
+                                    <i class="fa fa-rotate-right" style="font-size: 1.2rem; color: #6c757d;"></i>
+                                    Reset
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tabs BELOW Search -->
+                <div class="custom-tabs d-flex mb-4 gap-3">
+                    <button class="tab-btn active mr-1" data-bs-toggle="tab" data-bs-target="#all-tab-pane" value="ids">IDs Verified</button>
+                    <button class="tab-btn" data-bs-toggle="tab" data-bs-target="#batch-tab-pane" onclick="applyBatchDataFetch()" value="batchids">Batch Verified</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="kycTabContent">
+                    <!-- All Records Tab -->
+                    <div class="tab-pane fade show active" id="all-tab-pane" role="tabpanel">
+
+
+                        <!-- List Area -->
+                        <div id="serviceProvidersList" class="space-y-4"></div>
+                        <div class="shimmer-wrapper" id="serviceProviderShimmer" style="display: none;">
+                            <div class="shimmer-item"></div>
+                            <div class="shimmer-item"></div>
+                            <div class="shimmer-item"></div>
+                        </div>
+                        <div class="d-flex justify-content-end w-100">
+                            <a id="serviceProviderShowMoreBtn"
+                               class="toggle-link mb-3 me-4"
+                               style="color:#4e5e6a; font-size: 1.1rem; cursor:pointer;">
+                                Show More <i class="ph ph-caret-down"></i>
+                            </a>
+                        </div>
+                        <div id="noDataMessageServiceProvider" class="mb-2 mt-2 text-center" style="display: none;">
+                            <div style="color:#4e5e6a; font-size: 1.2rem;">No KYC's found.</div>
+                        </div>
+                    </div>
+                    <!-- Batch Verifications Tab -->
+                    <div class="tab-pane fade" id="batch-tab-pane" role="tabpanel">
+
+
+                        <!-- List Area -->
+                        <div id="batchVerificationList" class="space-y-4"></div>
+                        <div class="shimmer-wrapper" id="batchShimmer" style="display: none;">
+                            <div class="shimmer-item"></div>
+                            <div class="shimmer-item"></div>
+                            <div class="shimmer-item"></div>
+                        </div>
+                        <div class="d-flex justify-content-end w-100">
+                            <a id="batchShowMoreBtn"
+                               class="toggle-link mb-3 me-4"
+                               style="color:#4e5e6a; font-size: 1.1rem; cursor:pointer;">
+                                Show More <i class="bi bi-chevron-down"></i>
+                            </a>
+                        </div>
+                        <div id="noDataMessageBatch" class="mb-2 mt-2 text-center" style="display: none;">
+                            <div style="color:#4e5e6a; font-size: 1.2rem;">No batch KYC's found.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="responseModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document" style="max-height: 80vh;">
+        <div class="modal-content" style="height: 100%;">
+            <div class="modal-header d-flex align-items-center justify-content-between response-tabs-wrapper">
+                <ul class="nav nav-tabs" id="responseTabs" role="tablist">
+                    <li class="nav-item mr-2" role="presentation" style="cursor:pointer;">
+                        <button class="nav-link active" id="request-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#requestContent"
+                                type="button"
+                                role="tab">
+                            Request
+                        </button>
+                    </li>
+                    <li class="nav-item mr-2" role="presentation" style="cursor:pointer;">
+                        <button class="nav-link"
+                                id="signed-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#signedContent"
+                                type="button"
+                                role="tab">
+                            Signed Response
+                        </button>
+                    </li>
+                    <li class="nav-item d-none" role="presentation" id="verified-tab-wrapper" style="cursor:pointer;">
+                        <button class="nav-link" id="verified-tab" data-bs-toggle="tab" data-bs-target="#verifiedContent" type="button" role="tab">Verified Response</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-body custom-modal-body pt-1" style="overflow-y: auto; max-height: 60vh;">
+                <div class="tab-content mt-3" id="responseTabContent">
+                    <div class="tab-pane fade show active" id="requestContent" role="tabpanel" aria-labelledby="request-tab">
+                        <div class="request-response-content" style="word-break: break-word;"></div>
+                    </div>
+                    <div class="tab-pane fade show active" id="signedContent" role="tabpanel">
+                        <div class="signed-response-content" style="word-break: break-word;"></div>
+                    </div>
+                    <div class="tab-pane fade" id="verifiedContent" role="tabpanel">
+                        <div class="verified-response-content" style="word-break: break-word;">Verification pending...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div id="verifyResultBadge" class="mr-2" style="display: none;"></div>
+                <button type="button" class="btn btn-primary uaeid-primary" id="verifySignedResponseBtn">Verify</button>
+                <!-- Print Button with Icon -->
+                <button type="button" class="btn btn-other" id="printBtn" style="display: none;">
+                    @*<i class="fa fa-print" style="position: relative; top: 11px;"></i>*@
+                    Report
+                </button>
+                <button type="button" class="btn btn-other" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<form id="printForm" method="post" action="@Url.Action("PrintIdValidationData", "KYCDashboard")" target="_blank">
+    <input type="hidden" name="SignedData" id="printSignedData" />
+    <input type="hidden" name="VerificationResponse" id="printVerificationResponse" />
+</form>
+
+
+<script>
+    let pageSize = 10;
+    let currentPage = 1;
+    let totalServiceProviders = 0;
+    let batchCurrentPage = 0;
+    const batchPageSize = 10;
+    let allBatchData = [];
+    let totalBatchRecords = 0;
+    let firstPageLoadedFromModel = true;
+    let allServiceProviders = @Html.Raw(Json.Serialize(Model?.Report ?? new List<KYCValidationResponseDTO>()));
+    let lastVerificationResponse = null;
+    let currentUserData = null;
+    let organizationName = "@Model.orgReport?.orgName";
+
+    $(document).ready(function () {
+        $('#networkOverlay').hide();
+        document.getElementById("navigationNetworkOverlay").style.display = "none";
+
+        $('#spSearchInput, #spStatusFilter').on('input change', function () {
+            batchCurrentPage = 1;
+            $('#batchVerificationList').empty();
+            filterAndRenderBatchList();
+        });
+
+
+        $('#serviceProviderShowMoreBtn').on('click', function () {
+            currentPage++;
+            showShimmer('ids');
+            applyFiltersAndRender();
+        });
+
+        $('#batchShowMoreBtn').on('click', function () {
+            batchCurrentPage++;
+            applyBatchDataFetch();
+        });
+
+
+        const tabEl = document.querySelector('.tab-btn[data-bs-target="#all-tab-pane"]');
+        const tab = new bootstrap.Tab(tabEl);
+        tab.show();
+
+        resetServiceProviderList();
+
+    });
+
+    let activetab = "ids";
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            activetab = btn.value;
+
+            const targetId = btn.getAttribute('data-bs-target');
+
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('show', 'active');
+            });
+
+            const targetPane = document.querySelector(targetId);
+            if (targetPane) {
+                targetPane.classList.add('show', 'active');
+            }
+
+            if (targetId === '#batch-tab-pane') {
+                resetBatchList();
+            } else {
+                resetServiceProviderList();
+            }
+        });
+    });
+
+    const monthlyStats = @Html.Raw(Json.Serialize(Model.orgReport.monthlyStats)) || {};
+
+    const fullToShort = {
+        "January": "Jan", "February": "Feb", "March": "Mar", "April": "Apr",
+        "May": "May", "June": "Jun", "July": "Jul", "August": "Aug",
+        "September": "Sep", "October": "Oct", "November": "Nov", "December": "Dec"
+    };
+
+    function getLastSixMonthKeys() {
+        const now = new Date();
+        let result = [];
+        for (let i = 5; i >= 0; i--) {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const fullMonth = date.toLocaleString('default', { month: 'long' });
+            const shortMonth = fullToShort[fullMonth];
+            const year = date.getFullYear();
+            const key = `${fullMonth} ${year}`;
+            result.push({ label: shortMonth, key: key });
+        }
+        return result;
+    }
+
+    const months = getLastSixMonthKeys();
+    const successData = [];
+    const failedData = [];
+    const xLabels = [];
+    months.forEach(month => {
+        const stats = monthlyStats[month.key] || { successCount: 0, failedCount: 0 };
+        successData.push(stats.successCount);
+        failedData.push(stats.failedCount);
+        xLabels.push(month.label);
+    });
+
+    const options2 = {
+        series: [
+            { name: 'Success', data: successData },
+            { name: 'Failure', data: failedData }
+        ],
+        chart: {
+            type: 'bar',
+            height: 150,
+            fontFamily: 'Poppins, sans-serif',
+            zoom: { enabled: false },
+            toolbar: { show: false }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '55%',
+                borderRadius: 5,
+                borderRadiusApplication: 'end'
+            }
+        },
+        colors: ['#28a745', '#dc3545'],
+        dataLabels: { enabled: false },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        xaxis: {
+            categories: xLabels
+        },
+        yaxis: {
+            title: { text: 'Applications' }
+        },
+        fill: { opacity: 1 },
+        tooltip: {
+            y: {
+                formatter: val => val + " applications"
+            }
+        }
+    };
+
+    //var chart2 = new ApexCharts(document.querySelector("#dailyStatusBar"), options2);
+    //chart2.render();
+
+
+
+    const ctx = document.getElementById('barChart').getContext('2d');
+
+    const successFillColor = '#81c784';
+    const dangerFillColor = '#e57373';
+    const successBorderColor = '#2e7d32';
+    const dangerBorderColor = '#b71c1c';
+
+    const chartJs = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: xLabels,
+            datasets: [
+                {
+                    label: 'Success',
+                    data: successData,
+                    backgroundColor: successFillColor,
+                    borderWidth: 0,
+                },
+                {
+                    label: 'Failure',
+                    data: failedData,
+                    backgroundColor: dangerFillColor,
+                    borderWidth: 0,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    stacked: false // This ensures bars are not stacked
+                },
+                y: {
+                    beginAtZero: true,
+                    min: 0,
+                    grid: {
+                        color: '#f0f0f0',
+                        drawTicks: true
+                    },
+                    ticks: {
+                        stepSize: 100, // 👈 Adjust based on your data range
+                        maxTicksLimit: 5 // Optional: hard limit on number of ticks
+                    },
+                    stacked: false, // This ensures bars are not stacked
+                    title: {
+                        display: true,
+                        text: 'Verifications'
+                    }
+                }
+            },
+            animation: {
+                duration: 0
+            }
+        },
+        plugins: [
+            {
+                id: 'topBorderPlugin',
+                afterDatasetsDraw(chart) {
+                    const ctx = chart.ctx;
+                    chart.data.datasets.forEach((dataset, i) => {
+                        if (!chart.isDatasetVisible(i)) return;
+
+                        const meta = chart.getDatasetMeta(i);
+                        meta.data.forEach(bar => {
+                            const { x, y, width } = bar;
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.moveTo(x - width / 2, y);
+                            ctx.lineTo(x + width / 2, y);
+                            ctx.lineWidth = 3;
+                            ctx.strokeStyle = i === 0 ? successBorderColor : dangerBorderColor;
+                            ctx.stroke();
+                            ctx.restore();
+                        });
+                    });
+                }
+            },
+            {
+                id: 'fixedYAxisPlugin',
+                afterEvent(chart, args) {
+                    if (args.event.type === 'click') {
+                        const visibleCount = chart.data.datasets
+                            .filter((_, i) => chart.isDatasetVisible(i)).length;
+
+                        if (visibleCount === 0) {
+                            chart.options.scales.y.min = 0;
+                            chart.options.scales.y.max = 1000;
+                        } else {
+                            chart.options.scales.y.min = undefined;
+                            chart.options.scales.y.max = undefined;
+                        }
+                        chart.update();
+                    }
+                }
+            },
+            {
+                id: 'noDataPlugin',
+                afterDraw(chart, args, options) {
+                    const { ctx, data } = chart;
+
+                    const hasData = data.datasets.some(
+                        dataset =>
+                            dataset.data &&
+                            dataset.data.length > 0 &&
+                            dataset.data.some(value => value !== null && value !== undefined && value !== 0)
+                    );
+
+                    if (!hasData) {
+                        const { chartArea } = chart;
+                        if (!chartArea) return; // Chart area not ready yet
+
+                        const centerX = (chartArea.left + chartArea.right) / 2;
+                        const centerY = (chartArea.top + chartArea.bottom) / 2;
+
+                        ctx.save();
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.font = '16px "Segoe UI", sans-serif';
+                        ctx.fillStyle = '#666';
+                        ctx.clearRect(chartArea.left, chartArea.top, chartArea.width, chartArea.height);
+                        ctx.fillText('No data available', centerX, centerY);
+                        ctx.restore();
+                    }
+                }
+            }
+        ]
+
+    });
+
+
+    function applyFiltersAndRender() {
+        const searchValue = $('#spSearchInput').val().trim();
+        const selectedStatus = $('#spStatusFilter').val();
+        const id = "@Model.orgReport.orgId";
+
+        let selectedDate = $('#spDateFilter').val();
+        let fromDate = "";
+        let toDate = "";
+
+        if (selectedDate) {
+            // Local start & end of selected day
+            let localStart = new Date(selectedDate + "T00:00:00");
+            let localEnd = new Date(selectedDate + "T23:59:59");
+
+            // Format function for UTC date
+            function formatToUtcString(date) {
+                return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')} ${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}:${String(date.getUTCSeconds()).padStart(2, '0')}`;
+            }
+
+            fromDate = formatToUtcString(localStart);
+            toDate = formatToUtcString(localEnd);
+        }
+
+       $.ajax({
+            url: '@Url.Action("GetPaginatedIdUsers", "KycDashboard")',
+            method: 'POST',
+            data: {
+                searchValue: searchValue,
+                status: selectedStatus,
+                fromDate: fromDate,
+                toDate: toDate,
+                pageNumber: currentPage,
+                id: id
+            },
+            beforeSend: function () {
+                if ($('#serviceProvidersList').children().length === 0) {
+                    showShimmer('ids');
+                }
+            },
+            success: function (res) {
+
+                if (currentPage === 0) {
+                    $('#serviceProvidersList').empty();
+                }
+
+
+                const data = res.data || [];
+
+                totalServiceProviders = res.totalCount || 0;
+
+                renderAndAppendServiceProviders(data);
+
+                hideShimmer('ids');
+
+                // Show/Hide "Show More" button
+                if ((currentPage + 1) * pageSize < totalServiceProviders) {
+                    $('#serviceProviderShowMoreBtn').show();
+                } else {
+                    $('#serviceProviderShowMoreBtn').hide();
+                }
+
+                if (data.length === 0 && currentPage === 0) {
+                    $('#noDataMessageServiceProvider').show();
+                } else {
+                    $('#noDataMessageServiceProvider').hide();
+                }
+            },
+            error: function (err) {
+                hideShimmer('ids');
+                console.error('Error fetching paginated data:', err);
+            }
+            });
+
+    }
+
+    function loadKYCValidationPage() {
+        showShimmer("ids");
+
+        applyFiltersAndRender();
+
+    }
+
+
+    function applyBatchDataFetch() {
+        const orgId = "@Model.orgReport.orgId";
+        const batchPageSize = 10;
+
+        const shimmer = showBatchShimmer(6);
+
+        // Only clear list on first page
+        if (batchCurrentPage === 1) {
+            $('#batchVerificationList').empty();
+        }
+
+        showShimmer("batchids");
+
+        $.ajax({
+            url: '@Url.Action("GetBatchPaginatedKYCLogReport", "KYCDashboard")',
+            method: 'POST',
+            data: {
+                orgId: orgId,
+                status: "",
+                page: batchCurrentPage,
+                pageSize: batchPageSize
+            },
+            success: function (res) {
+                shimmer.remove();
+
+                const data = res.data || [];
+                totalBatchRecords = res.totalCount || 0;
+
+                // Append to global list
+                allBatchData = [...allBatchData, ...data];
+
+                filterAndRenderBatchList();
+
+                // Show/Hide Show More
+                //$('#batchShowMoreBtn').toggle((batchCurrentPage * batchPageSize) < totalBatchRecords);
+            },
+            error: function (err) {
+                shimmer.remove();
+                console.error("Batch fetch error:", err);
+                $('#noDataMessageBatch').show().html('<div style="color:#dc3545;font-size:1.2rem;">Error loading batch data.</div>');
+            },
+            complete: function () {
+                hideShimmer("batchids");
+            }
+        });
+    }
+
+
+    function filterAndRenderBatchList() {
+        const searchValue = $('#spSearchInput').val().trim().toLowerCase();
+        const selectedStatus = $('#spStatusFilter').val().trim().toLowerCase();
+
+        // Step 1: Filter the full dataset
+        const filteredData = allBatchData.filter(item => {
+            if (!item || !item.identifier || !item.status) return false;
+
+            const matchesSearch = !searchValue || item.identifier.toLowerCase().includes(searchValue);
+            const matchesStatus = !selectedStatus || item.status.toLowerCase() === selectedStatus;
+
+            return matchesSearch && matchesStatus;
+        });
+
+        // Step 2: Slice based on current page
+        const startIndex = (batchCurrentPage - 1) * batchPageSize;
+        const endIndex = batchCurrentPage * batchPageSize;
+        const paginatedFilteredData = filteredData.slice(startIndex, endIndex);
+
+        // Step 3: Append only this slice
+        renderAndAppendBatchServiceProviders(paginatedFilteredData);
+
+        // Step 4: Show/hide no data message
+        $('#noDataMessageBatch').toggle(filteredData.length === 0);
+    }
+
+
+
+
+    function showShimmer(tab) {
+        if (tab === 'ids') {
+            $('#serviceProviderShimmer').show();
+            $('#serviceProviderShowMoreBtn').hide();
+            //$('#serviceProvidersList').hide();
+            $('#noDataMessageServiceProvider').hide();
+        } else if (tab === 'batchids') {
+            $('#batchShimmer').show();
+            //$('#batchVerificationList').hide();
+            $('#noDataMessageBatch').hide();
+        }
+    }
+
+    function hideShimmer(tab) {
+        if (tab === 'ids') {
+            $('#serviceProviderShimmer').hide();
+            $('#serviceProvidersList').show();
+        } else if (tab === 'batchids') {
+            $('#batchShimmer').hide();
+            $('#batchVerificationList').show();
+        }
+    }
+
+    function applyBatchFiltersAndRender() {
+        const searchValue = $('#spSearchInput').val().trim().toLowerCase();
+        const selectedStatus = $('#spStatusFilter').val();
+        const selectedDate = $('#spDateFilter').val().trim();
+        const orgId = "@Model.orgReport.orgId";
+        const batchPageSize = 10;
+
+        $.ajax({
+            url: '@Url.Action("GetBatchPaginatedKYCLogReport", "KYCDashboard")',
+            method: 'POST',
+            data: {
+                searchValue: searchValue,
+                selectedDate: selectedDate,
+                orgId: orgId,
+                status: selectedStatus,
+                page: batchCurrentPage
+            },
+            success: function (res) {
+
+                if (batchCurrentPage == 0) {
+                    $('#batchVerificationList').empty();
+                }
+
+                const data = res.data || [];
+                totalBatchRecords = res.totalCount || 0;
+
+                renderAndAppendBatchServiceProviders(data);
+
+                if ((batchCurrentPage + 1) * batchPageSize < totalBatchRecords) {
+                    $('#batchShowMoreBtn').show();
+                } else {
+                    $('#batchShowMoreBtn').hide();
+                }
+
+                if (data.length === 0 && batchCurrentPage === 0) {
+                    $('#noDataMessageBatch').show();
+                } else {
+                    $('#noDataMessageBatch').hide();
+                }
+
+            },
+            error: function (err) {
+                console.error('Error fetching batch data:', err);
+                $('#noDataMessageBatch').show().html('<div style="color:#dc3545;font-size:1.2rem;">Error loading batch data.</div>');
+            }
+        });
+    }
+
+    function resetServiceProviderList() {
+        currentPage = 0;
+        firstPageLoadedFromModel = false;
+        applyFiltersAndRender();
+    }
+
+    function resetBatchList() {
+        batchCurrentPage = 0;
+        applyBatchFiltersAndRender();
+    }
+
+    function renderAndAppendServiceProviders(data) {
+
+        const container = $('#serviceProvidersList');
+        if (!container.length) {
+            console.error('Container #serviceProvidersList not found in DOM');
+            return;
+        }
+        const cards = data.map(item => {
+            try {
+                return generateServiceProviderCardHtml(item);
+            } catch (e) {
+                console.error('Error generating card for item:', item, e);
+                return '';
+            }
+        }).filter(card => card !== '');
+
+        container.append(cards.join(''));
+
+        //container.hide().show(0);
+
+        updateDateStamps();
+        updateDateTimeStamps();
+    }
+
+    function renderAndAppendBatchServiceProviders(data) {
+        const container = $('#batchVerificationList');
+        if (!container.length) {
+            console.error('Container #batchVerificationList not found in DOM');
+            return;
+        }
+        const cards = data.map(item => {
+            try {
+                return generateServiceProviderCardHtml(item);
+            } catch (e) {
+                console.error('Error generating batch card for item:', item, e);
+                return '';
+            }
+        }).filter(card => card !== '');
+        container.append(cards.join(''));
+        container.hide().show(0);
+        updateDateStamps();
+        updateDateTimeStamps();
+    }
+
+    function updateDateStamps() {
+        document.querySelectorAll(".convert-date").forEach(function (element) {
+            const dateStr = element.getAttribute("data-datestamp"); // Format: dd/mm/yyyy HH:MM:SS in UTC
+            if (dateStr) {
+                const dateObj = parseUTCStringToLocalDate(dateStr);
+                if (dateObj) {
+                    element.textContent = formatDateToDDMMYYYY(dateObj);
+                } else {
+                    element.textContent = "Invalid Date";
+                }
+            } else {
+                element.textContent = "NA";
+            }
+        });
+    }
+
+    // Update all datetime fields with local DD/MM/YYYY HH:mm:ss format
+    function updateDateTimeStamps() {
+        document.querySelectorAll(".convert-date-time").forEach(function (element) {
+            const timestampStr = element.getAttribute("data-datetimestamp"); // Format: dd/mm/yyyy HH:MM:SS in UTC
+            if (timestampStr) {
+                const dateObj = parseUTCStringToLocalDate(timestampStr);
+                if (dateObj) {
+                    element.textContent = formatDateTimeToDDMMYYYYHHMMSS(dateObj);
+                } else {
+                    element.textContent = "Invalid Date";
+                }
+            } else {
+                element.textContent = "NA";
+            }
+        });
+    }
+
+    // Helper: Parse a UTC string (dd-mm-yyyy HH:MM:SS) to local Date object
+    function parseUTCStringToLocalDate(utcString) {
+        const [datePart, timePart] = utcString.trim().split(" ");
+        if (!datePart) return null;
+
+        const [day, month, year] = datePart.split("/").map(Number);
+        const [hours = 0, minutes = 0, seconds = 0] = (timePart || "").split(":").map(Number);
+
+        if (
+            isNaN(day) || isNaN(month) || isNaN(year) ||
+            isNaN(hours) || isNaN(minutes) || isNaN(seconds)
+        ) {
+            return null;
+        }
+
+        // Construct date in UTC and convert to local
+        const utcDate = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds));
+        return new Date(utcDate); // This will be in local timezone
+    }
+
+    // Format date as DD/MM/YYYY
+    function formatDateToDDMMYYYY(date) {
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    // Format full datetime as DD/MM/YYYY HH:mm:ss
+    function formatDateTimeToDDMMYYYYHHMMSS(date) {
+        const datePart = formatDateToDDMMYYYY(date);
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        const seconds = String(date.getSeconds()).padStart(2, "0");
+        return `${datePart} ${hours}:${minutes}:${seconds}`;
+    }
+
+    function showBatchShimmer(count) {
+        let shimmerHtml = `<div class="shimmer-wrapper">`;
+        for (let i = 0; i < count; i++) {
+            shimmerHtml += `<div class="shimmer-item"></div>`;
+        }
+        shimmerHtml += `</div>`;
+        const $shimmer = $(shimmerHtml);
+        $('#batchVerificationList').append($shimmer);
+        return $shimmer;
+    }
+
+    function generateServiceProviderCardHtml(item) {
+        if (!item || !item.status || !item.identifier) {
+            console.warn('Invalid item data, skipping card generation:', item);
+            return '';
+        }
+
+        const status = item.status.toLowerCase();
+        let cardClass = '', badgeClass = '';
+        const encodedData = btoa(JSON.stringify(item));
+        let base64Image = item.photo || '';
+        let fullDataUrl = '';
+
+        if (base64Image.startsWith('data:image')) {
+            fullDataUrl = base64Image;
+        } else {
+            const imageType = 'png';
+            fullDataUrl = `data:image/${imageType};base64,${base64Image}`;
+        }
+
+        switch (status) {
+            case 'success':
+                cardClass = 'status-active';
+                badgeClass = 'status-badge-active';
+                break;
+            case 'failure':
+                cardClass = 'status-inactive';
+                badgeClass = 'status-badge-inactive';
+                break;
+            default:
+                cardClass = 'status-registered';
+                badgeClass = 'status-badge';
+        }
+
+        const kycMethodsHtml = `
+            <span class="method-badge d-flex justify-content-center align-items-center mb-1 mr-3" style="padding:4px 14px !important">
+                ${item.kycMethod || 'N/A'}
+            </span>
+        `;
+
+        const imageHtml = base64Image
+            ? `<img src="${fullDataUrl}" alt="Logo" style="width: 60px; height: 60px; object-fit: contain;" class="rounded border" />`
+            : `<i class="fa fa-user-circle fa-2x" style="width: 60px; height: 60px; display: inline-flex; align-items: center; justify-content: center; font-size: 40px;"></i>`;
+
+        return `
+            <div class="card service-provider-card mb-3 p-3" id="sp-${item.identifier}">
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-start gap-3">
+                            ${imageHtml}
+                            <div class="ml-2">
+                                <h5 class="fw-semibold d-flex justify-content-start mb-1 mt-1"
+                                        style="font-size:16px !important;
+                                        font-weight: 500;
+                                        font-size: 12px;
+                                        line-height: 16px;
+                                        color: rgba(35, 37, 40, 1);
+                                        margin-bottom: 5px;
+                                        "
+                                    ${item.name && item.name.length > 40 ? `title="${item.name}"` : ''}>
+                                    ${item.name
+                                        ? (item.name.length > 50
+                                            ? item.name.substring(0, 40) + '...'
+                                            : item.name)
+                                        : 'N/A'}
+                                </h5>
+                                <div class="sp-label-heading d-flex justify-content-start mb-1"
+                                style="
+                                        color:black;
+                                        font-weight: 400;
+                                        font-size: 12px;
+                                        line-height: 16px;
+                                        ">
+                                    Id Number : <span>${item.identifier}</span>
+                                </div>
+                                <div class="sp-label-heading d-flex justify-content-start"
+                                    style="
+                                        color:black;
+                                        font-weight: 400;
+                                        font-size: 12px;
+                                        line-height: 16px;
+                                        ">
+                                    Nationality: <span>${item.nationality ? item.nationality : 'N/A'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between ms-auto flex-wrap gap-3 text-end" style="gap:20px;max-width:350px;width:100%;">
+                            <div class="d-flex flex-column" style="align-items:start;">
+                                <div class="sp-label-heading">Card Expiry Date</div>
+                                <div style="font-weight:600;">
+                                    <span class="font-weight-bold">${item.expiryDate ? `${item.expiryDate}` : 'N/A'}</span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-column justify-content-center" style="min-width:100px;">
+                                <span class="status-badge-${item.status} fw-semibold">${item.status}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-top d-flex justify-content-between align-items-center mt-3 flex-wrap pt-3">
+                        <div class="d-flex justify-content-center align-items-baseline flex-row" style="gap:40px;">
+                            <div class="d-flex text-muted small mb-md-0 mb-2 flex-row" style="align-items:flex-start;gap:30px;">
+                                <div class="d-flex flex-column align-items-start mt-1">
+                                    <span class="sp-label-heading font-weight-bold mr-2">ID Validation Method</span>
+                                    <span class="m-status-badge">${kycMethodsHtml}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between ms-auto flex-wrap gap-3 text-end" style="gap:20px;max-width:350px;width:100%;">
+                            <div class="d-flex flex-column" style="align-items:start;">
+                                <div class="sp-label-heading">ID Verification Date & Time</div>
+                                <div style="font-weight:600;">
+                                    <span class="convert-date-time" data-datetimestamp="${item.validationDateTime}" style="font-weight:600;">${item.validationDateTime}</span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-vresponse view-response-btn" data-item='${encodedData}'>
+                                Signed Response
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    $(document).ready(function () {
+
+        $('#batchShowMoreBtn').on('click', function () {
+            batchCurrentPage++;
+            applyBatchFiltersAndRender();
+        });
+
+        let searchTimeout;
+        $('#spSearchInput').on('input', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if ($('#batch-tab-pane').hasClass('show active')) {
+                    resetBatchList();
+                } else {
+                    resetServiceProviderList();
+                }
+            }, 300);
+        });
+
+        $('#spStatusFilter').on('change', function () {
+            if ($('#batch-tab-pane').hasClass('show active')) {
+                resetBatchList();
+            } else {
+                $('#serviceProvidersList').empty();
+                resetServiceProviderList();
+            }
+        });
+
+        // Date Filter
+        $('#spDateFilter').on('change', function () {
+            if ($('#batch-tab-pane').hasClass('show active')) {
+                resetBatchList();
+            } else {
+                showShimmer("ids");
+                $('#serviceProvidersList').empty();
+                resetServiceProviderList();
+            }
+        });
+
+        //Reset Button
+        $('#spRefreshButton').on('click', function () {
+            $('#spSearchInput').val('');
+            $('#spStatusFilter').val('');
+            $('#spDateFilter').val('');
+            if ($('#batch-tab-pane').hasClass('show active')) {
+                resetBatchList();
+            } else {
+                resetServiceProviderList();
+            }
+        });
+
+        $('#printBtn').on('click', function () {
+            if (!lastVerificationResponse || !currentUserData) {
+                alert("No verified response to print.");
+                return;
+            }
+
+            // Fill hidden inputs
+            $('#printSignedData').val(JSON.stringify(lastVerificationResponse));
+            $('#printVerificationResponse').val(JSON.stringify(currentUserData));
+
+            $('#printForm').submit();
+        });
+
+
+        $(document).on('click', '.view-response-btn', function () {
+            const encoded = $(this).data('item');
+            const item = { ...JSON.parse(atob(encoded)), orgName: organizationName };
+            currentSignedResponse = item.signedResponse;
+            currentUserData = item;
+            currentKycMethod = item.kycMethod;
+
+            //set request body
+            appendRequestBody(item);
+
+            // Set signed response
+            $('#responseModal .signed-response-content').html(
+                item.signedResponse && item.signedResponse.trim() ? item.signedResponse : 'No Data Found'
+            );
+
+            // Hide verified tab initially
+            $('#verified-tab-wrapper').addClass('d-none');
+            $('#verifiedContent').removeClass('show active');
+
+            // Ensure request tab is active
+            $('#request-tab').addClass('active');
+            $('#requestContent').addClass('show active');
+
+            // Ensure signed tab is inactive
+            $('#signed-tab').removeClass('active');
+            $('#signedContent').removeClass('show active');
+
+            $('#verified-tab').removeClass('active');
+            $('#signed-tab').removeClass('d-none');
+
+            $("#printBtn").hide();
+            $('#verifyResultBadge').hide().html('');
+
+            // Toggle verify button visibility
+            if (!item.signedResponse || item.signedResponse.trim() === '') {
+                $('#verifySignedResponseBtn').hide();
+            } else {
+                $('#verifySignedResponseBtn').show();
+            }
+
+            const modalEl = document.getElementById('responseModal');
+            responseModalInstance = new bootstrap.Modal(modalEl);
+            responseModalInstance.show();
+        });
+
+
+        function appendRequestBody(item) {
+            const req = item.request || {};
+            const imageSectionParts = [];
+
+            // Field-to-label mapping
+            const fieldLabels = {
+                idNumber: "ID Number",
+                name: "Name",
+                dateOfBirth: "Date of Birth",
+                customerPhoneNumber: "Customer Phone Number",
+                customerEmail: "Customer Email",
+                cardNumber: "Card Number",
+                documentType: "Document Type",
+                documentNumber: "Document Number",
+                documentNationality: "Document Nationality",
+                expiryDate: "Expiry Date",
+                width: "Width",
+                height: "Height",
+                fingerIndex: "Finger Index",
+                remoteVerificationdata: "Remote Verification Data",
+                manualEntry: "Manual Entry",
+                authentication: "Authentication",
+
+            };
+
+            // Handle images
+            if (req.faceImage?.trim()) {
+                imageSectionParts.push(`<div class="mb-3">
+                        <img src="data:image/jpeg;base64,${req.faceImage}"
+                             alt="Face Image"
+                             style="width: 100px; height: 120px;  object-fit: cover;">
+                    </div>`);
+                        }
+                    //    if (req.capturedFingerImage?.trim()) {
+                    //        imageSectionParts.push(`<div class="mb-3 ml-4">
+                    //    <img src="data:image/jpeg;base64,${req.capturedFingerImage}"
+                    //         alt="Finger Image"
+                    //         style="width: 100px; height: 120px;  border-radius: 8px; object-fit: cover;">
+                    //</div>`);
+            //    }
+                    if (req.capturedFingerImage?.trim()) {
+                            imageSectionParts.push(`<div class="mb-3 ml-4">
+                        <img src="@Url.Content("~/assets/images/fingerprint.png")"
+                                        alt="Finger Image"
+                                        style="width: 80px; height: 90px;  border-radius: 8px; object-fit: cover;">
+                        </div>`);
+                        }
+                        if (req.passportImage?.trim()) {
+                            imageSectionParts.push(`<div class="mb-3 ml-4">
+                        <img src="data:image/jpeg;base64,${req.passportImage}"
+                             alt="Passport Image"
+                             style="width: 100px; height: 120px;  border-radius: 8px; object-fit: cover;">
+                    </div>`);
+                        }
+
+                        // Prepare details section
+                        let detailsSection = "";
+                        for (const [field, label] of Object.entries(fieldLabels)) {
+                            const value = req[field];
+                            if (value !== undefined && value !== null && value.toString().trim() !== "") {
+                                detailsSection += `
+                            <div class="col-12 d-flex mb-2">
+                                <strong style="width: 200px;white-space:nowrap;">${label}:</strong>
+                                <span style="padding:2px;">${value}</span>
+                            </div>
+                        `;
+                            }
+                        }
+
+                        const html = `
+                    <div class="d-flex flex-column ml-2 gap-4">
+                        <div class="image-section d-flex gap-3">
+                            ${imageSectionParts.join("")}
+                        </div>
+                        <div class="flex-grow-1 row mt-1">
+                            ${detailsSection}
+                        </div>
+                    </div>
+                `;
+
+            $('#responseModal .request-response-content').html(html);
+        }
+
+        $('#verifySignedResponseBtn').on('click', function () {
+            if (!currentSignedResponse) {
+                alert("No signed response available.");
+                return;
+            }
+            $('#networkOverlay').show();
+
+            $.ajax({
+                url: '@Url.Action("ValidateSignedData", "IdValidation")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ SignedData: currentSignedResponse, KycMethod: currentKycMethod }),
+                success: function (response) {
+                    const badgeContainer = $('#verifyResultBadge');
+                    const verifyBtn = $('#verifySignedResponseBtn');
+                    badgeContainer.show();
+                    $('#networkOverlay').hide();
+
+                    if (response.success) {
+                        $("#printBtn").show();
+                        lastVerificationResponse = response.result; // store response for print
+                        badgeContainer.html(`
+                            <span class="p-2" style="background-color:green;color:white;font-size: 0.95rem;padding:5px 10px !important;border-radius:16px;">
+                                VERIFIED
+                            </span>
+                        `);
+                        verifyBtn.hide();
+                        $('#verified-tab-wrapper').removeClass('d-none');
+                        const verifiedHtml = formatVerifiedData(response.result);
+                        $('.verified-response-content').html(verifiedHtml);
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: "Info",
+                            text: `Signed Response verified Failed`,
+                            showCancelButton: false,
+                            closeOnConfirm: true
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#networkOverlay').hide();
+                    alert("❌ Error occurred during verification:\n" + error);
+                }
+            });
+        });
+
+        function formatVerifiedData(response) {
+            const fallbackImage = '@Url.Content("~/assets/images/user.png")';
+            const name = response.name?.trim() || 'N/A';
+            const nationality = response.nationality?.trim() || 'N/A';
+            const idNumber = response.idNumber?.trim() || 'N/A';
+            const issueDate = response.issueDate?.trim() || 'N/A';
+            const expiryDate = response.expiryDate?.trim() || 'N/A';
+            const gender = response.gender?.trim() || 'N/A';
+            const dob = response.dob?.trim() || 'N/A';
+            const documentStatus = response.documentStatus?.trim() || '';
+
+            const rawPhoto = response.photo;
+            const photoSrc = rawPhoto
+                ? (rawPhoto.startsWith('data:image') ? rawPhoto : `data:image/jpeg;base64,${rawPhoto}`)
+                : fallbackImage;
+
+            return `
+                <h5 class="mb-3" style="font-size:20px !important;margin:0;">Verified Details:</h5>
+                <div class="d-flex align-items-start flex-wrap gap-3" style="padding-left:5%">
+                    <div class="me-3 flex-shrink-0 text-center">
+                        <img src="${photoSrc}"
+                             alt="Cardholder Photo"
+                             style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 2px solid #ccc;">
+                    </div>
+                    <div class="flex-grow-1" style="padding-left:5%">
+                        <div class="mb-2"><strong>Name:</strong> ${name}</div>
+                        <div class="mb-2"><strong>Nationality:</strong> ${nationality}</div>
+                        <div class="mb-2"><strong>ID Number:</strong> ${idNumber}</div>
+                        <div class="mb-2"><strong>Issue Date:</strong> ${issueDate}</div>
+                        <div class="mb-2"><strong>Expiry Date:</strong> ${expiryDate}</div>
+                        <div class="mb-2"><strong>Gender:</strong> ${gender}</div>
+                        <div class="mb-2"><strong>Date of Birth:</strong> ${dob}</div>
+                        ${documentStatus ? `<div class="mb-2"><strong>Document Status:</strong> ${documentStatus}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateServiceProviderDashboard() {
+            $.ajax({
+                url: '@Url.Action("UpdateServiceProviderPage", "KYCDashboard")',
+                method: 'POST',
+                data: {
+                    id: "@Model.orgReport.orgId",
+                    page: 1,
+                    perpage: 10
+                },
+                success: function (response) {
+                    const data = response.orgData;
+
+                    const totalSuccess = data.totalKycCountSuccessful || 0;
+                    const totalThisMonth = data.totalKycCountSuccessfulCurrentMonth || 0;
+                    const failed = data.totalKycCountFailed || 0;
+                    const total = totalSuccess + failed;
+                    const successRate = total > 0 ? Math.round((totalSuccess / total) * 100) : 0;
+                    const devices = data.totalKycDevices || 0;
+
+                    $('#totalKycCountSuccessfulCurrentMonth').text(totalThisMonth);
+                    $('#totalKycCountSuccessful').text(totalSuccess);
+                    $('#totalKycCountFailed').text(failed);
+                    $('#verificationSuccessRate').text(successRate + '%');
+                    $('#TotalKycDevices').text(devices);
+
+                    // Update chart
+                    const updatedMonthlyStats = data.monthlyStats;
+                    const updatedSuccessData = [];
+                    const updatedFailedData = [];
+                    const updatedXLabels = [];
+
+                    // Reuse the getLastSixMonthKeys and fullToShort logic to prepare updated chart data
+                    const monthsToDisplay = getLastSixMonthKeys(); // Get the latest 6 months
+
+                    monthsToDisplay.forEach(month => {
+                        const stats = updatedMonthlyStats[month.key] || { successCount: 0, failedCount: 0 };
+                        updatedSuccessData.push(stats.successCount);
+                        updatedFailedData.push(stats.failedCount);
+                        updatedXLabels.push(month.label);
+                    });
+
+                    // Check if chart2 (ApexCharts instance) exists before updating
+                    if (chart2) {
+                        chart2.updateSeries([
+                            { name: 'Success', data: updatedSuccessData },
+                            { name: 'Failure', data: updatedFailedData }
+                        ]);
+
+                        // Update the x-axis categories (labels)
+                        chart2.updateOptions({
+                            xaxis: {
+                                categories: updatedXLabels
+                            }
+                        });
+                    } else {
+                        console.error("ApexCharts instance 'chart2' not found. Chart will not update.");
+
+                    }
+                },
+
+                error: function () {
+                    console.error('Failed to fetch KPI data');
+                }
+            });
+        }
+    });
+</script>
+
+<script>
+    const REFRESH_INTERVAL = 30000;
+    const DEBOUNCE_DELAY = 2000;
+
+    let hasNewUpdates = false;
+    let debounceTimer;
+    let lastRefreshTime = Date.now();
+
+    var kafkaHubUrl = "@kafkaUrl";
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl(kafkaHubUrl)
+        .withAutomaticReconnect()
+        .configureLogging(signalR.LogLevel.Information)
+        .build();
+
+    // const connection = new signalR.HubConnectionBuilder()
+    //     .withUrl("https://beta-vg.uaekyc.ae/signalr/signalr/kafkaloghub")
+    //     .withAutomaticReconnect()
+    //     .build();
+
+    connection.on("SendLog", function (data) {
+        const parsedData = JSON.parse(data);
+        if(parsedData.serviceProviderName==="@Model.orgReport.orgId"){
+
+
+            hasNewUpdates = true;
+
+
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+              if (hasNewUpdates) {
+                updateServiceProviderDashboard();
+                if (activeTab === 'ids') {
+                       resetServiceProviderList();
+                } else if (activeTab === 'batchids') {
+                      resetBatchServiceProviderList();
+                }
+              }
+            }, DEBOUNCE_DELAY);
+
+        }
+    });
+
+    connection.start().catch(function (err) {
+        console.error("SignalR connection error:", err.toString());
+    });
+
+    setInterval(() => {
+      const now = Date.now();
+      if (hasNewUpdates && (now - lastRefreshTime >= REFRESH_INTERVAL)) {
+        updateServiceProviderDashboard();
+        if (activeTab === 'ids') {
+               resetServiceProviderList();
+        } else if (activeTab === 'batchids') {
+              resetBatchServiceProviderList();
+        }
+      }
+    }, 5000);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,0 +1,792 @@
+﻿@using Newtonsoft.Json
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Enterprise Gateway Portal</title>
+    <link rel="stylesheet" href="~/assets/appcss/RegistrationPage.css" />
+    <link rel="stylesheet" href="~/assets/externalCss/uaeid.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="~/assets/UAEIDfavicon.png" asp-append-version="true" />
+    <script src="~/assets/js/jquery-3.6.0.min.js"></script>
+    <script src="~/assets/js/sweetalert2@11.js"></script>
+
+    <script>
+        Swal = Swal.mixin({
+            customClass: {
+                popup: 'custom-swal-popup',
+                title: 'custom-swal-title',
+                htmlContainer: 'custom-swal-content',
+                confirmButton: 'custom-swal-confirm-btn',
+                cancelButton: 'custom-swal-cancel-btn'
+            },
+            buttonsStyling: false
+        });
+
+        const originalSwalFire = Swal.fire;
+
+        Swal.fire = function (options) {
+            if (typeof options === "string") {
+                options = { title: options };
+            }
+
+            const type = options.icon || options.type || "info";
+            let iconHtml = "";
+
+            switch (type) {
+                case "info":
+                    iconHtml = '<img src="@Url.Content("~/assets/images/Info.svg")" class="custom-swal-icon">';
+                    break;
+                case "warning":
+                    iconHtml = '<img src="@Url.Content("~/assets/images/warning.svg")" class="custom-swal-icon">';
+                    break;
+                case "error":
+                    iconHtml = '<img src="@Url.Content("~/assets/images/Error.svg")" class="custom-swal-icon">';
+                    break;
+                case "success":
+                    iconHtml = '<img src="@Url.Content("~/assets/images/Success.svg")" class="custom-swal-icon">';
+                    break;
+                default:
+                    iconHtml = "";
+            }
+
+            options.iconHtml = iconHtml;
+            options.icon = undefined;
+
+            return originalSwalFire.call(this, options);
+        };
+
+    </script>
+
+    <script src="~/assets/js/Custom_Alert.js" defer></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: #F9F7ED;
+        }
+
+        .login-container {
+            width: 70%;
+            height: 85vh;
+            border-radius: 32px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0px 30px 67px 0px #0000001A, 0px 122px 122px 0px #00000017, 0px 273px 164px 0px #0000000D, 0px 486px 194px 0px #00000003, 1px 760px 213px 0px #00000000;
+            background: #ffffff;
+            transition: transform 0.3s ease;
+            z-index: 10;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .card-first-part {
+            width: 50%;
+        }
+
+            .card-first-part > img {
+                height: 100%;
+                width: 100%;
+                border-top-left-radius: 32px;
+                border-bottom-left-radius: 32px;
+                object-fit: cover;
+            }
+
+        .card-second-part {
+            width: 50%;
+            padding: 7% 5.5%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .welcome-heading {
+            font-size: 34px;
+            font-weight: 600;
+            color: #92722A;
+            font-family: 'Inter';
+        }
+
+        .login-title {
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #6b4e31;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2c2c2c;
+            font-size: 0.95rem;
+        }
+
+        input::placeholder {
+            color: #b0b0b0;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background-color: #8c6c1a;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 2rem 0;
+            width: 100%;
+        }
+
+            .divider::before,
+            .divider::after {
+                content: "";
+                flex: 1;
+                height: 1px;
+                background-color: #d4af37;
+            }
+
+            .divider span {
+                margin: 0 0.75rem;
+                font-size: 0.75rem;
+                color: #6b4e31;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+            }
+
+        .switch-section {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #2c2c2c;
+        }
+
+            .switch-section a {
+                color: #8c6c1a;
+                font-weight: 600;
+                text-decoration: underline;
+                margin-left: 4px;
+                transition: color 0.3s ease;
+            }
+
+                .switch-section a:hover {
+                    color: #6b4e31;
+                }
+
+        svg {
+            margin-top: 20px;
+            width: 100%;
+            height: auto;
+            max-width: 300px;
+        }
+
+        .custom-svg-wrapper {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+
+        .login-container label {
+            margin-bottom: 0.3rem !important;
+        }
+
+        .login-btn {
+            margin-top: 0.8rem !important;
+            padding: 0.65rem !important;
+        }
+
+        .divider {
+            margin: 0.8rem 0 !important;
+        }
+
+            .divider span {
+                font-size: 0.75rem !important;
+            }
+
+        .switch-section {
+            margin-top: 0.8rem !important;
+            font-size: 0.85rem !important;
+        }
+
+        /* For very large desktops (1440px and above) */
+        @@media (min-width: 1550px) {
+            .login-container {
+                width: 60%;     
+                max-width: 1300px;     
+                height: auto;            
+                min-height: 650px;       
+                margin: 2rem auto;      
+            }
+
+            .card-first-part img {
+                border-radius: 32px 0 0 32px;
+                object-fit: cover;
+            }
+
+            .welcome-heading {
+                font-size: 36px;
+            }
+
+            .sub-heading {
+                font-size: 14px;
+            }
+
+            .login-button {
+                padding: 16px;
+                font-size: 17px;
+            }
+
+            .input-box input {
+                font-size: 15px;
+            }
+            .u-logo{
+                width:auto !important;
+            }
+        }
+
+
+        @@media (max-width: 1300px) {
+
+            .login-container {
+                height: 90vh !important;
+                width: 70% !important;
+            }
+
+            .welcome-heading {
+                font-size: 30px !important;
+            }
+
+            .sub-heading {
+                font-size: 12px !important;
+                margin-bottom: 40px !important;
+            }
+
+            .login-button {
+                padding: 12px !important;
+            }
+
+            .card-second-part {
+                padding: 5% 4%;
+            }
+
+            .input-container {
+                margin-bottom: 10px;
+            }
+
+            .login-title {
+                font-size: 1rem !important;
+                margin-bottom: 0.75rem !important;
+            }
+
+            .divider {
+                margin: 1rem 0;
+            }
+
+            .login-btn {
+                padding: 0.75rem;
+            }
+        }
+
+        @@media (max-width: 1024px) {
+
+            .login-container {
+                width: 75% !important;
+                height: 90vh !important;
+            }
+
+            .welcome-heading {
+                font-size: 18px !important;
+            }
+
+            .sub-heading {
+                font-size: 13px !important;
+                margin-bottom: 12px !important;
+            }
+
+            .card-second-part {
+                padding: 5% 3%;
+            }
+
+            .input-container {
+                margin-bottom: 8px !important;
+            }
+
+            .login-button {
+                padding: 10px !important;
+                font-size: 14px !important;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            body {
+                align-items: flex-start;
+                padding: 2rem 1rem;
+            }
+
+            .login-container {
+                max-width: 100%;
+                padding: 1.25rem;
+                margin-top: 30px;
+                margin-bottom: 30px;
+            }
+
+            .login-title {
+                font-size: 1.05rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .divider span {
+                font-size: 0.7rem;
+            }
+
+            .custom-svg-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .login-btn {
+                padding: 0.7rem;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .login-container {
+                padding: 1rem;
+                box-shadow: none;
+                border: none;
+            }
+
+            .login-title {
+                font-size: 1rem;
+            }
+
+            .login-btn {
+                font-size: 0.9rem;
+                padding: 0.65rem;
+            }
+        }
+
+        /* Main card section */
+        .card-second-part {
+            text-align: center;
+            color: #fff;
+        }
+
+        .sub-heading {
+            font-size: 0.85em;
+            font-weight: 500;
+            color: #000000;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+        }
+
+        /* Input container */
+        .input-container {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+            .input-container label {
+                display: block;
+                font-size: 14px;
+                font-weight: 500;
+                margin-bottom: 6px;
+                color: #232528;
+            }
+
+        .input-box {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 12px;
+            background: #fff;
+        }
+
+            .input-box img {
+                width: 20px;
+                margin-right: 10px;
+            }
+
+            .input-box input {
+                border: none;
+                outline: none;
+                width: 100%;
+                font-size: 14px;
+            }
+
+        /* Login button */
+        .login-button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #caa73b, #9a742d);
+            box-shadow: 0px 4px 6px -4px #CBA34433, 0px 10px 15px -3px #CBA34433;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 10px;
+            cursor: pointer;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.2);
+            transition: 0.3s ease;
+        }
+
+            .login-button:hover {
+                opacity: 0.9;
+            }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+            .divider::before,
+            .divider::after {
+                content: "";
+                flex: 1;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .divider:not(:empty)::before {
+                margin-right: 10px;
+            }
+
+            .divider:not(:empty)::after {
+                margin-left: 10px;
+            }
+
+            .divider span {
+                font-size: 13px;
+                color: #666;
+            }
+
+        /* UAEID button */
+        .uaeid-button {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            background: #fff;
+            color: #222;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: ease-in-out 0.3s;
+        }
+
+            .uaeid-button:hover {
+                background-color: #F9F7ED;
+            }
+
+        .login-form {
+            width: 100%;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            padding: 0px !important;
+            border: none !important;
+            border-radius: 0px !important;
+            height: 20px !important;
+        }
+
+        input:-webkit-autofill {
+            box-shadow: 0 0 0px 1000px #fff inset !important;
+            -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
+            -webkit-text-fill-color: #000 !important;
+            caret-color: #000;
+            transition: background-color 9999s ease-in-out 0s;
+        }
+
+        .input-box:focus-within {
+            border: 1px solid #CBA344;
+            box-shadow: 0 0 0 2px rgba(146, 114, 42, 0.2);
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="overlay">
+        <div class="cv-spinner">
+            <span class="spinner"></span>
+        </div>
+    </div>
+    <div class="login-container">
+        <div class="card-first-part" style="position: relative; display: inline-block;">
+            <!-- Background SVG -->
+            <img src="~/assets/images/Logo_New.svg" />
+
+            <!-- Overlay logo -->
+            <img src="~/assets/images/UAEIDIcon.svg"
+                 alt="Overlay Logo"
+                 class="u-logo"
+                 style="position: absolute; top: 4%; left: 6%; width: 40%; height: 10%; border-radius: 0px !important; " />
+        </div>
+
+        <div class="card-second-part">
+            <div class="login-form">
+                <span class="welcome-heading">Welcome back!</span>
+                <h3 class="sub-heading">ENTERPRISE GATEWAY APPLICATION</h3>
+
+                <form id="Loginform" method="post">
+
+                    <div class="input-container">
+                        <label for="email">Email</label>
+                        <div class="input-box">
+                            <img src="~/assets/images/ProfileIcon.svg" alt="Email Icon" />
+                            <input type="email" id="email" name="email" placeholder="Enter your name" />
+                        </div>
+                    </div>
+
+                    <div class="input-container">
+                        <label for="password">Password</label>
+                        <div class="input-box">
+                            <img src="~/assets/images/ChangePassIcon.svg" alt="Password Icon" />
+                            <input type="password" id="password" name="password" placeholder="Enter your password" />
+                        </div>
+                    </div>
+
+                    <button type="button" class="login-button" onclick="authenticate()">Login</button>
+
+                    @*<div class="divider">
+                        <span>Or Login with</span>
+                    </div>
+
+                    <button type="button" class="uaeid-button" onclick="window.location.href='@Url.Action("Index4","Login")'">
+                        Sign in with
+                        <img src="~/assets/images/UAEIDIcon.svg" alt="UAEID Icon" width="70" />
+                    </button>*@
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
+
+@* <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script> *@
+<script src="~/assets/js/jquery-ui.js"></script>
+<script>
+    var isSessionExpired = @((ViewBag.SessionExpired ?? false).ToString().ToLower());
+    var isUserNotFound = @((ViewBag.logout ?? false).ToString().ToLower());
+    var isDeviceExist = @((ViewBag.DeviceExist ?? false).ToString().ToLower());
+    var isLicenceInvalid = @((ViewBag.Licenceinvalid ?? false).ToString().ToLower());
+    var isLicenceNotActivated = @((ViewBag.LicenceNotActivated ?? false).ToString().ToLower());
+    var isLicenceExpired = @((ViewBag.LicenceExpired ?? false).ToString().ToLower());
+
+    if (isLicenceInvalid) {
+        Swal.fire({
+            title: "Info",
+            text: "Your licence is not valid",
+            icon: 'info',
+            showConfirmButton: false,
+            allowOutsideClick: false,
+        });
+    }
+
+    if (isLicenceNotActivated) {
+        Swal.fire({
+            icon: 'info',
+            title: "Info",
+            text: "License not Activated",
+            confirmButtonText: "Activate License",
+            allowOutsideClick: false,
+            showCancelButton: false,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                ActivateLicence();
+            }
+        });
+    }
+
+    if (isLicenceExpired) {
+        Swal.fire({
+            title: "Info",
+            text: "Your licence is expired please renew",
+            icon: 'info',
+            confirmButtonText: 'OK'
+        });
+    }
+
+    if (isSessionExpired) {
+        Swal.fire({
+            title: "Info",
+            text: "Your session has expired. Please log in again.",
+            icon: 'info',
+            confirmButtonText: 'OK'
+        });
+    }
+    if (isUserNotFound) {
+        Swal.fire({
+            title: "Info",
+            text: "You did not have access for this portal",
+            icon: 'info',
+            confirmButtonText: 'OK'
+        });
+    }
+    if (isDeviceExist) {
+        Swal.fire({
+            title: "Info",
+            text: "Your device is not Registered",
+            icon: 'info',
+            showConfirmButton: false,
+            allowOutsideClick: false,
+        });
+    }
+    function authenticate() {
+        var loginUrl = '@Url.Action("Index1", "Login")';
+        var formName = "Loginform"
+        var form = new FormData(document.getElementById(formName));
+        if (form.get("email") === "" || form.get("password") === "") {
+            Swal.fire({
+                title: "Info",
+                text: "Email or Password Should Not be Empty",
+                icon: 'info',
+                confirmButtonText: 'OK',
+                customClass: {
+                    popup: 'custom-swal-popup',
+                    title: 'custom-swal-title',
+                    htmlContainer: 'custom-swal-content',
+                    confirmButton: 'custom-swal-confirm-btn'
+                }
+            });
+            return;
+        } else {
+            document.getElementById("overlay").style.display = "block";
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("CheckPassword", "Login")',
+                dataType: 'json',
+                data: {
+                    Email: form.get("email"),
+                    Password: form.get("password")
+                },
+                success: function (result) {
+                    document.getElementById("overlay").style.display = "none";
+                    if (result.success) {
+                        var loginform = document.getElementById("Loginform");
+                        document.getElementById("Loginform").action = loginUrl;
+                        loginform.submit();
+                    }
+                    else {
+                        Swal.fire({
+                            title: "Info",
+                            text: result.message,
+                            icon: 'info',
+                            confirmButtonText: 'OK'
+                        });
+
+                        return;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    document.getElementById("overlay").style.display = "none";
+                    Swal.fire({
+                        title: "Error",
+                        text: "Something went wrong",
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                    console.error(xhr, status, error);
+                }
+
+            })
+        }
+
+    }
+    $("#password").keypress(function (event) {
+        if (event.which === 13) { // 13 is the key code for Enter
+            authenticate();
+        }
+    });
+    function ActivateLicence() {
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ActivateLicence", "Login")',
+            dataType: "json",
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+                $('#overlay').hide();
+            },
+            success: function (response) {
+                if (response.status === "Success") {
+                    Swal.fire({ icon: 'success', title: "Info", text: response.message });
+                } else if (response.status === "Failed") {
+                    Swal.fire({
+                        icon: 'info',
+                        title: "Activation Failed",
+                        text: response.message,
+                        showCancelButton: false,
+                        allowOutsideClick: false,
+                        confirmButtonText: "Retry"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            ActivateLicence();
+                        }
+                    });
+                }
+            },
+            error: function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: "Activation Failed",
+                    text: "An error occurred while activating the license.",
+                    showCancelButton: false,
+                    allowOutsideClick: false,
+                    confirmButtonText: "Retry"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        ActivateLicence();
+                    }
+                });
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        document.cookie = "NavigationLayout=; path=/;";
+        document.cookie = "HeaderNavigationLayout=Vertical; path=/;";
+    });
+
+</script>

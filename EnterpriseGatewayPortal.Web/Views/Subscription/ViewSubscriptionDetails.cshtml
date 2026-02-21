@@ -1,0 +1,112 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.SubscriptionVerification.SubscriptionDetailsViewModel
+
+@{
+    ViewData["Title"] = "Document Verification Details";
+}
+
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+<style>
+    #documentVerificationDetailsLegend {
+        width: 30%;
+        font-size: 1.2rem;
+    }
+</style>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body">
+                <form asp-action="Update" method="post">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <div class="form-group">
+                                <label asp-for="DocumentIssuerName" class="col-form-label"></label>
+                                <input asp-for="DocumentIssuerName" class="form-control" class="form-control" readonly />
+                                <span asp-validation-for="DocumentIssuerName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="SubscriptionDate" class="col-form-label"></label>
+                                <input asp-for="SubscriptionDate" class="form-control" class="form-control" readonly />
+                                <span asp-validation-for="SubscriptionDate" class="text-danger"></span>
+                            </div>
+                           
+                            <div class="form-group">
+                                <label asp-for="SubscriptionFee" class="col-form-label"></label>
+                                <input asp-for="SubscriptionFee" class="form-control" class="form-control" readonly />
+                                <span asp-validation-for="SubscriptionFee" class="text-danger"></span>
+                            </div>
+                            
+                            
+                           
+                        </div>
+                        <div class="form-group col-md-6">
+                            <div class="form-group">
+                                <label asp-for="DocumentTypes" class="col-form-label"></label>
+                                <input asp-for="DocumentTypes" class="form-control" class="form-control" readonly />
+                                <span asp-validation-for="DocumentTypes" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="ExpiryDate" class="col-form-label"></label>
+                                <input asp-for="ExpiryDate" class="form-control" class="form-control" readonly />
+                                <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Status" class="col-form-label"></label>
+                                <input asp-for="Status" class="form-control" class="form-control" readonly />
+                                <span asp-validation-for="Status" class="text-danger"></span>
+                            </div>
+                           @* <div class="form-group">
+                                <label asp-for="CreatedBy" class="col-form-label"></label>
+                                <input asp-for="CreatedBy" class="form-control" class="form-control" readonly />
+                                <span asp-validation-for="CreatedBy" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="CreatedAt" class="col-form-label"></label>
+                                <input asp-for="CreatedAt" class="form-control" class="form-control" readonly />
+                                <span asp-validation-for="CreatedAt" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="UpdatedAt" class="col-form-label"></label>
+                                <input asp-for="UpdatedAt" class="form-control" class="form-control" readonly />
+                                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="UpdatedBy" class="col-form-label"></label>
+                                <input asp-for="UpdatedBy" class="form-control" class="form-control" readonly />
+                                <span asp-validation-for="UpdatedBy" class="text-danger"></span>
+                            </div>*@
+                        </div>
+                    </div>
+                    
+                       <div class="d-flex justify-content-end" style="padding-top: 31px;">
+                            <div style="padding-top: 20px;">
+
+                            &nbsp;&nbsp;
+                            <a type="button" asp-action="SubscriptionList" class="btn btn-danger">Cancel</a>
+                        </div>
+                    
+                    <div style="display:none;">
+                        <input asp-for="Id" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+
+        $(document).ready(function () {
+            var DocumentVerificationLink = document.getElementById('DocumentVerificationModle').querySelector('.nav-link');
+            DocumentVerificationLink.click();
+            $('#homeMenu').addClass('breadcrumb-item').append('Document Verification > Subscription Details');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#SubscriptionMenu').addClass('active');
+            $('#networkOverlay').hide();
+        });
+
+    </script>
+}

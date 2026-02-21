@@ -1,0 +1,120 @@
+﻿@using EnterpriseGatewayPortal.Web.Models
+@model EnterpriseGatewayPortal.Web.Models.SecurityQuestions.SecurityQuestionViewModel
+
+@{
+    ViewData["Title"] = "Change Sequerity Question";
+
+}
+@{
+    await Html.RenderPartialAsync("_AlertBox");
+}
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+{
+        new BreadCrumbModel { Title = "Change Security Question" , Url = "",IconKey = "edit"}
+    };
+}
+<label class="form-label sub-label">Change Security Question</label>
+<div class="row" id="spacingCss">
+
+    <div class="col-md-12 plr">
+        <div class="card-custom">
+            <div class="card-body">
+                <form id="securityQue" asp-action="ChangeSecurityQuestion">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <div class="form-group col-md-6">
+                                <div class="form-group" hidden>
+                                    <input asp-for="UserId" class="form-control" />
+                                    <input asp-for="Que1Id" class="form-control" />
+                                    <input asp-for="Que2Id" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Question1" class="col-form-label"></label>
+                                    <select asp-for="Question1" class="form-control"
+                                            asp-items="@Model.SecurityQueList1"></select>
+                                    <span asp-validation-for="Question1" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <input asp-for="Answer1" class="form-control" placeholder="Answer for Question One" />
+                                    <span asp-validation-for="Answer1" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Question2" class="col-form-label"></label>
+                                    <select asp-for="Question2" class="form-control"
+                                            asp-items="@Model.SecurityQueList2"></select>
+                                    <span asp-validation-for="Question2" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <input asp-for="Answer2" class="form-control" placeholder="Answer for Question Two" />
+                                    <span id='message'></span>
+                                    <span asp-validation-for="Answer2" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="myform-button" style="margin-top: 0px">
+                        <div class="d-flex justify-content-end">
+
+                            <a asp-controller="UserDashboard" asp-action="Profile" class="btn btn-other">
+                                Cancel
+                            </a>
+                            &nbsp;&nbsp;
+                            <button id="secQueBtn" class="btn btn-primary uaeid-primary" type="submit" style="opacity: 0.5;" disabled>
+                                Update
+                            </button>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            // breadcrumb stuff (unchanged)
+            $('#homeMenu').addClass('breadcrumb-item').append('Dashboard');
+            $('#mainMenu').addClass('breadcrumb-item active').append('Change Security Question');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#networkOverlay').hide();
+
+            function validateForm() {
+                var q1 = $('#Question1').val();
+                var q2 = $('#Question2').val();
+                var a1 = $('#Answer1').val().trim();
+                var a2 = $('#Answer2').val().trim();
+
+                if (q1 && q2 && q1 === q2) {
+                    $('#message').html('Both question cannot be same').css('color', 'red');
+                    disableButton();
+                    return;
+                }
+
+                if (!a1 || !a2) {
+                    $('#message').html('');
+                    disableButton();
+                    return;
+                }
+
+                $('#message').html('');
+                enableButton();
+            }
+
+            function disableButton() {
+                $('#secQueBtn').prop('disabled', true).css('opacity', '0.5');
+            }
+
+            function enableButton() {
+                $('#secQueBtn').prop('disabled', false).css('opacity', '1');
+            }
+
+            $('#Question1, #Question2, #Answer1, #Answer2').on('change keyup', validateForm);
+            disableButton();
+        });
+    </script>
+}

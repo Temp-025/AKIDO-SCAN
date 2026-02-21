@@ -1,0 +1,91 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.RoleManagement.RoleManagementNewViewModel
+
+@{ ViewData["Title"] = "Role New"; }
+
+@{await Html.RenderPartialAsync("_AlertBox");}
+<style>
+    .classshide {
+        display: none !important;
+    }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<div class="row" id="spacingCss">
+
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="card-body">
+                <form asp-action="Save">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <div class="form-group" hidden>
+                                <input asp-for="Id" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="RoleName" class="col-form-label"></label>
+                                <input asp-for="RoleName" class="form-control" />
+                                <span asp-validation-for="RoleName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="DisplayName" class="col-form-label"></label>
+                                <input asp-for="DisplayName" class="form-control" />
+                                <span asp-validation-for="DisplayName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Description" class="col-form-label"></label>
+                                <input asp-for="Description" class="form-control" />
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+                        @* @await Html.PartialAsync("_Activities", Model.Activities)*@
+                        <div class="form-group col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Activities" class="col-form-label"></label>
+                                <partial name="_Activities" for="Activities" />
+                                <input asp-for="Activitie" type="hidden" />
+                            </div>
+                            <div class="form-group Checkerkbox" style="display:none;">
+                                <label asp-for="CheckerActivitie" class="col-form-label s3">Checker Activity</label>
+                                <partial name="_CheckerActivities" for="CheckerActivitie" />
+
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding-right: 10px">
+                        <div style="float: left;margin-top: 3px;padding-left: 22px;">
+                            <b>NOTE: </b>(*) Mark fields are mandatory.
+                        </div>
+                        <div class="d-flex justify-content-end ">
+                            <button class="btn btn-primary" type="submit">
+                                Save
+                            </button>
+                            &nbsp;&nbsp;
+
+                            <a asp-action="List" class="btn btn-danger">
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            $('#rolesMenu').addClass('active');
+
+            $('#homeMenu').removeClass('breadcrumb-item');
+            $('#homeMenu').addClass('breadcrumb-item').append('Roles > Add');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $('#networkOverlay').hide();
+        });
+    </script>
+}
+

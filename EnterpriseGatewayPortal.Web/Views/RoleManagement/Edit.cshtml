@@ -1,0 +1,177 @@
+﻿@model EnterpriseGatewayPortal.Web.ViewModel.RoleManagement.RoleManagementNewViewModel
+@using EnterpriseGatewayPortal.Web.Models
+
+@{
+    ViewBag.Breadcrumb = new List<BreadCrumbModel>
+{
+        new BreadCrumbModel { Title = "Administration - Roles", Url = Url.Action("List","RoleManagement"),IconKey = "roles"},
+        new BreadCrumbModel { Title = "Edit",Url = "",IconKey = "edit"},
+    };
+}
+@{ ViewData["Title"] = "Role Edit"; }
+
+@{await Html.RenderPartialAsync("_AlertBox");}
+<style>
+    .classshide {
+        display: none !important;
+    }
+</style>
+<div class="classshide">
+    <div id='viewer'></div>
+</div>
+<label class="form-label sub-label">Edit Role</label>
+<div class="row" id="spacingCss">
+
+    <div class="col-md-12 plr">
+        <div class="card-custom">
+            <div class="card-body">
+                <form id="uform" asp-action="Update">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <div class="form-group col-md-6" style="float:left;">
+                                <div class="form-group" hidden>
+                                    <input asp-for="Id" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="RoleName" class="col-form-label"></label>
+                                    <input asp-for="RoleName" class="form-control" readonly />
+                                    <span asp-validation-for="RoleName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="DisplayName" class="col-form-label"></label>
+                                    <input asp-for="DisplayName" class="form-control" />
+                                    <span asp-validation-for="DisplayName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Description" class="col-form-label"></label>
+                                    <input asp-for="Description" class="form-control" />
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Status" class="col-form-label"></label>
+                                    <input asp-for="Status" class="form-control" readonly />
+                                </div>
+                            </div>
+                            @* @await Html.PartialAsync("_Activities", Model.Activities)*@
+                            @if (Model.RoleName != "businessUser")
+                            {
+                                <div class="form-group col-md-6" style="float:left;">
+                                    <div class="form-group">
+                                        <label asp-for="Activities" class="col-form-label"></label>
+                                        <partial name="_Activities" for="Activities" />
+                                        <input asp-for="Activitie" type="hidden" />
+                                    </div>
+
+                                    <div class="form-group Checkerkbox classshide" style="display:none;">
+                                        <label asp-for="CheckerActivitie" class="col-form-label s3">Checker Activity</label>
+                                        <partial name="_CheckerActivities" for="CheckerActivitie" />
+
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+
+                    <div style="padding-right: 10px">
+
+                        <div style="float: left;margin-top: 9px;padding-left: 22px;">
+                            <b>NOTE: </b>(*) Mark fields are mandatory.
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="List" class="btn btn-other">
+                                Cancel
+                            </a>
+                            &nbsp; &nbsp;
+
+                            @if (!User.IsInRole("Roles Checker"))
+                            {
+                                @if (Model.Status == "ACTIVE")
+                                {
+                                    @* <button style="margin-right:5px;" type="button" data-operation="UPDATE_ROLE_STATUS" data-url='@Url.Action("SetRoleState","RoleManagement",new {id=@Model.Id,Doaction="Deactivation"})' class="btn btn-secondary CriticalAction">
+                                            Deactivate Role
+                                        </button>*@
+                                }
+                                @if (Model.Status == "DEACTIVATED")
+                                {
+                                    @* <button style="margin-right:5px;" type="button" data-operation="UPDATE_ROLE_STATUS" data-url='@Url.Action("SetRoleState","RoleManagement",new {id=@Model.Id,Doaction="Activation" })' class="btn btn-secondary CriticalAction">
+                                            Activate Role
+                                        </button>*@
+                                }
+                                <button class="btn btn-primary uaeid-primary" type="submit">
+                                    Update
+                                </button>
+                                @* <button class="btn btn-primary CriticalAction" data-operation="ROLE_UPDATE" id="submitForm" type="button" style="opacity: 0.5;" disabled>
+                                        Update
+                                    </button> *@
+                            }
+
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+    
+    <script>
+        var operationName = "";
+        var operationUrl = "";
+        $(document).ready(function () {
+
+            $("#Administration > a")
+                .attr("aria-expanded", "true")
+                .addClass("active");
+
+            $("#Administration")
+                .addClass("submenu-active show");
+
+            $("#Administration .submenu")
+                .addClass("show");
+
+            $('#Roles').addClass('active');
+
+             document.getElementById("navigationNetworkOverlay").style.display = "none";
+          // var isCheker = "@User.IsInRole("Roles Checker")";
+          //   if (isCheker == "True") {
+          //       $("Input[type=text],Input[type=checkbox]").prop('disabled', true);
+          //   }
+
+            // $(".CriticalAction").on("click", function (e) {
+            //     var button = $(this);
+            //     operationName = button.attr("data-operation");
+            //     operationUrl = button.attr("data-url");
+            //     isAuthenticationRequired();
+            // })
+            $('#rolesMenu').addClass('active');
+            $('#networkOverlay').hide();
+            $('#homeMenu').removeClass('breadcrumb-item');
+            $('#homeMenu').addClass('breadcrumb-item').append('Roles > Edit');
+            $('#mainMenu').removeClass('breadcrumb-item');
+            $('#subMenu').removeClass('breadcrumb-item');
+            $(".CriticalAction").on("click", function (e) {
+
+                var form = $("#uform");
+                form.submit();
+            })
+
+        });
+
+        function submitForm() {
+            if (operationName == "ROLE_UPDATE") {
+                var form = $("#uform");
+                form.submit();
+            } else {
+                window.location.href = operationUrl;
+            }
+        }
+    </script>
+
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

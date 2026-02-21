@@ -1,0 +1,762 @@
+﻿@using System.Security.Claims;
+<style>
+    img {
+    cursor: pointer;
+    }
+</style>
+@{
+    var prePaidOrPostPaid = User.FindFirst("PrePaidOrPostPiad").Value;
+    var IDPLogin = User.FindFirst("IDPLogin").Value;
+    var userExist = User.FindFirst("UserExist").Value;
+    var template = "";
+    var bulkSign = "";
+    var spoc_email = User.FindFirst("SpocEmail").Value;
+    var user_email = User.FindFirst("userEmail").Value;
+    var DelegateUser = "";
+    if (IDPLogin == "true" && userExist == "true")
+    {
+        template = User.FindFirst("Template").Value;
+        bulkSign = User.FindFirst("BulkSign").Value;
+
+    }
+    else
+    {
+        template = "false";
+        bulkSign = "false";
+    }
+    var userRoleName = User.FindFirst("userRoleName")?.Value;
+}
+<nav id="sidebar" class="nsidebar">
+    <div class="sidebar-header fixed-top">
+        <h3 class="gap-header">
+            <img id="primaryImage" alt="" width="250" height="60"
+                 style="padding: 9px 9px 9px 9px;background-color:#CBA344 !important;" src="~/assets/images/NewUAEIDprimaryImg.svg" /> @*LOGO-01-01.svg*@
+        </h3>
+        <strong class="gap-header"><img id="secondaryImage" alt="" width="40" height="55" style="padding-top:15px;" src="~/assets/images/NewUAEIDprimaryImg.svg" /></strong>
+    </div>
+
+    <ul class="list-unstyled components" style="margin-top:55px">
+
+        @if (userRoleName == "KYCADMIN")
+        {
+            <li class="nav-item" id="dashboardMenu">
+                <a class="nav-link" asp-controller="KYCDashboard" asp-action="Index" onclick="showLoader()">
+                    <i class="dashboardNew-icon" style="padding:0px 12px"></i>
+                    Dashboard
+                </a>
+            </li>
+        }
+        else
+        {
+            <li class="nav-item" id="dashboardMenu">
+                <a class="nav-link" asp-controller="Dashboard" asp-action="Index" onclick="showLoader()">
+                    <i class="dashboardNew-icon" style="padding:0px 12px"></i>
+                    Dashboard
+                </a>
+            </li>
+
+        }
+
+        @*  @if (User.IsInRole("Organization"))
+        {
+            <li class="nav-item" id="eSealRegistrationMenu">
+                <a class="nav-link" asp-controller="ESealRegistration" asp-action="GetOrganizationById">
+                    <i class="organizationNew-icon" style="padding:0px 12px"></i>
+                    Organization
+                </a>
+            </li>
+        } *@
+        @if (User.IsInRole("OrganizationDetails"))
+        {
+            <li class="dropdown" id="OrgDetailsModle">
+                <a class="nav-link drop-logo" href="#OrgDetails" data-toggle="collapse" aria-expanded="false">
+                    <i class="organizationNew-icon" style="padding:0px 12px"></i>
+                    Organization Details
+                </a>
+                <ul class="list-unstyledData dashColSubmenu collapse" id="OrgDetails">
+                    @if (User.IsInRole("Organization"))
+                    {
+                        <li class="nav-data" id="eSealRegistrationMenu">
+                            <a class="nav-data" asp-controller="ESealRegistration" asp-action="GetOrganizationById">
+
+                                Profile
+                            </a>
+                        </li>
+                    }
+                    @if (User.IsInRole("Signature Templates"))
+                    {
+                        <li class="nav-data" id="signatureTemplatesMenu">
+                            <a class="nav-data" asp-controller="Template" asp-action="Index" onclick="showLoader()">
+
+                                Signature Templates
+                            </a>
+                        </li>
+                    }
+                    @if (User.IsInRole("ESeal"))
+                    {
+                        <li class="nav-data" id="eSealDetailsMenu">
+                            <a class="nav-data" asp-controller="ESealDetail" asp-action="Index" onclick="showLoader()">
+
+                                ESeal
+                            </a>
+                        </li>
+                    }
+
+                </ul>
+            </li>
+        }
+
+        @if (User.IsInRole("Business Users"))
+        {
+            <li class="nav-item" id="businessMenu">
+                <a class="nav-link" asp-controller="BussinessUser" asp-action="List">
+                    <i class="BusinessUserNew-icon" style="padding:0px 12px"></i>
+                    Business Users
+                </a>
+            </li>
+        }
+
+        @if (User.IsInRole("Beneficiaries"))
+        {
+            <li class="nav-item" id="beneficiariesMenu">
+                <a class="nav-link" asp-controller="Beneficiaries" asp-action="BeneficiaryList">
+                    <i class="Beneficiaries-icon" style="padding:0px 12px"></i>
+                    Beneficiaries
+                </a>
+            </li>
+        }
+
+
+        @if (User.IsInRole("Applications"))
+        {
+            <li class="nav-item" id="applicationsMenu">
+                <a class="nav-link" asp-controller="Clients" asp-action="List">
+                    <i class="applicationsNew-icon" style="padding:0px 12px"></i>
+                    Business Applications
+                </a>
+            </li>
+        }
+        @if (User.IsInRole("QR Credentials"))
+        {
+            <li class="dropdown" id="QrServiceModle">
+                <a class="nav-link drop-logo" href="#QrModel" data-toggle="collapse" aria-expanded="false">
+                    <i class="wallet-icon" style="padding:0px 12px"></i>
+                    QR Credentials
+                </a>
+                <ul class="list-unstyledData dashColSubmenu collapse" id="QrModel">
+                    @if (User.IsInRole("QR Credentials Create"))
+                    {
+                        <li class="nav-data" id="QrCredentialsMenu">
+                            <a asp-controller="QrCredential" asp-action="List" onclick="showLoader()" class="nav-data">Credentials</a>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("QR Subscribed Requests"))
+                    {
+                        <li class="nav-data" id="CredentialsVerifyRequestMenu">
+                            <a asp-controller="QRVerificationSubscriptionRequest" asp-action="List" onclick="showLoader()" class="nav-data">Subscription Requests</a>
+                        </li>
+                    }
+                </ul>
+            </li>
+        }
+        @if (User.IsInRole("QR Credentials Verification"))
+        {
+            <li class="dropdown" id="QRverificationModle">
+                <a class="nav-link drop-logo" href="#QRverifyModel" data-toggle="collapse" aria-expanded="false">
+                    <i class="walletVerification-icon" style="padding:0px 12px"></i>
+                    QR verification
+                </a>
+                <ul class="list-unstyledData dashColSubmenu collapse" id="QRverifyModel">
+                    @if (User.IsInRole("Subscribed QR Credentials"))
+                    {
+                        <li class="nav-data" id="QrSubscribeCredentialsMenu">
+                            <a asp-controller="QrSubscribeCredential" asp-action="List" onclick="showLoader()" class="nav-data">Subscribed Qr Credentials</a>
+                        </li>
+                    }
+                </ul>
+            </li>
+        }
+        @if (User.IsInRole("Wallet") && User.IsInRole("credential_issuer"))
+		{
+
+			<li class="dropdown" id="WalletServiceModle">
+				<a class="nav-link drop-logo" href="#WalletModel" data-toggle="collapse" aria-expanded="false">
+					<i class="wallet-icon" style="padding:0px 12px"></i>
+					Wallet Credentials
+				</a>
+				<ul class="list-unstyledData dashColSubmenu collapse" id="WalletModel">
+					@if (User.IsInRole("Credentials"))
+					{
+						<li class="nav-data" id="CredentialsMenu">
+							<a asp-controller="Wallet" asp-action="Index" class="nav-data">Credentials</a>
+						</li>
+					}
+					@if (User.IsInRole("Revoke User Credentials"))
+					{
+						<li class="nav-data" id="RevokeCredentialMenu">
+							<a asp-controller="Wallet" asp-action="Revoke" class="nav-data">Revoke User Credentials</a>
+						</li>
+					}
+                    <li class="nav-data" id="walletCredentialsVerifyRequestMenu">
+                        <a asp-controller="WalletVerificationSubscriptionRequest" asp-action="List" onclick="showLoader()" class="nav-data">Subscription Requests</a>
+                    </li>
+				</ul>
+			</li>
+		}
+
+        @if (User.IsInRole("Credential Subscription Verification") && User.IsInRole("credential_verifier"))
+        {
+            <li class="dropdown" id="WalletverificationModle">
+                <a class="nav-link drop-logo" href="#WalletverifyModel" data-toggle="collapse" aria-expanded="false">
+                    <i class="walletVerification-icon" style="padding:0px 12px"></i>
+                    Wallet verification
+                </a>
+            <ul class="list-unstyledData dashColSubmenu collapse" id="WalletverifyModel">
+                    @if (User.IsInRole("Subscribed Credentials"))
+                    {
+                        <li class="nav-data" id="CredentialsVerifyMenu">
+                    <a asp-controller="WalletCredentialVerification" asp-action="List" class="nav-data">Subscribed Credentials</a>
+                        </li>
+                  
+                    }
+                   
+                </ul>
+            </li>
+         } 
+
+		@* @if (User.IsInRole("Document Issuer") && (userExist == "true"))
+		{
+			<li class="dropdown" id="DocumentIssuerModle">
+				<a class="nav-link drop-logo" href="#DocumentIssuer" data-toggle="collapse" aria-expanded="false">
+					<i class="documentIssuer-icon" style="padding:0px 12px"></i>
+					Document Issuer
+				</a>
+				<ul class="list-unstyledData dashColSubmenu collapse" id="DocumentIssuer">
+					@if (User.IsInRole("Documents"))
+					{
+						<li class="nav-data" id="DocumentsMenu">
+							<a asp-controller="DocumentIsuuer" asp-action="List" class="nav-data" onclick="DocIssuer(event)">Documents</a>
+						</li>
+					}
+					@if (User.IsInRole("Verification Requests"))
+					{
+						<li class="nav-data" id="VerificationRequestsMenu">
+							<a asp-controller="VerificationRequests" asp-action="List" class="nav-data" onclick="VerificationRequests(event)"> Verification Requests</a>
+						</li>
+					}
+				</ul>
+			</li>
+		}
+
+		@if (User.IsInRole("Document Verification") && (userExist == "true"))
+		{
+			<li class="dropdown" id="DocumentVerificationModle">
+				<a class="nav-link drop-logo" href="#DocumentVerification" data-toggle="collapse" aria-expanded="false">
+					<i class="documentVerification-icon" style="padding:0px 12px"></i>
+					Document Verification
+				</a>
+				<ul class="list-unstyledData dashColSubmenu collapse" id="DocumentVerification">
+					@if (User.IsInRole("Verification"))
+					{
+						<li class="nav-data" id="VerificationMenu">
+							<a class="nav-data" asp-controller="DocumentVerification" asp-action="Index" onclick="Verification(event)">Verification</a>
+						</li>
+					}
+				</ul>
+			</li>
+		} *@
+		  @if (User.IsInRole("Document Signing") && (userExist == "true"))
+        {
+            <li class="nav-item" id="DocumentMenu">
+                <a class="nav-link" asp-controller="Documents" asp-action="Index" onclick="Document(event)">
+                    <i class="DocumentSigning-icon" style="padding:0px 12px"></i>
+                    Document Signing
+                </a>
+            </li>
+        }
+
+       @*   @if (User.IsInRole("Bulk signing") && (userExist == "true")) 
+            
+        {
+            <li class="dropdown" id="builksignModle">
+                <a class="nav-link drop-logo" href="#selfServicePortal" data-toggle="collapse" aria-expanded="false">
+                    <i class="bulkSigning-icon" style="padding:0px 12px"></i>
+                    Bulk signing
+                </a>
+                <ul class="list-unstyledData dashColSubmenu collapse" id="selfServicePortal">
+                    @if (User.IsInRole("Templates"))
+                    {
+                        <li class="nav-data" id="TemplateMenu">
+                            <a class="nav-data" asp-controller="DocumentTemplates" asp-action="Index" onclick="Template(event)">Templates</a>
+                        </li>
+                    }
+                    @if (User.IsInRole("Transactions"))
+                    {
+                        <li class="nav-data" id="TransactionMenuItem">
+                            <a class="nav-data" asp-controller="BulkSign" asp-action="GetBulkSigDataList" onclick="Transaction(event)">Transactions</a>
+                        </li>
+                    }
+                </ul>
+            </li>
+        } *@
+        @if (User.IsInRole("Bulk signing") && (userExist == "true") && template == "true" && bulkSign == "true")
+        {
+
+            <li class="dropdown" id="builksignModle">
+                <a class="nav-link drop-logo" href="#selfServicePortal" data-toggle="collapse" aria-expanded="false">
+                    <i class="bulkSigning-icon" style="padding:0px 12px"></i>
+                    Bulk signing
+                </a>
+                <ul class="list-unstyledData dashColSubmenu collapse" id="selfServicePortal">
+
+
+                    @if (User.IsInRole("Templates"))
+                    {
+                        <li class="nav-data" id="TemplateMenu">
+                            <a class="nav-data" asp-controller="DocumentTemplates" asp-action="Index" onclick="Template(event)">Templates</a>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("Transactions"))
+                    {
+                        <li class="nav-data" id="TransactionMenuItem">
+                            <a class="nav-data" asp-controller="BulkSign" asp-action="GetBulkSigDataList" onclick="Transaction(event)">Transactions</a>
+                        </li>
+                    }
+
+
+
+
+                </ul>
+            </li>
+        }
+        else if (User.IsInRole("Bulk signing") && (userExist == "true") && bulkSign == "true" && template == "false")
+        {
+            <li class="dropdown" id="builksignModle">
+                <a class="nav-link drop-logo" href="#selfServicePortal" data-toggle="collapse" aria-expanded="false">
+                    <i class="bulkSigning-icon" style="padding:0px 12px"></i>
+                    Bulk signing
+                </a>
+                <ul class="list-unstyledData dashColSubmenu collapse" id="selfServicePortal">
+
+
+
+
+                    @if (User.IsInRole("Transactions"))
+                    {
+                        <li class="nav-data" id="TransactionMenuItem">
+                            <a class="nav-data" asp-controller="BulkSign" asp-action="GetBulkSigDataList" onclick="Transaction(event)">Transactions</a>
+                        </li>
+                    }
+
+
+
+
+                </ul>
+            </li>
+        }
+        else if (User.IsInRole("Bulk signing") && (userExist == "true") && template == "true" && bulkSign == "false")
+        {
+
+            <li class="dropdown" id="builksignModle">
+                <a class="nav-link drop-logo" href="#selfServicePortal" data-toggle="collapse" aria-expanded="false">
+                    <i class="bulkSigning-icon" style="padding:0px 12px"></i>
+                    Bulk signing
+                </a>
+                <ul class="list-unstyledData dashColSubmenu collapse" id="selfServicePortal">
+
+
+                    @if (User.IsInRole("Templates"))
+                    {
+                        <li class="nav-data" id="TemplateMenu">
+                            <a class="nav-data" asp-controller="DocumentTemplates" asp-action="Index" onclick="Template(event)">Templates</a>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("Transactions"))
+                    {
+                        <li class="nav-data" id="TransactionMenuItem">
+                            <a class="nav-data" asp-controller="BulkSign" asp-action="GetBulkSigDataList" onclick="Transaction(event)">Transactions</a>
+                        </li>
+                    }
+
+
+
+
+                </ul>
+            </li>
+        }
+
+		
+		@if (User.IsInRole("Payments"))
+		{
+			<li class="dropdown" id="PaymentsModle">
+				<a class="nav-link drop-logo" href="#PaymentsModel" data-toggle="collapse" aria-expanded="false">
+					<i class="paymentsModel-icon" style="padding:0px 12px"></i>
+					Payments
+				</a>
+				<ul class="list-unstyledData dashColSubmenu collapse" id="PaymentsModel">
+                    @if (User.IsInRole("Rate Cards"))
+					{
+						<li class="nav-data" id="RateCardsMenu">
+							<a asp-controller="RateCards" asp-action="Index" class="nav-data">Rate Cards</a>
+						</li>
+					}
+					@if (User.IsInRole("Price Slabs"))
+					{
+						<li class="nav-data" id="PriceSlabsMenu">
+							<a asp-controller="PriceSlabs" asp-action="List2" class="nav-data"> Price Slabs</a>
+						</li>
+					}
+                   @*  @if (User.IsInRole("Buy credits"))
+                    {
+                                <li class="nav-data" id="buyCreditsMenu">
+                                    <a asp-controller="BuyCredits" asp-action="Index" class="nav-data" onclick="CheckSpoc(event)">Buy Credits</a>
+                                </li>
+                    } *@
+					@if (User.IsInRole("Payment History"))
+					{
+						<li class="nav-data" id="PaymentHistoryMenu">
+							<a asp-controller="PaymentHistory" asp-action="OrgPaymentList" class="nav-data">Payment History</a>
+						</li>
+					}
+					
+					@if (User.IsInRole("Balance Sheets"))
+					{
+						<li class="nav-data" id="BalanceSheetsMenu">
+@* 							<a asp-controller="BalanceSheets" asp-action="BalanceList" class="nav-data" onclick="CheckSpocBalance(event)">Balance Sheets</a>
+ *@							<a asp-controller="BalanceSheets" asp-action="BalanceList" class="nav-data">Balance Sheets</a>
+						</li>
+					}
+					@if (User.IsInRole("Usage Reports"))
+					{
+						<li class="nav-data" id="UsageReportsMenu">
+							<a asp-controller="UsageReports" asp-action="Index" class="nav-data">Usage Reports</a>
+						</li>
+					}
+					
+				</ul>
+			</li>
+		}
+
+        @if (User.IsInRole("Id Validation Service"))
+        {
+            <li class="dropdown" id="IdValidationModle">
+                <a class="nav-link drop-logo" href="#IdValidationModel" data-toggle="collapse" aria-expanded="false">
+                    <i class="paymentsModel-icon" style="padding:0px 12px"></i>
+                    Id Validation
+                </a>
+                <ul class="list-unstyledData dashColSubmenu collapse" id="IdValidationModel">
+                    @if (User.IsInRole("Kyc Applications"))
+                    {
+                        <li class="nav-data" id="ApiKeysMenu">
+                            <a asp-controller="KycApplications" asp-action="Index" onclick="showLoader()" class="nav-data">Api Keys</a>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("Kyc Methods"))
+                    {
+                        <li class="nav-data" id="KycMethodsMenu">
+                            <a asp-controller="KycMethods" asp-action="Index" onclick="showLoader()" class="nav-data">Kyc Methods</a>
+                        </li>
+                    }
+
+
+                    @if (User.IsInRole("Kyc Devices"))
+                    {
+                        <li class="nav-data" id="KycDevicesMenu">
+                            <a asp-controller="KYCDevice" asp-action="Index" onclick="showLoader()" class="nav-data">Kyc Devices</a>
+                        </li>
+                    }
+
+                </ul>
+            </li>
+        }
+
+		@if (User.IsInRole("Users"))
+		{
+			<li class="nav-item" id="usersMenu">
+				<a class="nav-link" asp-controller="Users" asp-action="List">
+					<i class="usersNew-icon" style="padding:0px 12px"></i>
+					Admin Users
+				</a>
+			</li>
+		}
+
+		@if (User.IsInRole("Roles"))
+		{
+			<li class="nav-item" id="rolesMenu">
+				<a class="nav-link" asp-controller="RoleManagement" asp-action="List">
+					<i class="Roles-icon" style="padding:0px 12px"></i>
+					Roles
+				</a>
+			</li>
+		}
+		@if (User.IsInRole("Admin Log Reports"))
+		{
+			<li class="nav-item" id="adminLogReportMenuItem">
+				<a asp-controller="AdminLogReports" asp-action="Reports">
+					<i class="AdminLog-icon" style="padding:0px 12px"></i>
+					@* Admin Log Reports *@
+					Activity Reports
+				</a>
+			</li>
+		}
+		@* <li class="nav-item" id="digitalFormsMenu">
+		<a class="nav-link" asp-controller="DigitalForm" asp-action="Index" onclick="DigitalForms(event)">
+		<i class="DigitalForm-icon" style="padding:0px 12px"></i>
+		Digital Forms
+		</a>
+		</li> *@
+
+       
+    </ul>
+</nav>
+
+
+<script type="text/javascript">
+    var idpLogin = "";
+    var bulkSign = "";
+    var spoc_Email = "";//
+    var user_Email = "";//
+    var checkDelegationPrevillage = "";
+    $(document).ready(function () {
+        //$.get('@Url.Action("GetLogoImage", "Logo")', function (data) {
+        //    $("#primaryImage").attr("src", data);
+        //    $("#secondaryImage").attr("src", data);
+        //});
+        // var imgData = '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'
+        // var img1 = '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'
+        // document.getElementById("primaryImage").src = "data:image/jpg;base64," + img1
+        // document.getElementById("secondaryImage").src = "data:image/jpg;base64," + imgData
+        // $("#primaryImage, #secondaryImage").click(function () {
+        //     window.location.href = '@Url.Action("Index", "Dashboard")'
+        // });
+        idpLogin = '@IDPLogin';
+        bulkSign = '@bulkSign';
+        spoc_Email = '@spoc_email';
+        user_Email = '@user_email';
+        prePaidOrPostPaid = '@prePaidOrPostPaid';
+        checkDelegationPrevillage = '@DelegateUser';
+    });
+
+    function viewStakeholder(organizationUid) {
+        $('#organizationDiv').empty();
+        $('#SearchOrganizationName').val(name);
+
+        var dataToSend = { organizationUid: organizationUid };
+        $.ajax({
+            url: '@Url.Action("GetOrganizationById", "ESealRegistration")',
+            data: dataToSend,
+            type: "GET",
+            /*contentType: "json",*/
+            error: ajaxErrorHandler,
+            beforeSend: function () {
+                $('#overlay').show();
+            },
+            complete: function () {
+                $('#overlay').hide();
+            },
+            success: function (data) {
+                if (data != null) {
+
+                    $('#organizationDiv').html(data);
+
+                } else {
+                    swal({ type: 'error', title: "Failed", text: "Organization details not found" });
+                }
+            }
+        });
+    }
+    function SignatureTemplates() {
+        $('#overlay').show();
+    }
+    // function Template(event) {
+    //     event.preventDefault();
+    //     if (idpLogin === "false") {
+    //         swal({ type: 'info', title: "Information", text: "Login with UgPass to access this module" });
+    //     } else if (bulkSign == "false") {
+    //         swal({ type: 'info', title: "Information", text: "You dont have permission to access this module" });
+    //     } else {
+    //         window.location.href = '@Url.Action("Index", "DocumentTemplates")'
+    //     }
+    // }
+    // function Transaction(event) {
+    //     event.preventDefault();
+    //     if (idpLogin == "false") {
+    //         swal({ type: 'info', title: "Information", text: "Login with UgPass to access this module" });
+    //     } else if (bulkSign == "false") {
+    //         swal({ type: 'info', title: "Information", text: "You dont have permission to access this module" });
+    //     } else {
+    //         window.location.href = '@Url.Action("GetBulkSigDataList", "BulkSign")'
+    //     }
+    // }
+    function Template(event) {
+
+         event.preventDefault();
+         if (idpLogin === "false")
+         {
+            swal({ type: 'info', title: "Information", text: "Login with UAEID to access this module" });
+         } else {
+             window.location.href = '@Url.Action("Index", "DocumentTemplates")'
+         }
+     }
+     function Transaction(event) {
+         event.preventDefault();
+         if (idpLogin == "false") {
+            swal({ type: 'info', title: "Information", text: "Login with UAEID to access this module" });
+         } else {
+             window.location.href = '@Url.Action("GetBulkSigDataList", "BulkSign")'
+         }
+     }
+    function Document(event) {
+        event.preventDefault();
+        if (idpLogin == "false") {
+            swal({ type: 'info', title: "Information", text: "Login with UAEID to access this module" });
+        }
+        else {
+            window.location.href = '@Url.Action("Index", "Documents")'
+        }
+    }
+    // function Credential(event) {
+    //     event.preventDefault();
+    //     if (idpLogin == "false") {
+    //         swal({ type: 'info', title: "Information", text: "Login with UgPass to access this module" });
+    //     }
+    //     else {
+    //         window.location.href = '@Url.Action("Index", "Wallet")'
+    //     }
+    // }
+    // function RevokeCredential(event) {
+    //     event.preventDefault();
+    //     if (idpLogin == "false") {
+    //         swal({ type: 'info', title: "Information", text: "Login with UgPass to access this module" });
+    //     }
+    //     else {
+    //         window.location.href = '@Url.Action("Revoke", "Wallet")'
+    //     }
+    // }
+    function Verification(event) {
+        event.preventDefault();
+        if (idpLogin == "false") {
+            swal({ type: 'info', title: "Information", text: "Login with UAEID to access this module" });
+        }
+        else {
+            window.location.href = '@Url.Action("Index", "DocumentVerification")'
+        }
+    }
+    function Subscription(event) {
+        event.preventDefault();
+        if (idpLogin == "false") {
+            swal({ type: 'info', title: "Information", text: "Login with UAEID to access this module" });
+        }
+        else {
+            window.location.href = '@Url.Action("SubscriptionList", "Subscription")'
+        }
+    }
+    // function DocIssuer(event) {
+    //     event.preventDefault();
+    //     if (idpLogin == "false") {
+    //         swal({ type: 'info', title: "Information", text: "Login with UgPass to access this module" });
+    //     }
+    //     else {
+    //         window.location.href = '@Url.Action("List", "DocumentIsuuer")'
+    //     }
+    // }
+
+    function DocIssuer(event) {
+        event.preventDefault();
+
+        if (idpLogin == "false") {
+            swal({ type: 'info', title: "Information", text: "Login with UAEID to access this module" });
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("DocumentIssuerPrivilage", "DocumentIsuuer")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status === "Success" && response.result.organisationPrivileges.documentIssuer === true) {
+                    window.location.href = '@Url.Action("List", "DocumentIsuuer")' // Redirect if issuer is true
+                } else {
+                    swal({ type: 'error', title: "Access Denied", text: "You don't have permission to access this module." });
+                }
+            },
+            error: function () {
+                swal({ type: 'error', title: "Error", text: "Something went wrong, please try again later." });
+            }
+        });
+    }
+    function VerificationRequests(event) {
+        event.preventDefault();
+        if (idpLogin == "false") {
+            swal({ type: 'info', title: "Information", text: "Login with UAEID to access this module" });
+        }
+        else {
+            window.location.href = '@Url.Action("List", "VerificationRequests")'
+        }
+    }
+
+    function CheckSpoc(event) {
+        event.preventDefault();
+
+        if (spoc_Email != user_Email) {
+            swal({ type: 'info', title: "Information", text: "Only Spoc email can access this module" });
+        }
+        else if (prePaidOrPostPaid == "True") {
+            swal({ type: 'info', title: "Information", text: "Only PrePaid Organization can access this module" });
+        }
+        else if (idpLogin == "false") {
+            swal({ type: 'info', title: "Information", text: "Login with UAEID to access this module" });
+        }
+        else {
+            window.location.href = '@Url.Action("Index", "BuyCredits")'
+        }
+
+    }
+
+    function CheckSpocBalance(event) {
+        event.preventDefault();
+
+        if (spoc_Email != user_Email) {
+            swal({ type: 'info', title: "Information", text: "Only Spoc email can access this module" });
+        }
+        else if (prePaidOrPostPaid == "True") {
+            swal({ type: 'info', title: "Information", text: "Only PrePaid Organization can access this module" });
+        }
+        else {
+            window.location.href = '@Url.Action("BalanceList", "BalanceSheets")'
+        }
+
+    }
+
+    function checkDelegation(event) {
+        event.preventDefault();
+
+
+        if (idpLogin === "false") {
+            swal({ type: 'info', title: "Information", text: "Login with UAEID to access this module" });
+        }
+        else if (checkDelegationPrevillage == "false") {
+            swal({ type: 'info', title: "Information", text: "You don't have access to this module" });
+        }
+        else {
+            window.location.href = '@Url.Action("List", "SignatureDelegation")'
+        }
+
+    }
+
+    function DigitalForms(event) {
+        event.preventDefault();
+        if (idpLogin === "false") {
+            swal({ type: 'info', title: "Information", text: "Login with UAEID to access this module" });
+        }
+
+        else {
+            window.location.href = '@Url.Action("Index", "DigitalForm")'
+        }
+    }
+
+</script>

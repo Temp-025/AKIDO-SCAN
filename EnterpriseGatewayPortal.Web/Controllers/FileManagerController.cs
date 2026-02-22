@@ -1,8 +1,10 @@
 ﻿using EnterpriseGatewayPortal.Web.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EnterpriseGatewayPortal.Web.Controllers
 {
+    [Authorize]
     public class FileManagerController : Controller
     {
         private readonly DataExportService _dataExportService;

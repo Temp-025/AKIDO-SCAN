@@ -1,10 +1,12 @@
 ﻿using EnterpriseGatewayPortal.Core.Domain.Services;
 using EnterpriseGatewayPortal.Core.Domain.Services.Communication;
 using EnterpriseGatewayPortal.Core.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EnterpriseGatewayPortal.Web.Controllers
 {
+    [Authorize]
     public class IdValidationController : Controller
     {
         private readonly Core.Domain.Services.IClientService _clientService;

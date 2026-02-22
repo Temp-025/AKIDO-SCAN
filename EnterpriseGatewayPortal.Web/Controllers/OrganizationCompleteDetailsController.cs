@@ -1,10 +1,12 @@
 ﻿using EnterpriseGatewayPortal.Core.Domain.Models;
 using EnterpriseGatewayPortal.Core.Domain.Services;
 using EnterpriseGatewayPortal.Core.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EnterpriseGatewayPortal.Web.Controllers
 {
+    [Authorize]
     public class OrganizationCompleteDetailsController : Controller
     {
         private readonly ILogger<OrganizationCompleteDetailsController> _logger;

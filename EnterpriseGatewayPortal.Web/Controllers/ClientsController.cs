@@ -33,18 +33,6 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         {
             return View();
         }
-        string get_unique_string(int string_length)
-        {
-            const string src = "ABCDEFGHIJKLMNOPQRSTUVWXYSabcdefghijklmnopqrstuvwxyz0123456789";
-            var sb = new StringBuilder();
-            Random RNG = new Random();
-            for (var i = 0; i < string_length; i++)
-            {
-                var c = src[RNG.Next(0, src.Length)];
-                sb.Append(c);
-            }
-            return sb.ToString();
-        }
 
         string getCertificate(IFormFile file)
         {
@@ -93,6 +81,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Save(ClientsNewViewModel viewModel)
         {
 
@@ -212,6 +201,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(ClientsEditViewModel viewModel)
         {
             if (viewModel.ApplicationName != null)

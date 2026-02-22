@@ -141,7 +141,6 @@ else
         $('#networkOverlay').hide();s
 
 
-         //var pdfData = '@(Convert.ToBase64String(Model.CredentialPdfReport))';
          //var pdf = '@Model.CredentialPdfReport';
         var pdfData = @Html.Raw(Json.Serialize(ViewBag.PdfBytes));
          uploadPdfFromBytes(pdfData);
@@ -266,8 +265,6 @@ else
         //         }
         //     }
         // });
-
-        //var byteCharacters = atob('@(Convert.ToBase64String(Model.CredentialPdfReport))');
          var pdfData = @Html.Raw(Json.Serialize(Model.CredentialPdfReport));
         var byteArray = window.atob(pdfData);
         // var byteNumbers = new Array(byteCharacters.length);
@@ -414,7 +411,6 @@ else
             });
 
             function signRetry(data) {
-                var byteCharacters = atob('@(Convert.ToBase64String(Model.CredentialPdfReport))');
                 var byteNumbers = new Array(byteCharacters.length);
                 for (var i = 0; i < byteCharacters.length; i++) {
                     byteNumbers[i] = byteCharacters.charCodeAt(i);

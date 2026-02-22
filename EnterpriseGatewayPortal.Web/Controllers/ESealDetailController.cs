@@ -19,7 +19,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         private readonly IOrganizationCertificateService _organizationCertificateService;
         private readonly IOrganizationDetailService _organizationDetailService;
         private readonly IConfiguration _configuration;
-        
+
         public ESealDetailController(IAdminLogService adminLogService,
             IESealDetailService eSealDetail,
             IOrganizationCertificateService organizationCertificateService,
@@ -31,15 +31,15 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             _organizationDetailService = organizationDetailService;
             _configuration = configuration;
         }
-        
+
         public async Task<IActionResult> Index()
         {
             string logMessage;
             try
             {
-                var OrganizationDetailsindb=await _organizationDetailService.GetAllOrganizationDetailListAsync();
+                var OrganizationDetailsindb = await _organizationDetailService.GetAllOrganizationDetailListAsync();
                 var OrganizationDetailsList = (IEnumerable<OrganizationDetail>)OrganizationDetailsindb.Resource;
-                var OrganizationDetails= OrganizationDetailsList.First();
+                var OrganizationDetails = OrganizationDetailsList.First();
 
                 if (OrganizationDetails == null)
                 {
@@ -81,6 +81,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult MakeTransparentImage(EsealImageDTO esealImageDTO)
         {
             APIResponse response = new();
@@ -107,6 +108,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
 
         [HttpPost]
         [Route("[action]")]
+        [ValidateAntiForgeryToken]
         public async Task<JsonResult> Edit(string eSealImage)
         {
             string logMessage;
@@ -126,11 +128,11 @@ namespace EnterpriseGatewayPortal.Web.Controllers
 
                 return Json(new { Status = "Failed", Title = "ESeal Logo Update", response.Message });
             }
-     
+
             ESealImageUpdateDTO eSealImageUpdateDTO = new ESealImageUpdateDTO();
 
             eSealImageUpdateDTO.eSealImage = eSealImage;
-            eSealImageUpdateDTO.orgUid= organizationUid;
+            eSealImageUpdateDTO.orgUid = organizationUid;
             var response1 = await _organizationDetailService.UpdateESealImageAsync(eSealImageUpdateDTO);
             if (!response.Success)
             {

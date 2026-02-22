@@ -166,6 +166,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reports([FromForm] AdminLogReportViewModel viewModel)
         {
             string logMessage;
@@ -208,7 +209,6 @@ namespace EnterpriseGatewayPortal.Web.Controllers
                 "Get Admin Reports", LogMessageType.SUCCESS.GetValue(), logMessage, UUID, Email);
 
             if (viewModel is null ||
-                viewModel.ModuleName is null ||
                 viewModel.StartDate is null ||
                 viewModel.EndDate is null)
             {
@@ -220,7 +220,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
                 {
 
                     UserName = userName,
-                    ModuleName = viewModel.ModuleName.GetValue(),
+                    //ModuleName = viewModel.ModuleName.GetValue(),
                     StartDate = viewModel.StartDate.Value.ToString("yyyy-MM-dd 00:00:00"),
                     EndDate = viewModel.EndDate.Value.ToString("yyyy-MM-dd 23:59:59"),
                     PerPage = viewModel.PerPage,

@@ -27,11 +27,12 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         {
             var cookieOptions = new CookieOptions
             {
+                HttpOnly = true,
                 Path = "/",
                 Expires = DateTime.Now.AddDays(1),
             };
             Response.Cookies.Append("NavigationLayout", Layout, cookieOptions);
-            if(Layout == "KYCAdminLayout")
+            if (Layout == "KYCAdminLayout")
             {
                 return Json(new { redirectUrl = Url.Action("Index", "KYCDashboard") });
             }
@@ -39,10 +40,17 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult SetTheme(string data)
         {
-            CookieOptions cookie = new CookieOptions();
-            cookie.Expires = DateTime.Now.AddYears(1);
+            var cookie = new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddYears(1),
+                HttpOnly = true,
+                Secure = Request.IsHttps,
+                SameSite = SameSiteMode.Lax
+            };
+
             Response.Cookies.Append("theme", data, cookie);
             return Ok();
         }

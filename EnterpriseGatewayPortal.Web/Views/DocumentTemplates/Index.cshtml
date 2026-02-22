@@ -23,36 +23,6 @@
 
 </style>
 
-@if (Model == null || Model.Documents.Count() == 0)
-{
-    <style>
-        table {
-            height: 70% !important;
-        }
-
-        .table-hover > tbody > tr:hover > td {
-            background: none !important;
-        }
-
-        body {
-            overflow: hidden;
-        }
-
-        .dataTables_wrapper {
-            height: 100% !important;
-        }
-
-            .dataTables_wrapper > .row:nth-of-type(2) {
-                height: 100% !important;
-            }
-
-        td:not([style*="display: none"]) {
-            border-bottom-right-radius: 12px !important;
-            border-bottom-left-radius: 12px !important;
-        }
-    </style>
-}
-
 <div class="classshide">
     <div id='viewer'></div>
 </div>
@@ -76,7 +46,7 @@
                        
                     </div>
                 </div>
-                <table id="templatesTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table @(Model == null || Model.Documents.Count() == 0 ? "empty-table" : "")">
+                <table id="templatesTable" class="table-striped table-bordered table-hover table-checkable order-column full-width table">
                     <thead>
                         <tr>
                             <th hidden>Id</th>

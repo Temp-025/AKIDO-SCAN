@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
-using System.Xml.Linq;
 
 namespace EnterpriseGatewayPortal.Web.Models.Users
 {
@@ -26,15 +25,15 @@ namespace EnterpriseGatewayPortal.Web.Models.Users
         [Display(Name = "Email ")]
         public string MailId { get; set; }
 
-       
+
         [Required]
-        [DataType(DataType.PhoneNumber, ErrorMessage = "Mobile number length should be 10 digit required")]
-        [MinLength(10)]
-        [MaxLength(10)]
+        [DataType(DataType.PhoneNumber, ErrorMessage = "Mobile number length should be 9 digit required")]
+        [MinLength(9)]
+        [MaxLength(9)]
         [Display(Name = "Mobile Number ")]
         public string MobileNo { get; set; }
 
-        
+
 
         //[Required]
         [Display(Name = "Role ")]
@@ -45,6 +44,6 @@ namespace EnterpriseGatewayPortal.Web.Models.Users
         [Display(Name = "Status ")]
         public string Status { get; set; }
 
-        
+
     }
 }

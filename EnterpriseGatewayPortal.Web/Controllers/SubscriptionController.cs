@@ -220,6 +220,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetDocumentType(string issuerUid)
         {
             var response = await _documentVerifyIssuerService.GetDocTypeListByIdAsync(issuerUid);
@@ -249,6 +250,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CheckRecord(string issuerUid)
         {
             try

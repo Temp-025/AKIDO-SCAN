@@ -7,6 +7,7 @@ using EnterpriseGatewayPortal.Core.DTOs;
 using EnterpriseGatewayPortal.Core.Utilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 
 
 namespace EnterpriseGatewayPortal.Core.Services
@@ -38,13 +39,24 @@ namespace EnterpriseGatewayPortal.Core.Services
         }
 
         private static Random random = new Random();
+
         public static string RandomString(int length)
         {
-
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz@#$0123456789";
-            return new string(Enumerable.Repeat(chars, length)
-              .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            var result = new char[length];
+            var bytes = new byte[length];
+
+            RandomNumberGenerator.Fill(bytes);
+
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = chars[bytes[i] % chars.Length];
+            }
+
+            return new string(result);
         }
+
         public async Task<UserResponse> RevertUser(User user)
         {
             if (user == null)

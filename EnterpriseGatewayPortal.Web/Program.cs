@@ -131,14 +131,22 @@ finally
 
 async Task ConfigureServices(WebApplicationBuilder builder)
 {
-    builder.Services.AddHttpClient("ignoreSSL")
-        .ConfigurePrimaryHttpMessageHandler(() =>
-        {
-            return new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
-            };
-        });
+
+    if (builder.Environment.IsDevelopment())
+    {
+        builder.Services.AddHttpClient("ignoreSSL")
+            .ConfigurePrimaryHttpMessageHandler(() =>
+                new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                });
+    }
+    else
+    {
+        builder.Services.AddHttpClient("ignoreSSL");
+    }
+
     ConfigurationManager configuration = builder.Configuration;
 
     var origins = configuration.GetSection("Origin_url").Get<string[]>();

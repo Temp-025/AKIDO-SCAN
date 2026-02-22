@@ -103,6 +103,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Save(RoleManagementNewViewModel viewModel)
         {
             try
@@ -165,6 +166,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(RoleManagementNewViewModel viewModel)
         {
             try
@@ -227,6 +229,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             try

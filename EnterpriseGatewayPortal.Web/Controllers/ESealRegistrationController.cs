@@ -247,6 +247,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Route("[action]")]
         public async Task<IActionResult> UpdateAgentUrl(UpdateSpocAndAgentUrlViewModel viewModel)
         {
@@ -297,6 +298,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
 
         [HttpPost]
         [Route("[action]")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateSpocEmail(UpdateSpocAndAgentUrlViewModel viewModel)
         {
             string logMessage;
@@ -345,6 +347,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
         [HttpPost]
         [Route("[action]")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateEmailDomain(UpdateEmailDomainViewModel viewModel)
         {
             string logMessage;

@@ -1,12 +1,11 @@
 ﻿using EnterpriseGatewayPortal.Core.Domain.Services;
 using EnterpriseGatewayPortal.Core.DTOs;
 using EnterpriseGatewayPortal.Web.Constants;
-using EnterpriseGatewayPortal.Web.ViewModel.VerifyWalletCredential;
-using EnterpriseGatewayPortal.Web.ViewModel.Wallet;
+using EnterpriseGatewayPortal.Web.Enums;
 using EnterpriseGatewayPortal.Web.ViewModel;
+using EnterpriseGatewayPortal.Web.ViewModel.VerifyWalletCredential;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using EnterpriseGatewayPortal.Web.Enums;
 
 namespace EnterpriseGatewayPortal.Web.Controllers
 {
@@ -90,6 +89,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Approve(int id)
         {
             ApproveRejectWalletVerifierReqDTO dto = new ApproveRejectWalletVerifierReqDTO();
@@ -110,6 +110,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reject(int id, string remarks)
         {
             ApproveRejectWalletVerifierReqDTO dto = new ApproveRejectWalletVerifierReqDTO();

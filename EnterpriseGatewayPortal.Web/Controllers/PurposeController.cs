@@ -1,8 +1,5 @@
-﻿using DocumentFormat.OpenXml.Drawing.Charts;
-using EnterpriseGatewayPortal.Core.Domain.Services;
+﻿using EnterpriseGatewayPortal.Core.Domain.Services;
 using EnterpriseGatewayPortal.Core.DTOs;
-using EnterpriseGatewayPortal.Core.Utilities;
-using EnterpriseGatewayPortal.Web.Constants;
 using EnterpriseGatewayPortal.Web.ViewModel;
 using EnterpriseGatewayPortal.Web.ViewModel.Purposes;
 using Microsoft.AspNetCore.Mvc;
@@ -71,6 +68,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             return View(ViewModel);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Save(PurposeNewViewModel ViewModel)
         {
             if (!ModelState.IsValid)
@@ -101,6 +99,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             }
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(PurposeEditViewModel ViewModel)
         {
             if (!ModelState.IsValid)
@@ -133,6 +132,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             }
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _purposeService.DeletePurposeAsync(id);

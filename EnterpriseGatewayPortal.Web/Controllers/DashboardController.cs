@@ -79,6 +79,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             return clientslist.ToArray();
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<JsonResult> GetServiceProviderGraphDetails(string serviceProviderName)
         {
             var graphDetails = await _statisticsService.GetGraphCountAsync(serviceProviderName);

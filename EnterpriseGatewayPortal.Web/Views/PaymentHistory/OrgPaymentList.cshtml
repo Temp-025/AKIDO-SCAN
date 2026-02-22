@@ -132,90 +132,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model.Count() > 0)
-                    {
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td hidden>@item.Id</td>
-
-                                @if (!String.IsNullOrEmpty(item.PaymentChannel))
-                                {
-                                    <td>@item.PaymentChannel</td>
-                                }
-                                else
-                                {
-                                    <td>N/A</td>
-                                }
-                                @if (item.TotalAmount != 0)
-                                {
-                                    <td>@item.TotalAmount</td>
-                                }
-                                else
-                                {
-                                    <td>N/A</td>
-                                }
-                                @if (!String.IsNullOrEmpty(item.TransactionReferenceId))
-                                {
-                                    <td>@item.TransactionReferenceId</td>
-                                }
-                                else
-                                {
-                                    <td>N/A</td>
-                                }
-                                @* @if (!String.IsNullOrEmpty(item.InvoiceNumber))
-                                    {
-                                        <td>@item.InvoiceNumber</td>
-                                    }
-                                    else
-                                    {
-                                        <td>N/A</td>
-                                    }*@
-                                @if (!String.IsNullOrEmpty(item.PaymentStatus))
-                                {
-                                    <td>@item.PaymentStatus</td>
-                                }
-                                else
-                                {
-                                    <td>N/A</td>
-                                }
-                                @*<td>@item.CreatedOn</td>*@
-                                <td>@item.CreatedOn.ToString("yyyy-MM-dd")</td>
-
-                                <td class="valigntop">
-                                    <div class="">
-                                        <button class="btn btn-xs deepPink-bgcolor no-margin Actions_btn" type="button" data-toggle="dropdown" style="font-size:0.8rem;"
-                                                aria-expanded="false">
-                                            Actions
-                                            <i class="fa fa-angle-down"></i>
-                                        </button>
-                                        <ul class="dropdown-menu pull-left" role="menu">
-
-                                            <li class="table-dropdown-li">
-                                                <a asp-action="View" asp-controller="PaymentHistory" asp-route-ackId="@item.AggregatorAcknowledgementId" onclick="document.getElementById('navigationNetworkOverlay').style.display='block'">
-                                                    <img src="~/assets/images/Eye_View_Icon.svg" alt="edit" style="position: relative;bottom: 1px;width: 18px;height: 18px;" />View
-                                                </a>
-                                            </li>
-                                            @if (item.PaymentChannel.ToLower() != "manual")
-                                            {
-                                                <li class="table-dropdown-li">
-                                                    <a onclick="showPaymentInfo('@item.PaymentInfo')">
-                                                        <img src="~/assets/images/InfoIcon.svg"
-                                                             alt="More info"
-                                                             title="More info"
-                                                             class="info-icon" style="position: relative;bottom: 1px;width: 18px;height: 18px;" />Payment Info
-                                                    </a>
-                                                </li>
-                                            }
-
-                                        </ul>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
                         <tr>
                             <td style="display: none;"></td>
                             <td style="text-align:center" valign="top" colspan="6" class="dataTables_empty">
@@ -229,7 +145,6 @@
                             <td style="display: none;"></td>
                             <td style="display: none;"></td>
                         </tr>
-                    }
                 </tbody>
             </table>
         </div>

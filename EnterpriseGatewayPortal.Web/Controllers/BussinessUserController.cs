@@ -23,11 +23,10 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         private readonly IConfiguration _configuration;
         private readonly ILogger<BussinessUserController> _logger;
         private readonly IOrganizationDetailService _organizationDetailService;
-        private readonly IOrgSignatureTemplateService _orgSignatureTemplateService;
+        //private readonly IOrgSignatureTemplateService _orgSignatureTemplateService;
         public BussinessUserController(IAdminLogService adminLogService,
             IBussinessUserService bussinessUserService,
             ILocalBusinessUsersService localBusinessUsersService,
-            IOrgSignatureTemplateService orgSignatureTemplateService,
             IWebHostEnvironment environment, IConfiguration configuration, IOrganizationDetailService organizationDetailService,
             ILogger<BussinessUserController> logger) : base(adminLogService)
 
@@ -38,7 +37,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             _configuration = configuration;
             _logger = logger;
             _organizationDetailService = organizationDetailService;
-            _orgSignatureTemplateService = orgSignatureTemplateService;
+            //_orgSignatureTemplateService = orgSignatureTemplateService;
         }
 
         [HttpGet]
@@ -75,20 +74,19 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Add()
+        public IActionResult Add()
         {
-            string logMessage;
-            var organizationTemplates = await _orgSignatureTemplateService.GetOrganizationTemplatesDTOByUIdAsync(OrganizationId);
+            //var organizationTemplates = await _orgSignatureTemplateService.GetOrganizationTemplatesDTOByUIdAsync(OrganizationId);
 
-            var templateDto = (OrganizationTemplatesDTO)organizationTemplates.Resource;
-            if (templateDto == null)
-            {
-                logMessage = $"Failed to get the Organization Template From Local DB";
-                SendAdminLog(ModuleNameConstants.SignatureTemplates, ServiceNameConstants.SignatureTemplates,
-                    "Get Organization Template List", LogMessageType.FAILURE.ToString(), logMessage, UUID, Email);
-                return NotFound();
-            }
-            ViewBag.SignatureTemplate = templateDto.signatureTemplateId;
+            //var templateDto = (OrganizationTemplatesDTO)organizationTemplates.Resource;
+            //if (templateDto == null)
+            //{
+            //    logMessage = $"Failed to get the Organization Template From Local DB";
+            //    SendAdminLog(ModuleNameConstants.SignatureTemplates, ServiceNameConstants.SignatureTemplates,
+            //        "Get Organization Template List", LogMessageType.FAILURE.ToString(), logMessage, UUID, Email);
+            //    return NotFound();
+            //}
+            //ViewBag.SignatureTemplate = templateDto.signatureTemplateId;
             return View();
         }
 
@@ -215,16 +213,16 @@ namespace EnterpriseGatewayPortal.Web.Controllers
                         "Get Business user details", LogMessageType.FAILURE.ToString(), logMessage, UUID, Email);
                     return NotFound();
                 }
-                var organizationTemplates = await _orgSignatureTemplateService.GetOrganizationTemplatesDTOByUIdAsync(OrganizationId);
+                //var organizationTemplates = await _orgSignatureTemplateService.GetOrganizationTemplatesDTOByUIdAsync(OrganizationId);
 
-                var templateDto = (OrganizationTemplatesDTO)organizationTemplates.Resource;
-                if (templateDto == null)
-                {
-                    logMessage = $"Failed to get the Organization Template From Local DB";
-                    SendAdminLog(ModuleNameConstants.SignatureTemplates, ServiceNameConstants.SignatureTemplates,
-                        "Get Organization Template List", LogMessageType.FAILURE.ToString(), logMessage, UUID, Email);
-                    return NotFound();
-                }
+                //var templateDto = (OrganizationTemplatesDTO)organizationTemplates.Resource;
+                //if (templateDto == null)
+                //{
+                //    logMessage = $"Failed to get the Organization Template From Local DB";
+                //    SendAdminLog(ModuleNameConstants.SignatureTemplates, ServiceNameConstants.SignatureTemplates,
+                //        "Get Organization Template List", LogMessageType.FAILURE.ToString(), logMessage, UUID, Email);
+                //    return NotFound();
+                //}
                 // ViewBag.SignatureTemplate = templateDto.signatureTemplateId;
                 ViewBag.SignaturePhoto = district.SignaturePhoto;
                 ViewBag.InitialImage = district.ShortSignature;
@@ -249,7 +247,6 @@ namespace EnterpriseGatewayPortal.Web.Controllers
                     Status = district.Status,
                     Template = Convert.ToBoolean(district.IsEsealPreparatory),
                     SubscriberUid = district.SubscriberUid,
-                    SignatureTemplate = templateDto.signatureTemplateId
                 };
 
                 logMessage = $"Successfully received the Business User details  From Local DB";
@@ -265,6 +262,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateBusinessUser(BusinessUserEditViewModel viewModel)
         {
             string logMessage;

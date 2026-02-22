@@ -53,7 +53,6 @@
     /* Add your custom arrow */
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         background: url('@Url.Content("~/assets/images/dropDown-icon-brown.svg")');
-        //background: url('@Url.Content("~/assets/images/imgDropDownBrown.png")');
         background-repeat: no-repeat;
         background-size: 16px 16px;
         width: 19px;
@@ -330,7 +329,7 @@
     <div class="col-md-12 plr">
         <div class="card-custom">
             <div class="card-body">
-                <form enctype="multipart/form-data" asp-action="Save">
+                <form enctype="multipart/form-data" asp-action="Save">  
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="form-row">
                         <div class="form-group col-md-12">

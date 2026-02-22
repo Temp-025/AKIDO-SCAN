@@ -2,6 +2,7 @@
 @using EnterpriseGatewayPortal.Core.DTOs
 @using EnterpriseGatewayPortal.Core.Domain.Services
 @using EnterpriseGatewayPortal.Web.Models
+@Html.AntiForgeryToken();
 
 @*@using DTPortal.Core.Constants*@
 @*@inject IMakerCheckerService MakerCheckerService*@
@@ -777,6 +778,9 @@
 
         $.ajax({
             type: "POST",
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
             url: '@Url.Action("UpdateSpocEmail", "ESealRegistration")',
             data: viewModel,
             dataType: "json",
@@ -885,6 +889,9 @@
 
         $.ajax({
             type: "POST",
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
             url: '@Url.Action("UpdateEmailDomain", "ESealRegistration")',
             data: viewModel,
             dataType: "json",

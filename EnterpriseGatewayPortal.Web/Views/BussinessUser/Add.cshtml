@@ -107,7 +107,6 @@
     }
 
     .custom-file-input-style {
-        // border: 1px solid #CBA344;
         border: 2px solid #E1E3E5;
         border-radius: 8px;
         padding: 0;
@@ -153,7 +152,6 @@
     }
 
     .custom-file-input-style2 {
-        // border: 1px solid #CBA344;
         border: 2px solid #E1E3E5;
         border-radius: 8px;
         box-sizing: border-box;
@@ -400,8 +398,6 @@
 
     /* Add your custom arrow */
     .select2-container--default .select2-selection--single .select2-selection__arrow {
-        // background: url('@Url.Content("~/assets/images/dropDown-icon-brown.svg")'); /*previously used*/
-        //background: url('@Url.Content("~/assets/images/imgDropDownBrown.png")');
         background: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M27.0613 13.0612L17.0613 23.0612C16.9219 23.2011 16.7563 23.312 16.574 23.3877C16.3917 23.4634 16.1962 23.5024 15.9988 23.5024C15.8013 23.5024 15.6059 23.4634 15.4235 23.3877C15.2412 23.312 15.0756 23.2011 14.9363 23.0612L4.93626 13.0612C4.65446 12.7794 4.49615 12.3972 4.49615 11.9987C4.49615 11.6002 4.65446 11.218 4.93626 10.9362C5.21805 10.6544 5.60024 10.4961 5.99876 10.4961C6.39727 10.4961 6.77946 10.6544 7.06126 10.9362L16 19.875L24.9388 10.935C25.2205 10.6532 25.6027 10.4949 26.0013 10.4949C26.3998 10.4949 26.782 10.6532 27.0638 10.935C27.3455 11.2168 27.5039 11.599 27.5039 11.9975C27.5039 12.396 27.3455 12.7782 27.0638 13.06L27.0613 13.0612Z' fill='%2392722A'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-size: 16px 16px;
@@ -415,10 +411,6 @@
         display: none !important;
     }
 
-    // .select2-search select2-search--dropdown {
-        // display: none !important;
-        //
-    }
 
     .select2-container .select2-dropdown.select2-dropdown--below {
         top: -5px !important;
@@ -479,7 +471,6 @@
 
     /* Custom arrow */
     .country-code-dropdown + .select2-container--default .select2-selection--single .select2-selection__arrow {
-        // background: url('@Url.Content("~/assets/images/imgDropDownBrown.png")') no-repeat center; /*previously used*/
 
         background: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M27.0613 13.0612L17.0613 23.0612C16.9219 23.2011 16.7563 23.312 16.574 23.3877C16.3917 23.4634 16.1962 23.5024 15.9988 23.5024C15.8013 23.5024 15.6059 23.4634 15.4235 23.3877C15.2412 23.312 15.0756 23.2011 14.9363 23.0612L4.93626 13.0612C4.65446 12.7794 4.49615 12.3972 4.49615 11.9987C4.49615 11.6002 4.65446 11.218 4.93626 10.9362C5.21805 10.6544 5.60024 10.4961 5.99876 10.4961C6.39727 10.4961 6.77946 10.6544 7.06126 10.9362L16 19.875L24.9388 10.935C25.2205 10.6532 25.6027 10.4949 26.0013 10.4949C26.3998 10.4949 26.782 10.6532 27.0638 10.935C27.3455 11.2168 27.5039 11.599 27.5039 11.9975C27.5039 12.396 27.3455 12.7782 27.0638 13.06L27.0613 13.0612Z' fill='%2392722A'/%3E%3C/svg%3E");
         background-size: 18px 18px;
@@ -711,7 +702,7 @@
 <script>
     var ninRegex = /^[A-Z0-9]{1,14}$/;
     var passportRegex = /^[A-Z0-9]{1,12}$/;
-    var signature_templateID = @Html.Raw(ViewBag.SignatureTemplate);
+
     $(document).ready(function () {
         $("#BusinessModule > a")
             .attr("aria-expanded", "true")
@@ -928,30 +919,30 @@
             }
             mobileNumber = newNumber;
         }
-        if(signature_templateID == 2){
-            if(designation == null || designation == ""){
-                Swal.fire({ icon: 'error', title: "error", text: "Designation is Mandatory Based on the selected Signature Template" });
-                 validData = false;
-            }
+        //if(signature_templateID == 2){
+        //    if(designation == null || designation == ""){
+        //        Swal.fire({ icon: 'error', title: "error", text: "Designation is Mandatory Based on the selected Signature Template" });
+        //         validData = false;
+        //    }
 
-        }
-        if(signature_templateID == 3){
-            if(signaturePhoto == null || signaturePhoto == ""){
-                Swal.fire({ icon: 'error', title: "error", text: "SignaturePhoto Photo is Mandatory Based on the selected Signature Template" });
-                 validData = false;
-            }
+        //}
+        //if(signature_templateID == 3){
+        //    if(signaturePhoto == null || signaturePhoto == ""){
+        //        Swal.fire({ icon: 'error', title: "error", text: "SignaturePhoto Photo is Mandatory Based on the selected Signature Template" });
+        //         validData = false;
+        //    }
 
-        }
-        if(signature_templateID == 4){
-            if((signaturePhoto == null || signaturePhoto == "") || (designation == null || designation == "")){
-                Swal.fire({ icon: 'error', title: "error", text: "SignaturePhoto Photo and Designation is Mandatory Based on the selected Signature Template" });
-                 validData = false;
-            }
+        //}
+        //if(signature_templateID == 4){
+        //    if((signaturePhoto == null || signaturePhoto == "") || (designation == null || designation == "")){
+        //        Swal.fire({ icon: 'error', title: "error", text: "SignaturePhoto Photo and Designation is Mandatory Based on the selected Signature Template" });
+        //         validData = false;
+        //    }
 
-        }
-        if (!validData) {
-            return;
-        }
+        //}
+        //if (!validData) {
+        //    return;
+        //}
 
         // Create the businessUser object with the validated values
         var businessUser = [

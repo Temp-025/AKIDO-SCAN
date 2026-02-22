@@ -132,7 +132,6 @@
 
 			<div class="pdfView">
 				<table align='center'>
-					<h2 style="font-weight:bold; color: #3498db; padding-bottom: 15px;">Credential Report</h2>
 					<tr>
 						<th style="min-width:210px"></th>
 						<th></th>
@@ -202,7 +201,6 @@
 						<td><div style="float:left">Data Attributes</div><div style="margin-left:33%; padding-left:3px"></div></td>
 
 					</tr>
-					<table class="split-table" style="border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, .15);">
 
 
 						@foreach (var orgUser in Model.DataAttributes)
@@ -248,15 +246,7 @@
 														<td><label>DataType</label></td>
 														<td> : </td>
 														<td>
-															@if (orgUser.DataType == null)
-
-															{
 																<label>NA</label>
-															}
-															else
-															{
-																<lable>@orgUser.DataType</lable>
-															}
 														</td>
 
 													</tr>
@@ -276,7 +266,6 @@
 						}
 					</table>
 
-				</table>
 
 
 			</div>

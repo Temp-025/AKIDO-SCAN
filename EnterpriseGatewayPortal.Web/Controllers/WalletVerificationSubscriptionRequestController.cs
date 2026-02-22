@@ -1,16 +1,11 @@
-﻿using DocumentFormat.OpenXml.Office2010.Excel;
-using EnterpriseGatewayPortal.Core.Domain.Models;
-using EnterpriseGatewayPortal.Core.Domain.Services;
+﻿using EnterpriseGatewayPortal.Core.Domain.Services;
 using EnterpriseGatewayPortal.Core.DTOs;
-using EnterpriseGatewayPortal.Core.Services;
 using EnterpriseGatewayPortal.Web.Constants;
 using EnterpriseGatewayPortal.Web.Enums;
 using EnterpriseGatewayPortal.Web.ViewModel;
 using EnterpriseGatewayPortal.Web.ViewModel.VerifyWalletCredential;
-using EnterpriseGatewayPortal.Web.ViewModel.Wallet;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using NuGet.Configuration;
 
 namespace EnterpriseGatewayPortal.Web.Controllers
 {
@@ -20,17 +15,17 @@ namespace EnterpriseGatewayPortal.Web.Controllers
 
         public WalletVerificationSubscriptionRequestController(IAdminLogService adminLogService, IWalletService walletService) : base(adminLogService)
         {
-           
-           _walletService = walletService;
+
+            _walletService = walletService;
         }
-       
+
         [HttpGet]
         public async Task<IActionResult> List()
         {
             var viewModel = new List<VerifyCredentialListViewModel>();
 
             var VerifiersList = await _walletService.GetAllCredentialsVerifieriesListByOrgId(OrganizationId);
-            
+
             if (VerifiersList == null)
             {
                 SendAdminLog(ModuleNameConstants.Wallet, ServiceNameConstants.WalletCredentials, "Get all wallet List", LogMessageType.FAILURE.ToString(), "Fail to get wallet list", UUID, Email);
@@ -54,7 +49,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
                     });
                 }
             }
-            
+
             return View(viewModel);
         }
 
@@ -92,6 +87,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Approve(int id)
         {
             ApproveRejectWalletVerifierReqDTO dto = new ApproveRejectWalletVerifierReqDTO();
@@ -112,6 +108,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reject(int id, string remarks)
         {
             ApproveRejectWalletVerifierReqDTO dto = new ApproveRejectWalletVerifierReqDTO();

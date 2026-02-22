@@ -1,9 +1,8 @@
-﻿using EnterpriseGatewayPortal.Core.Domain.Services.Communication;
-using EnterpriseGatewayPortal.Core.Domain.Services;
+﻿using EnterpriseGatewayPortal.Core.Domain.Services;
+using EnterpriseGatewayPortal.Core.Domain.Services.Communication;
 using EnterpriseGatewayPortal.Core.DTOs;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using EnterpriseGatewayPortal.Core.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EnterpriseGatewayPortal.Web.Controllers
 {
@@ -19,6 +18,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConvertFile([FromForm] IFormFile file)
         {
             if (file == null)
@@ -51,6 +51,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddCommentFile([FromForm] CommentrequestDTO request)
         {
             if (request.File == null)
@@ -75,6 +76,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddInitial_WatermarkFile([FromForm] InitialWatermarkDTO request)
         {
             if (request.Pdf == null)

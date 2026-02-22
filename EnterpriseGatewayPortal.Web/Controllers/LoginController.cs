@@ -124,6 +124,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index1(LoginModel loginModel)
         {
             var response = new Response();
@@ -235,8 +236,10 @@ namespace EnterpriseGatewayPortal.Web.Controllers
 
             var cookieOptions = new CookieOptions
             {
+                HttpOnly = true,
                 Path = "/",
                 Expires = DateTime.Now.AddDays(1),
+                Secure = Request.IsHttps
             };
 
             Response.Cookies.Append("MyCookieName", "CookieValue", cookieOptions);
@@ -639,8 +642,11 @@ namespace EnterpriseGatewayPortal.Web.Controllers
 
                 var cookieOptions = new CookieOptions
                 {
+                    HttpOnly = true,
                     Path = "/",
                     Expires = DateTime.Now.AddDays(1),
+                    Secure = Request.IsHttps,
+
                 };
                 if (Request.Cookies["NavigationLayout"] != null)
                 {

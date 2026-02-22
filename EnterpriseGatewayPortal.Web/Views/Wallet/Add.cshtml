@@ -1,5 +1,6 @@
 ﻿@model EnterpriseGatewayPortal.Web.ViewModel.Wallet.CredentialAddViewModel
 @using EnterpriseGatewayPortal.Web.Models
+@Html.AntiForgeryToken();
 
 @{
     ViewBag.Breadcrumb = new List<BreadCrumbModel>
@@ -1607,6 +1608,9 @@
             $.ajax({
                 type: "POST",
                 url: '@Url.Action("AddCategoryList", "Wallet")',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
                 data: JSON.stringify(credentialAddViewModel),
                 contentType: "application/json",
                 beforeSend: function () {

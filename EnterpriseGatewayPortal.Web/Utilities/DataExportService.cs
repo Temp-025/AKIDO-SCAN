@@ -290,32 +290,44 @@ namespace EnterpriseGatewayPortal.Web.Utilities
         {
             _logger.LogInformation("DownloadFile start...");
 
-            string path = Path.Combine(_environment.WebRootPath, FOLDER_PATH);
-            if (Directory.Exists(path))
+            var baseDir = Path.GetFullPath(Path.Combine(_environment.WebRootPath, FOLDER_PATH));
+
+            if (!Directory.Exists(baseDir))
             {
-                string filePath = $"{path}//{fileName}";
-                if (File.Exists(filePath))
-                {
-                    FileInfo fileInfo = new FileInfo(filePath);
-                    int differenceHours = (int)(DateTime.Now - fileInfo.CreationTime).TotalHours;
-                    if (differenceHours > fileExpirationHours)
-                    {
-                        _logger.LogError($"File {fileName} has expired");
-                        throw new NotFoundException("File doesn't exists");
-                    }
+                _logger.LogError($"Directory {baseDir} not found");
+                throw new NotFoundException("Directory not found");
+            }
 
-                    _logger.LogInformation("DownloadFile end...");
+            // Combine and normalize the requested path
+            var requestedPath = Path.GetFullPath(Path.Combine(baseDir, fileName));
 
-                    return File.ReadAllBytes(filePath);
-                }
+            // 🔒 Prevent path traversal: must stay inside baseDir
+            if (!requestedPath.StartsWith(baseDir, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogError($"Invalid file path attempt: {fileName}");
+                throw new NotFoundException("Invalid file path");
+            }
 
+            if (!File.Exists(requestedPath))
+            {
                 _logger.LogError($"File {fileName} not found");
                 throw new NotFoundException("File not found");
             }
 
-            _logger.LogError($"Directory {path} not found");
-            throw new NotFoundException("Directory not found");
+            var fileInfo = new FileInfo(requestedPath);
+
+            int differenceHours = (int)(DateTime.Now - fileInfo.CreationTime).TotalHours;
+            if (differenceHours > fileExpirationHours)
+            {
+                _logger.LogError($"File {fileName} has expired");
+                throw new NotFoundException("File doesn't exist");
+            }
+
+            _logger.LogInformation("DownloadFile end...");
+
+            return File.ReadAllBytes(requestedPath);
         }
+
 
         public byte[] GeneratePdf(string htmlContent)
         {

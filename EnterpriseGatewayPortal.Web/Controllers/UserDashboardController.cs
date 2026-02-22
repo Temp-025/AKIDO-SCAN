@@ -1,5 +1,4 @@
-﻿using EnterpriseGatewayPortal.Core.Domain.Models;
-using EnterpriseGatewayPortal.Core.Domain.Services;
+﻿using EnterpriseGatewayPortal.Core.Domain.Services;
 using EnterpriseGatewayPortal.Core.Domain.Services.Communication;
 using EnterpriseGatewayPortal.Web.Models;
 using EnterpriseGatewayPortal.Web.Models.SecurityQuestions;
@@ -17,16 +16,13 @@ namespace EnterpriseGatewayPortal.Web.Controllers
     public class UserDashboardController : BaseController
     {
         private readonly IUserService _userService;
-        private readonly ISecurityQuestionService _securityQuestionService;
         private readonly ILogger<UserDashboardController> _logger;
         private readonly IUserPasswordService _userPasswordService;
         public UserDashboardController(IAdminLogService adminLogService,
-            ISecurityQuestionService securityQuestionService,
             ILogger<UserDashboardController> logger,
             IUserService userService,
             IUserPasswordService userPasswordService) : base(adminLogService)
         {
-            _securityQuestionService = securityQuestionService;
             _logger = logger;
             _userService = userService;
             _userPasswordService = userPasswordService;
@@ -65,6 +61,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Profile(ProfileViewModel viewModel)
         {
 
@@ -131,143 +128,145 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             return View(model);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> SetSecurityQuestion(SecurityQuestionViewModel viewModel)
-        {
-            try
-            {
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> SetSecurityQuestion(SecurityQuestionViewModel viewModel)
+        //{
+        //    try
+        //    {
 
-                var QueAns1 = new UserSecurityQue
-                {
-                    UserId = viewModel.UserId,
-                    Question = viewModel.Question1,
-                    Answer = viewModel.Answer1,
-                    UpdatedBy = UUID,
-                    CreatedBy = UUID,
-                };
-                var response = await _securityQuestionService.CreateUserSecurityQnsAns(QueAns1);
-                if (response == null || !response.Success)
-                {
-                    viewModel.SecurityQueList1 = getSecurityQuestionList(1);
-                    viewModel.SecurityQueList2 = getSecurityQuestionList(2);
-                    return View("SetSecurityQuestion", viewModel);
-                }
-                else
-                {
-                    var QueAns2 = new UserSecurityQue
-                    {
-                        UserId = viewModel.UserId,
-                        Question = viewModel.Question2,
-                        Answer = viewModel.Answer2,
-                        UpdatedBy = UUID,
-                        CreatedBy = UUID,
-                    };
-                    var response1 = await _securityQuestionService.CreateUserSecurityQnsAns(QueAns2);
-                    if (response1 == null || !response1.Success)
-                    {
-                        AlertViewModel alert = new AlertViewModel { Message = (response1 == null ? "Internal error please contact to admin" : response1.Message) };
-                        TempData["Alert"] = JsonConvert.SerializeObject(alert);
-                        viewModel.SecurityQueList1 = getSecurityQuestionList(1);
-                        viewModel.SecurityQueList2 = getSecurityQuestionList(2);
-                        return View("SetSecurityQuestion", viewModel);
-                    }
-                    else
-                    {
-                        AlertViewModel alert = new AlertViewModel { IsSuccess = true, Message = "Your Password and Security question set successfully" };
-                        TempData["Alert"] = JsonConvert.SerializeObject(alert);
-                    }
-                }
-                return RedirectToAction("AccountActivateSuccess");
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("SetSecurityQuestion post Exception : {0}", e.Message);
-                ViewBag.error = "Internal Error";
-                ViewBag.error_description = "Something went wrong, Please try again later";
-                return View("Errorp");
-            }
-        }
+        //        var QueAns1 = new UserSecurityQue
+        //        {
+        //            UserId = viewModel.UserId,
+        //            Question = viewModel.Question1,
+        //            Answer = viewModel.Answer1,
+        //            UpdatedBy = UUID,
+        //            CreatedBy = UUID,
+        //        };
+        //        var response = await _securityQuestionService.CreateUserSecurityQnsAns(QueAns1);
+        //        if (response == null || !response.Success)
+        //        {
+        //            viewModel.SecurityQueList1 = getSecurityQuestionList(1);
+        //            viewModel.SecurityQueList2 = getSecurityQuestionList(2);
+        //            return View("SetSecurityQuestion", viewModel);
+        //        }
+        //        else
+        //        {
+        //            var QueAns2 = new UserSecurityQue
+        //            {
+        //                UserId = viewModel.UserId,
+        //                Question = viewModel.Question2,
+        //                Answer = viewModel.Answer2,
+        //                UpdatedBy = UUID,
+        //                CreatedBy = UUID,
+        //            };
+        //            var response1 = await _securityQuestionService.CreateUserSecurityQnsAns(QueAns2);
+        //            if (response1 == null || !response1.Success)
+        //            {
+        //                AlertViewModel alert = new AlertViewModel { Message = (response1 == null ? "Internal error please contact to admin" : response1.Message) };
+        //                TempData["Alert"] = JsonConvert.SerializeObject(alert);
+        //                viewModel.SecurityQueList1 = getSecurityQuestionList(1);
+        //                viewModel.SecurityQueList2 = getSecurityQuestionList(2);
+        //                return View("SetSecurityQuestion", viewModel);
+        //            }
+        //            else
+        //            {
+        //                AlertViewModel alert = new AlertViewModel { IsSuccess = true, Message = "Your Password and Security question set successfully" };
+        //                TempData["Alert"] = JsonConvert.SerializeObject(alert);
+        //            }
+        //        }
+        //        return RedirectToAction("AccountActivateSuccess");
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        _logger.LogInformation("SetSecurityQuestion post Exception : {0}", e.Message);
+        //        ViewBag.error = "Internal Error";
+        //        ViewBag.error_description = "Something went wrong, Please try again later";
+        //        return View("Errorp");
+        //    }
+        //}
 
-        public async Task<IActionResult> ChangeSecurityQuestion()
-        {
-            var id = int.Parse(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
-            // var id = 1;
-            var UserSecQues = await _securityQuestionService.GetUserSecurityQuestions(id);
-            if (UserSecQues == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                var model = new SecurityQuestionViewModel()
-                {
-                    Que1Id = UserSecQues.Result[0].Id,
-                    Question1 = UserSecQues.Result[0].Question,
-                    Que2Id = UserSecQues.Result[1].Id,
-                    Question2 = UserSecQues.Result[1].Question,
-                    UserId = id,
-                    SecurityQueList1 = getSecurityQuestionList(1),
-                    SecurityQueList2 = getSecurityQuestionList(2)
-                };
-                _logger.LogInformation("<-- ChangeSecurityQuestion get");
-                return View(model);
-            }
-        }
-        [HttpPost]
-        public async Task<IActionResult> ChangeSecurityQuestion(SecurityQuestionViewModel viewModel)
-        {
+        //public async Task<IActionResult> ChangeSecurityQuestion()
+        //{
+        //    var id = int.Parse(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+        //    // var id = 1;
+        //    var UserSecQues = await _securityQuestionService.GetUserSecurityQuestions(id);
+        //    if (UserSecQues == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    else
+        //    {
+        //        var model = new SecurityQuestionViewModel()
+        //        {
+        //            Que1Id = UserSecQues.Result[0].Id,
+        //            Question1 = UserSecQues.Result[0].Question,
+        //            Que2Id = UserSecQues.Result[1].Id,
+        //            Question2 = UserSecQues.Result[1].Question,
+        //            UserId = id,
+        //            SecurityQueList1 = getSecurityQuestionList(1),
+        //            SecurityQueList2 = getSecurityQuestionList(2)
+        //        };
+        //        _logger.LogInformation("<-- ChangeSecurityQuestion get");
+        //        return View(model);
+        //    }
+        //}
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> ChangeSecurityQuestion(SecurityQuestionViewModel viewModel)
+        //{
 
 
-            var QueAns1 = new UserSecurityQue
-            {
-                Id = viewModel.Que1Id,
-                UserId = viewModel.UserId,
-                Question = viewModel.Question1,
-                Answer = viewModel.Answer1,
-                CreatedBy = UUID,
-                UpdatedBy = UUID
-            };
-            var response = await _securityQuestionService.UpdateUserSecurityQnsAns(QueAns1);
-            if (response == null || !response.Success)
-            {
-                viewModel.SecurityQueList1 = getSecurityQuestionList(1);
-                viewModel.SecurityQueList2 = getSecurityQuestionList(2);
+        //    var QueAns1 = new UserSecurityQue
+        //    {
+        //        Id = viewModel.Que1Id,
+        //        UserId = viewModel.UserId,
+        //        Question = viewModel.Question1,
+        //        Answer = viewModel.Answer1,
+        //        CreatedBy = UUID,
+        //        UpdatedBy = UUID
+        //    };
+        //    var response = await _securityQuestionService.UpdateUserSecurityQnsAns(QueAns1);
+        //    if (response == null || !response.Success)
+        //    {
+        //        viewModel.SecurityQueList1 = getSecurityQuestionList(1);
+        //        viewModel.SecurityQueList2 = getSecurityQuestionList(2);
 
-                AlertViewModel alert = new AlertViewModel { Message = (response == null ? "Internal error please contact to admin" : response.Message) };
-                TempData["Alert"] = JsonConvert.SerializeObject(alert);
-                return View("ChangeSecurityQuestion", viewModel);
-            }
-            else
-            {
-                var QueAns2 = new UserSecurityQue
-                {
-                    Id = viewModel.Que2Id,
-                    UserId = viewModel.UserId,
-                    Question = viewModel.Question2,
-                    Answer = viewModel.Answer2,
-                    CreatedBy = UUID,
-                    UpdatedBy = UUID
-                };
-                var response1 = await _securityQuestionService.UpdateUserSecurityQnsAns(QueAns2);
-                if (response1 == null || !response1.Success)
-                {
-                    viewModel.SecurityQueList1 = getSecurityQuestionList(1);
-                    viewModel.SecurityQueList2 = getSecurityQuestionList(2);
+        //        AlertViewModel alert = new AlertViewModel { Message = (response == null ? "Internal error please contact to admin" : response.Message) };
+        //        TempData["Alert"] = JsonConvert.SerializeObject(alert);
+        //        return View("ChangeSecurityQuestion", viewModel);
+        //    }
+        //    else
+        //    {
+        //        var QueAns2 = new UserSecurityQue
+        //        {
+        //            Id = viewModel.Que2Id,
+        //            UserId = viewModel.UserId,
+        //            Question = viewModel.Question2,
+        //            Answer = viewModel.Answer2,
+        //            CreatedBy = UUID,
+        //            UpdatedBy = UUID
+        //        };
+        //        var response1 = await _securityQuestionService.UpdateUserSecurityQnsAns(QueAns2);
+        //        if (response1 == null || !response1.Success)
+        //        {
+        //            viewModel.SecurityQueList1 = getSecurityQuestionList(1);
+        //            viewModel.SecurityQueList2 = getSecurityQuestionList(2);
 
-                    AlertViewModel alert = new AlertViewModel { Message = (response1 == null ? "Internal error please contact to admin" : response1.Message) };
-                    TempData["Alert"] = JsonConvert.SerializeObject(alert);
-                    return View("ChangeSecurityQuestion", viewModel);
-                }
-                else
-                {
-                    AlertViewModel alert = new AlertViewModel { IsSuccess = true, Message = "Security question updated successfully" };
-                    TempData["Alert"] = JsonConvert.SerializeObject(alert);
-                    return RedirectToAction("Profile");
+        //            AlertViewModel alert = new AlertViewModel { Message = (response1 == null ? "Internal error please contact to admin" : response1.Message) };
+        //            TempData["Alert"] = JsonConvert.SerializeObject(alert);
+        //            return View("ChangeSecurityQuestion", viewModel);
+        //        }
+        //        else
+        //        {
+        //            AlertViewModel alert = new AlertViewModel { IsSuccess = true, Message = "Security question updated successfully" };
+        //            TempData["Alert"] = JsonConvert.SerializeObject(alert);
+        //            return RedirectToAction("Profile");
 
-                }
+        //        }
 
-            }
-        }
+        //    }
+        //}
         public List<SelectListItem> getSecurityQuestionList(int listNo)
         {
             var security = new List<SelectListItem>();
@@ -304,119 +303,120 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             }
             return security;
         }
-        [HttpGet]
-        public async Task<IActionResult> ValidateSecurityQuestion(string id)
-        {
-            try
-            {
-                _logger.LogInformation("--> ValidateSecurityQuestion get");
-                if (string.IsNullOrEmpty(id))
-                {
-                    _logger.LogInformation("ValidateSecurityQuestion get : id value getting null");
-                    ViewBag.error = "Invalid Request";
-                    ViewBag.error_description = "Input value getting null";
-                    return View("Errorp");
-                }
-                User Response = await _userService.GetUserByEmail(id); ;
+        //[HttpGet]
+        //public async Task<IActionResult> ValidateSecurityQuestion(string id)
+        //{
+        //    try
+        //    {
+        //        _logger.LogInformation("--> ValidateSecurityQuestion get");
+        //        if (string.IsNullOrEmpty(id))
+        //        {
+        //            _logger.LogInformation("ValidateSecurityQuestion get : id value getting null");
+        //            ViewBag.error = "Invalid Request";
+        //            ViewBag.error_description = "Input value getting null";
+        //            return View("Errorp");
+        //        }
+        //        User Response = await _userService.GetUserByEmail(id); ;
 
 
-                if (Response == null)
-                {
-                    _logger.LogInformation("ValidateSecurityQuestion get : getting user details response null");
-                    ViewBag.error = "Internal Error";
-                    ViewBag.error_description = "Something went wrong!";
-                    return View("Errorp");
-                }
+        //        if (Response == null)
+        //        {
+        //            _logger.LogInformation("ValidateSecurityQuestion get : getting user details response null");
+        //            ViewBag.error = "Internal Error";
+        //            ViewBag.error_description = "Something went wrong!";
+        //            return View("Errorp");
+        //        }
 
-                var UserStatus = Response.Status;
-                if (UserStatus == "NEW")
-                {
-                    _logger.LogInformation("ValidateSecurityQuestion get : User status is new fail to get security question details");
-                    ViewBag.error = "Invalid Request";
-                    ViewBag.error_description = "User security question not configured.";
-                    return View("Errorp");
-                }
+        //        var UserStatus = Response.Status;
+        //        if (UserStatus == "NEW")
+        //        {
+        //            _logger.LogInformation("ValidateSecurityQuestion get : User status is new fail to get security question details");
+        //            ViewBag.error = "Invalid Request";
+        //            ViewBag.error_description = "User security question not configured.";
+        //            return View("Errorp");
+        //        }
 
-                var UserSecQues = await _securityQuestionService.GetUserSecurityQuestions(Response.Id);
-                if (UserSecQues == null || !UserSecQues.Success)
-                {
-                    _logger.LogInformation("ValidateSecurityQuestion get :" + (UserSecQues != null ? UserSecQues.Message : " getting user sequrity question details response null"));
-                    ViewBag.error = (UserSecQues != null ? UserSecQues.Message : "");
-                    ViewBag.error_description = (UserSecQues != null ? UserSecQues.Message : "Something went wrong!");
-                    return View("Errorp");
-                }
+        //        var UserSecQues = await _securityQuestionService.GetUserSecurityQuestions(Response.Id);
+        //        if (UserSecQues == null || !UserSecQues.Success)
+        //        {
+        //            _logger.LogInformation("ValidateSecurityQuestion get :" + (UserSecQues != null ? UserSecQues.Message : " getting user sequrity question details response null"));
+        //            ViewBag.error = (UserSecQues != null ? UserSecQues.Message : "");
+        //            ViewBag.error_description = (UserSecQues != null ? UserSecQues.Message : "Something went wrong!");
+        //            return View("Errorp");
+        //        }
 
-                var model = new SecurityQuestionViewModel()
-                {
-                    Que1Id = UserSecQues.Result[0].Id,
-                    Que2Id = UserSecQues.Result[1].Id,
-                    UserId = Response.Id,
-                    Username = Response.Name,
-                    Question1 = UserSecQues.Result[0].Question,
-                    Question2 = UserSecQues.Result[1].Question,
-                };
-                _logger.LogInformation("<-- ValidateSecurityQuestion get");
-                return View(model);
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("ValidateSecurityQuestion get Exception : {0}", e.Message);
-                ViewBag.error = "Internal Error";
-                ViewBag.error_description = "Something went wrong, Please try again later";
-                return View("Errorp");
-            }
-        }
-        [HttpPost]
-        public async Task<IActionResult> ValidateSecurityQuestion(SecurityQuestionViewModel viewModel)
-        {
-            try
-            {
-                _logger.LogInformation("--> ValidateSecurityQuestion post");
-
-
-                ValidateUserSecQueRequest data = new ValidateUserSecQueRequest();
-                List<SecQuestionsAnswers> secQueList = new List<SecQuestionsAnswers>()
-            {
-                new SecQuestionsAnswers
-                {
-                    secQue = viewModel.Question1,
-                    answer =viewModel.Answer1
-                },
-                new SecQuestionsAnswers
-                {
-                    secQue = viewModel.Question2,
-                    answer =viewModel.Answer2
-                },
-            };
+        //        var model = new SecurityQuestionViewModel()
+        //        {
+        //            Que1Id = UserSecQues.Result[0].Id,
+        //            Que2Id = UserSecQues.Result[1].Id,
+        //            UserId = Response.Id,
+        //            Username = Response.Name,
+        //            Question1 = UserSecQues.Result[0].Question,
+        //            Question2 = UserSecQues.Result[1].Question,
+        //        };
+        //        _logger.LogInformation("<-- ValidateSecurityQuestion get");
+        //        return View(model);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        _logger.LogInformation("ValidateSecurityQuestion get Exception : {0}", e.Message);
+        //        ViewBag.error = "Internal Error";
+        //        ViewBag.error_description = "Something went wrong, Please try again later";
+        //        return View("Errorp");
+        //    }
+        //}
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> ValidateSecurityQuestion(SecurityQuestionViewModel viewModel)
+        //{
+        //    try
+        //    {
+        //        _logger.LogInformation("--> ValidateSecurityQuestion post");
 
 
-                data.secQueAns = secQueList;
-                data.uuid = viewModel.UserId.ToString();
+        //        ValidateUserSecQueRequest data = new ValidateUserSecQueRequest();
+        //        List<SecQuestionsAnswers> secQueList = new List<SecQuestionsAnswers>()
+        //    {
+        //        new SecQuestionsAnswers
+        //        {
+        //            secQue = viewModel.Question1,
+        //            answer =viewModel.Answer1
+        //        },
+        //        new SecQuestionsAnswers
+        //        {
+        //            secQue = viewModel.Question2,
+        //            answer =viewModel.Answer2
+        //        },
+        //    };
 
-                var Response = await _securityQuestionService.ValidateUserSecurityQuestions(data);
-                if (Response == null || !Response.Success)
-                {
-                    _logger.LogInformation("ValidateSecurityQuestion post : Security Question Validate Failed");
-                    AlertViewModel alert = new AlertViewModel { Message = (Response == null ? "Internal error please contact to admin" : Response.Message) };
-                    TempData["Alert"] = JsonConvert.SerializeObject(alert);
-                    return View("ValidateSecurityQuestion", viewModel);
-                }
-                else
-                {
-                    AlertViewModel alert = new AlertViewModel { IsSuccess = true, Message = "Security Question Validate Successfully" };
-                    TempData["Alert"] = JsonConvert.SerializeObject(alert);
 
-                    return RedirectToAction("SetPassword", new { id = viewModel.UserId });
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("ValidateSecurityQuestion post Exception : {0}", e.Message);
-                ViewBag.error = "Internal Error";
-                ViewBag.error_description = "Something went wrong, Please try again later";
-                return View("Errorp");
-            }
-        }
+        //        data.secQueAns = secQueList;
+        //        data.uuid = viewModel.UserId.ToString();
+
+        //        var Response = await _securityQuestionService.ValidateUserSecurityQuestions(data);
+        //        if (Response == null || !Response.Success)
+        //        {
+        //            _logger.LogInformation("ValidateSecurityQuestion post : Security Question Validate Failed");
+        //            AlertViewModel alert = new AlertViewModel { Message = (Response == null ? "Internal error please contact to admin" : Response.Message) };
+        //            TempData["Alert"] = JsonConvert.SerializeObject(alert);
+        //            return View("ValidateSecurityQuestion", viewModel);
+        //        }
+        //        else
+        //        {
+        //            AlertViewModel alert = new AlertViewModel { IsSuccess = true, Message = "Security Question Validate Successfully" };
+        //            TempData["Alert"] = JsonConvert.SerializeObject(alert);
+
+        //            return RedirectToAction("SetPassword", new { id = viewModel.UserId });
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        _logger.LogInformation("ValidateSecurityQuestion post Exception : {0}", e.Message);
+        //        ViewBag.error = "Internal Error";
+        //        ViewBag.error_description = "Something went wrong, Please try again later";
+        //        return View("Errorp");
+        //    }
+        //}
         [HttpGet]
         public IActionResult ChangePassword(int id, bool isFirstLogin = false)
         {
@@ -436,6 +436,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             }
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel viewModel)
         {
             try
@@ -506,6 +507,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             }
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetPassword(SetPasswordViewModel viewModel)
         {
             try
@@ -549,6 +551,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             return View();
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(string email)
         {
             var UserinDb = await _userService.GetUserByEmail(email);

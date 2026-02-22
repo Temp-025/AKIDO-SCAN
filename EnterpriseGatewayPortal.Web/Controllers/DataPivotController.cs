@@ -1,13 +1,8 @@
-﻿using DocumentFormat.OpenXml.Drawing.Charts;
-
-using EnterpriseGatewayPortal.Core.Domain.Services;
+﻿using EnterpriseGatewayPortal.Core.Domain.Services;
 using EnterpriseGatewayPortal.Core.DTOs;
-using EnterpriseGatewayPortal.Core.Services;
-using EnterpriseGatewayPortal.Core.Utilities;
 using EnterpriseGatewayPortal.Web.Attribute;
 using EnterpriseGatewayPortal.Web.Constants;
 using EnterpriseGatewayPortal.Web.Enums;
-using EnterpriseGatewayPortal.Web.Models;
 using EnterpriseGatewayPortal.Web.ViewModel;
 using EnterpriseGatewayPortal.Web.ViewModel.DataPivot;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +21,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         private readonly IDataPivotService _dataPivotService;
         private readonly IOrganizationService _organizationService;
         private readonly IScopeService _scopeService;
-        
+
         public DataPivotController(IAdminLogService adminLogService, IDataPivotService dataPivotService, IOrganizationService organizationService, IScopeService scopeService) : base(adminLogService)
         {
             _dataPivotService = dataPivotService;
@@ -192,7 +187,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             }).ToList();
 
             var AuthList = await GetAuthSchemList();
-           
+
             var viewModel = new DataPivotViewModel
             {
 
@@ -218,7 +213,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
-
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(DataPivotViewModel viewModel)
         {
 
@@ -280,6 +275,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -352,7 +348,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         {
             var result = await _dataPivotService.GetAuthSchemesList();
             var list = new List<SelectListItem>();
-            
+
             if (result == null)
             {
                 return list;
@@ -361,18 +357,18 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             {
                 foreach (var auth in result)
                 {
-                   
-                        list.Add(new SelectListItem { Text = auth.DisplayName, Value = auth.Name });
-                    
 
-                   
+                    list.Add(new SelectListItem { Text = auth.DisplayName, Value = auth.Name });
+
+
+
                 }
 
                 return list;
             }
 
-           
-            
+
+
         }
     }
 }

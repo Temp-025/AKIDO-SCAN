@@ -6,7 +6,7 @@
 @{
     await Html.RenderPartialAsync("_AlertBox");
     var hasData = Model != null && Model.Count() > 0;
-    var len = Model.Count();
+    //var len = Model.Count();
 }
 @{
     var IDPLogin = User.FindFirst("IDPLogin").Value;

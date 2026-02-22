@@ -29,6 +29,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(OrganizationUsageReportUsageViewModel viewModel)
         {
             string logMessage;

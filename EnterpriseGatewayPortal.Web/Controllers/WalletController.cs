@@ -189,6 +189,7 @@ namespace EnterpriseGatewayPortal.Web.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetPDFBytes(string id)
         {
             var credentialInDb = await _walletService.GetCredentialById(id);

@@ -7,10 +7,7 @@
 @{
     await Html.RenderPartialAsync("_AlertBox");
 }
-@{
-    var signatureTemplate = Model.SignatureTemplate;
-}
-
+@Html.AntiForgeryToken();
 @{
     ViewBag.Breadcrumb = new List<BreadCrumbModel>
     {
@@ -383,6 +380,8 @@
 <script>
     $(document).ready(function () {
 
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
         $("#BusinessModule > a")
             .attr("aria-expanded", "true")
             .addClass("active");
@@ -502,7 +501,6 @@
         var delegate = $('#Delegate').prop('checked');
         var digitalForm = $('#DigitalForm').prop('checked');
        // var lsaPrivilage = $('#LsaPrivilege').prop('checked');
-       var signTemplate = @signatureTemplate;
 
        var form = $("#businessUserForm");
         var url = form.attr("action");
@@ -547,46 +545,6 @@
 
         }
 
-        switch (signTemplate) {
-            case 2:
-                if (designation.trim() === "") {
-                    Swal.fire({
-                        icon: 'error',
-                        title: "Error",
-                        text: "Designation is Mandatory Based on the selected Signature Template"
-                    });
-                    validData = false;
-                }
-                break;
-
-            case 3:
-                if (!signaturePhoto || signaturePhoto.trim() === "") {
-                    Swal.fire({
-                        icon: 'error',
-                        title: "Error",
-                        text: "SignaturePhoto Photo is Mandatory Based on the selected Signature Template"
-                    });
-                    validData = false;
-                }
-                break;
-
-            case 4:
-                if (designation.trim() === "" || !signaturePhoto || signaturePhoto.trim() === "") {
-                    Swal.fire({
-                        icon: 'error',
-                        title: "Error",
-                        text: "SignaturePhoto Photo and Designation is Mandatory Based on the selected Signature Template"
-                    });
-                    validData = false;
-                }
-                break;
-        }
-
-
-        if (!validData) {
-            //event.preventDefault();
-            return;
-        }
          // Create the businessUser object with the validated values
           var formData = new FormData();
     formData.append("UgpassEmail", ugpassEmail);
@@ -602,10 +560,14 @@
     formData.append("Bulksign", bulksign);
     formData.append("Delegate", delegate);
     formData.append("DigitalForm", digitalForm);
-    formData.append("orgContactsEmailId", orgContactsEmailId);
+        formData.append("orgContactsEmailId", orgContactsEmailId);
+
 
       $.ajax({
-        type: "POST",
+          type: "POST",
+          headers: {
+              'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+          },
         url: url,
         data: formData,
         cache: false,

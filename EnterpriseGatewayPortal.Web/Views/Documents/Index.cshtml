@@ -14,7 +14,7 @@
 }
 
 @{
-    var hasData = Model != null || Model.Count() != 0;
+    //var hasData = Model != null || Model.Count() != 0;
 
 }
 
@@ -195,8 +195,7 @@
                     "bLengthChange": false,
                     "searching": true,
                     order: [[1, 'desc']], // 1 refers to the index of 'CreatedAt' column
-                    "paging": @hasData.ToString().ToLower(),
-                    "info": @hasData.ToString().ToLower(),
+                  @*"info": @hasData.ToString().Tower(),*@
                      "initComplete": function () {
                         // Move the search bar into our custom container
                         $(".dataTables_filter").appendTo("#custom-search-container");

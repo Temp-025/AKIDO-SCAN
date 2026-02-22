@@ -1,40 +1,38 @@
-﻿using EnterpriseGatewayPortal.Core.Constants;
-using EnterpriseGatewayPortal.Core.Domain.Lookups;
-using EnterpriseGatewayPortal.Core.Domain.Models;
+﻿using EnterpriseGatewayPortal.Core.Domain.Models;
 using EnterpriseGatewayPortal.Core.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace EnterpriseGatewayPortal.Core.Persistance.Repositories
 {
-	
 
-		public class AdminLogRepository : GenericRepository<AdminLog, EnterprisegatewayportalDbContext>, IAdminLogRepository
-		{
-			private readonly ILogger _logger;
-			public AdminLogRepository(ILogger logger, EnterprisegatewayportalDbContext context) : base(context, logger)
-			{
-				_logger = logger;
-			}
 
-		public async Task<AdminLog?> AddAdminLogAsync(AdminLog adminLog)
-		{
-			try
-			{
-				var adminlog = await Context.Set<AdminLog>().AddAsync(adminLog);
-				var addedAdminLogs = adminlog.Entity;
-				Context.SaveChanges();
-				return addedAdminLogs;
-			}
-			catch (Exception error)
-			{
-				Logger.LogError("AddAdminLogAsync:: Database Exception: {0}", error);
-				return null;
-			}
-		}
+    public class AdminLogRepository : GenericRepository<AdminLog, EnterprisegatewayportalDbContext>, IAdminLogRepository
+    {
+        private readonly ILogger _logger;
+        public AdminLogRepository(ILogger logger, EnterprisegatewayportalDbContext context) : base(context, logger)
+        {
+            _logger = logger;
+        }
 
-		public async Task<IEnumerable<AdminLog>> GetLatestLogsAsync(int count)
-		{
+        public async Task<AdminLog?> AddAdminLogAsync(AdminLog adminLog)
+        {
+            try
+            {
+                var adminlog = await Context.Set<AdminLog>().AddAsync(adminLog);
+                var addedAdminLogs = adminlog.Entity;
+                Context.SaveChanges();
+                return addedAdminLogs;
+            }
+            catch (Exception error)
+            {
+                Logger.LogError("AddAdminLogAsync:: Database Exception: {0}", error);
+                return null;
+            }
+        }
+
+        public async Task<IEnumerable<AdminLog>> GetLatestLogsAsync(int count)
+        {
             try
             {
                 return await Context.AdminLogs
@@ -47,15 +45,15 @@ namespace EnterpriseGatewayPortal.Core.Persistance.Repositories
                 Logger.LogError("GetLatestLogsAsync:: Database Exception: {0}", error);
                 return null;
             }
-			
-		}
+
+        }
 
         public async Task<List<AdminLog>> GetLocalAdminLogReportByTimeStampAsync(string startDate, string endDate, string userName, string moduleName, int page, int perPage)
         {
             try
             {
-                var startDateTime = DateTime.Parse(startDate);
-                var endDateTime = DateTime.Parse(endDate);
+                var startDateTime = DateTime.Parse(startDate).ToUniversalTime();
+                var endDateTime = DateTime.Parse(endDate).ToUniversalTime();
 
                 return await Context
                     .AdminLogs
@@ -81,8 +79,8 @@ namespace EnterpriseGatewayPortal.Core.Persistance.Repositories
         {
             try
             {
-                DateTime startDateTime = DateTime.Parse(startDate);
-                DateTime endDateTime = DateTime.Parse(endDate);
+                var startDateTime = DateTime.Parse(startDate).ToUniversalTime();
+                var endDateTime = DateTime.Parse(endDate).ToUniversalTime();
 
                 // Build the query
                 var query = Context.AdminLogs.AsQueryable();
@@ -126,7 +124,7 @@ namespace EnterpriseGatewayPortal.Core.Persistance.Repositories
 
                      if (distinctUUIDs.Count == 1)
                      {
-                            // All UUIDs are the same, take the latest record
+                         // All UUIDs are the same, take the latest record
                          return group
                                 .OrderByDescending(r => r.Timestamp) // Adjust this to your date field
                              .Take(1)

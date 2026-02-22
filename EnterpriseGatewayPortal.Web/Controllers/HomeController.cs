@@ -30,8 +30,10 @@ namespace EnterpriseGatewayPortal.Web.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
                 Path = "/",
-                Expires = DateTime.Now.AddDays(1),
+                Expires = DateTimeOffset.UtcNow.AddDays(1),
             };
             Response.Cookies.Append("NavigationLayout", Layout, cookieOptions);
             if (Layout == "KYCAdminLayout")
@@ -47,9 +49,9 @@ namespace EnterpriseGatewayPortal.Web.Controllers
         {
             var cookie = new CookieOptions
             {
-                Expires = DateTimeOffset.UtcNow.AddYears(1),
+                Expires = DateTimeOffset.UtcNow.AddDays(30),
                 HttpOnly = true,
-                Secure = Request.IsHttps,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             };
 
